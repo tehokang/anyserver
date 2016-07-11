@@ -1,0 +1,42 @@
+{
+  "_comment": "",
+  "name": "GameServer",
+  "type":
+  {
+    "_comment" : "A server must support one of following types",
+    "websocket" : 
+    {
+      "support" : false,
+      "port" : 9999
+    },    
+    "http" : 
+    {
+      "support" : false,
+      "port" : 9999
+    }, 
+    "InetDomainSocket" : 
+    {
+      "support" : false,
+      "port" : 9999
+    },
+    "UnixDomainSocket" :
+    {
+      "support" : true,
+      "file" : "uds_@name"
+    }
+  },
+  
+  "capabilities" :
+  {
+    "max_client" : 200,
+    "security" : false,
+    "log" : 
+    {
+      "enable" : true,
+      "file" : ""
+    }    
+  },
+    
+  "version": "0.0.1",
+  "copyright": "All right reserved by TehoKang"
+}

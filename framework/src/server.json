@@ -1,28 +1,27 @@
 {
   "_comment": "",
-  "name": "GameServer",
+  "@name": "GameServer",
   "type":
   {
-    "_comment" : "A server must support one of following types",
     "websocket" : 
     {
-      "support" : false,
-      "port" : 9999
+      "enable" : false,
+      "bind" : 9999
     },    
     "http" : 
     {
-      "support" : false,
-      "port" : 9999
+      "enable" : false,
+      "bind" : 9999
     }, 
-    "InetDomainSocket" : 
+    "inet_domainsocket" : 
     {
-      "support" : false,
-      "port" : 9999
+      "enable" : false,
+      "bind" : 9999
     },
-    "UnixDomainSocket" :
+    "unix_domainsocket" :
     {
-      "support" : true,
-      "file" : "uds_@name"
+      "enable" : true,
+      "bind" : "uds.tmp"
     }
   },
   

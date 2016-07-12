@@ -10,15 +10,20 @@
 SILENT ?= @
 TARGET ?= $(TARGET_NAME)
 
-SRCS := $(shell find $(BUILD_SRC_DIR) -name "*.cc" ! -name ".*" 2>/dev/null)
+SRCS := $(shell find $(BUILD_SRC_DIR) -name "*.cpp" ! -name ".*" 2>/dev/null)
 INCS := $(addprefix -I, $(abspath $(shell find $(BUILD_SRC_DIR)/ -type d 2>/dev/null)))
 
 CXXFLAGS := $(INCS) -std=c++11
-LDFLAGS :=
+LDFLAGS := -lpthread
 DEFINES := -DSERVER_PORT=$(SERVER_PORT)
 
-OBJS := $(SRCS:.cc=.o)
-DEPS := $(SRCS:.cc=.d)
+ifeq ($(CONFIG_DEBUG),YES)
+CXXFLAGS += -DCONFIG_DEBUG
+endif
+
+
+OBJS := $(SRCS:.cpp=.o)
+DEPS := $(SRCS:.cpp=.d)
 
 all: prepare $(TARGET)
 
@@ -36,13 +41,13 @@ distclean: clean
 clean:
 	rm -f $(OBJS) $(DEPS)
 
-.cc.o:
+.cpp.o:
 	$(ECHO) "Compiling ..."
 	$(CXX) $(CXXFLAGS) -c $< -o $(abspath $@)
 
-%.d: %.cc
-	$(ECHO) "Generating dependencies ... " $<
-	$(CXX) -MM -MP -MT "$(@:.d=.o) $@" -MF $@ $<
+%.d: %.cpp
+	$(HUSH_ECHO) Generating dependencies for $< ...
+	$(HUSH) $(CXX) $(CXXFlags) -MM -MP -MT "$(@:.d=.o) $@" -MF $@ $<
 
 $(TARGET).unstripped: $(OBJS)
 	$(ECHO) "Linking ... $(TARGET)"
@@ -55,3 +60,4 @@ ifeq ($(STRIP),y)
 	strip --strip-unneeded --strip-debug --discard-all $(BUILD_OUT_DIR)/$(TARGET)
 endif
 
+-include $(DEPS)

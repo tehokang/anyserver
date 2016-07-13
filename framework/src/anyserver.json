@@ -15,12 +15,12 @@
     }, 
     "inet_domainsocket" : 
     {
-      "enable" : false,
+      "enable" : true,
       "bind" : 9999
     },
     "unix_domainsocket" :
     {
-      "enable" : true,
+      "enable" : false,
       "bind" : "uds.tmp"
     }
   },
@@ -29,13 +29,13 @@
   {
     "max_client" : 200,
     "security" : false,
-    "log" : 
-    {
-      "enable" : true,
-      "file" : ""
-    }    
+    "tcp" : true
   },
-    
+  "log" : 
+  {
+    "enable" : true,
+    "file" : "./log.txt"
+  },
   "version": "0.0.1",
   "copyright": "All right reserved by TehoKang"
 }

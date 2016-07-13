@@ -1,13 +1,16 @@
-#include "server_configuration.h"
-#include "anylogger.h"
+#include "anyserver_controller.h"
 
 using namespace anyserver;
 
 int main(int argc, char **argv)
 {
-    AnyLogger::setLogLevel(true, true, true, true);
+    AnyServerController anyserver(argv[1]);
+    anyserver.setLogLevel(true, true, true, true);
 
-    ServerConfiguration::init(argv[1]);
+    if ( anyserver.init() && anyserver.start() )
+    {
+        printf("Started AnyServerController \n");
+    }
 
     return 0;
 }

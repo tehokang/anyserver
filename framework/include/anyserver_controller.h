@@ -27,7 +27,7 @@ public:
     virtual void stop();
     virtual void setLogLevel(bool debug, bool info, bool warn, bool error);
 
-    virtual void onClientConnected(int fd, string ip_address) override;
+    virtual void onClientConnected(int fd, string ip_address, int port) override;
     virtual void onClientDisconnected(int fd) override;
     virtual void onReceive(int fd) override;
 protected:

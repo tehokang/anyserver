@@ -68,11 +68,13 @@ bool AnyServerConfiguration::__parse__(string file)
             {
                 server.bind = root["type"][name]["bind"].asString();
                 server.enable = root["type"][name]["enable"].asBool();
+                server.tcp = root["type"][name]["tcp"].asBool();
 
-                LOG_DEBUG("server : %s, enable : %d, bind : %s \n",
+                LOG_DEBUG("server : %s, enable : %d, bind : %s, tcp : %d \n",
                         server.header.data(),
                         server.enable,
-                        server.bind.data());
+                        server.bind.data(),
+                        server.tcp);
             }
         }
     }
@@ -83,12 +85,10 @@ bool AnyServerConfiguration::__parse__(string file)
     const Json::Value capabilities = root["capabilities"];
     m_server_info.capabilities.max_client = capabilities["max_client"].asUInt();
     m_server_info.capabilities.enable_security = capabilities["security"].asBool();
-    m_server_info.capabilities.tcp = capabilities["tcp"].asBool();
 
     LOG_DEBUG("[Capabilities] \n");
     LOG_DEBUG("max_client : %d \n", m_server_info.capabilities.max_client);
     LOG_DEBUG("enable_security : %d \n", m_server_info.capabilities.enable_security);
-    LOG_DEBUG("tcp : %d \n", m_server_info.capabilities.tcp);
 
     /**
      * @note Parse log configuration

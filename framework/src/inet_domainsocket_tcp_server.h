@@ -7,12 +7,12 @@
 namespace anyserver
 {
 
-class InetDomainSocketServer : public AnyServer
+class InetDomainSocketTcpServer : public AnyServer
 {
 public:
-    InetDomainSocketServer(
+    InetDomainSocketTcpServer(
             const string name, const string bind, const unsigned int max_client=200);
-    virtual ~InetDomainSocketServer();
+    virtual ~InetDomainSocketTcpServer();
 
 protected:
     virtual bool init() override;
@@ -21,8 +21,11 @@ protected:
     virtual void stop() override;
 
 private:
+    /**
+     * @note http://www.joinc.co.kr/w/Site/Network_Programing/AdvancedComm/epoll24
+     */
     static void* epoll_thread(void *argv);
-    pthread_t _epoll_thread_;
+    pthread_t m_epoll_thread;
 
     bool m_run_thread;
     struct epoll_event m_ev;

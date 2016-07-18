@@ -6,30 +6,33 @@
     "websocket" : 
     {
       "enable" : false,
-      "bind" : 9999
+      "bind" : 9999,
+      "tcp" : true
     },    
     "http" : 
     {
       "enable" : false,
-      "bind" : 9999
+      "bind" : 9999, 
+      "tcp" : true
     }, 
     "inet_domainsocket" : 
     {
       "enable" : true,
-      "bind" : 9999
+      "bind" : 9999, 
+      "tcp" : true
     },
     "unix_domainsocket" :
     {
       "enable" : false,
-      "bind" : "uds.tmp"
+      "bind" : "uds.tmp",
+      "tcp" : true
     }
   },
   
   "capabilities" :
   {
     "max_client" : 200,
-    "security" : false,
-    "tcp" : true
+    "security" : false
   },
   "log" : 
   {

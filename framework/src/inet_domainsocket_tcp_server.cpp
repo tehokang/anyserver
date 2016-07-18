@@ -1,4 +1,4 @@
-#include "inet_domainsocket_server.h"
+#include "inet_domainsocket_tcp_server.h"
 #include "anymacro.h"
 
 #include <unistd.h>
@@ -13,7 +13,7 @@
 namespace anyserver
 {
 
-InetDomainSocketServer::InetDomainSocketServer(
+InetDomainSocketTcpServer::InetDomainSocketTcpServer(
         const string name, const string bind, const unsigned int max_client)
     : AnyServer(name, bind, max_client)
     , m_events(nullptr)
@@ -24,13 +24,13 @@ InetDomainSocketServer::InetDomainSocketServer(
     LOG_DEBUG("\n");
 }
 
-InetDomainSocketServer::~InetDomainSocketServer()
+InetDomainSocketTcpServer::~InetDomainSocketTcpServer()
 {
     LOG_DEBUG("\n");
     SAFE_FREE(m_events);
 }
 
-bool InetDomainSocketServer::init()
+bool InetDomainSocketTcpServer::init()
 {
     LOG_DEBUG("\n");
 
@@ -73,18 +73,18 @@ bool InetDomainSocketServer::init()
     return true;
 }
 
-void InetDomainSocketServer::__deinit__()
+void InetDomainSocketTcpServer::__deinit__()
 {
     int status = 0;
-    pthread_join(_epoll_thread_, reinterpret_cast<void **>(&status));
+    pthread_join(m_epoll_thread, reinterpret_cast<void **>(&status));
 }
 
-bool InetDomainSocketServer::start()
+bool InetDomainSocketTcpServer::start()
 {
     LOG_DEBUG("\n");
 
     if ( 0 != pthread_create(
-            &_epoll_thread_, NULL, InetDomainSocketServer::epoll_thread, (void*)this) )
+            &m_epoll_thread, NULL, InetDomainSocketTcpServer::epoll_thread, (void*)this) )
     {
         LOG_ERROR("Failed to create thread \n");
         return false;
@@ -92,17 +92,17 @@ bool InetDomainSocketServer::start()
     return true;
 }
 
-void InetDomainSocketServer::stop()
+void InetDomainSocketTcpServer::stop()
 {
     LOG_DEBUG("\n");
     m_run_thread = false;
 }
 
-void* InetDomainSocketServer::epoll_thread(void *argv)
+void* InetDomainSocketTcpServer::epoll_thread(void *argv)
 {
     LOG_DEBUG("\n");
 
-    InetDomainSocketServer *server = static_cast<InetDomainSocketServer*>(argv);
+    InetDomainSocketTcpServer *server = static_cast<InetDomainSocketTcpServer*>(argv);
     server->m_run_thread = true;
     int trigger_count = 0;
     int client_fd = 0;
@@ -140,7 +140,9 @@ void* InetDomainSocketServer::epoll_thread(void *argv)
                         it!=listeners.end(); ++it )
                 {
                     IAnyServerListener *listener = (*it);
-                    listener->onClientConnected(client_fd, inet_ntoa(clientaddr.sin_addr));
+                    listener->onClientConnected(client_fd,
+                            inet_ntoa(clientaddr.sin_addr),
+                            clientaddr.sin_port);
                 }
             }
             else
@@ -151,7 +153,14 @@ void* InetDomainSocketServer::epoll_thread(void *argv)
                 {
                     epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, events);
                     close(events[i].data.fd);
-                    printf("Close fd\n");
+
+                    list<IAnyServerListener*> listeners = server->m_listeners;
+                    for ( list<IAnyServerListener*>::iterator it = listeners.begin();
+                            it!=listeners.end(); ++it )
+                    {
+                        IAnyServerListener *listener = (*it);
+                        listener->onClientDisconnected(client_fd);
+                    }
                 }
                 else
                 {

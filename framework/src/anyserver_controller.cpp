@@ -83,7 +83,7 @@ void AnyServerController::setLogLevel(bool debug, bool info, bool warn, bool err
     AnyLogger::setLogLevel(info, debug, warn, error);
 }
 
-void AnyServerController::onClientConnected(int fd, string ip_address)
+void AnyServerController::onClientConnected(int fd, string ip_address, int port)
 {
     LOG_DEBUG("\n");
 }

@@ -11,7 +11,7 @@ namespace anyserver
 class IAnyServerListener
 {
 public:
-    virtual void onClientConnected(int fd, string ip_address) = 0;
+    virtual void onClientConnected(int fd, string ip_address, int port) = 0;
     virtual void onClientDisconnected(int fd) = 0;
     virtual void onReceive(int fd) = 0;
 };

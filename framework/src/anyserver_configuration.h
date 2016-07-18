@@ -21,12 +21,13 @@ public:
     {
     public:
         ServerType(const string _header, const ServerKinds _kinds)
-            : header(_header), bind(""), enable(false), kinds(_kinds)
+            : header(_header), bind(""), enable(false), kinds(_kinds), tcp(true)
         {
         }
         string header;
         string bind;
         bool enable;
+        bool tcp;
         ServerKinds kinds;
     };
 
@@ -34,13 +35,12 @@ public:
     {
     public:
         Capabilities()
-            : max_client(200), enable_security(false), tcp(true)
+            : max_client(200), enable_security(false)
         {
 
         }
         unsigned int max_client;
         bool enable_security;
-        bool tcp;
     };
 
     class ServerInfo

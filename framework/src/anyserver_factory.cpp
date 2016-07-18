@@ -1,7 +1,7 @@
 #include "anymacro.h"
 #include "anyserver_factory.h"
 #include "anyserver_configuration.h"
-#include "inet_domainsocket_server.h"
+#include "inet_domainsocket_tcp_server.h"
 
 namespace anyserver
 {
@@ -49,7 +49,7 @@ bool AnyServerFactory::init(const string config_file)
                 case AnyServerConfiguration::INETDS:
                     {
                         AnyServerPtr server = AnyServerPtr(
-                                new InetDomainSocketServer(
+                                new InetDomainSocketTcpServer(
                                         server_type.header,
                                         server_type.bind,
                                         server_info.capabilities.max_client));

@@ -34,28 +34,26 @@ bool InetDomainSocketTcpServer::init()
 {
     LOG_DEBUG("\n");
 
-    struct sockaddr_in addr, clientaddr;
-    struct eph_comm *conn;
-    int clilen = sizeof(clientaddr);
-
     m_events = (struct epoll_event *)malloc(sizeof(*m_events) * EPOLL_SIZE);
-    if ((m_epoll_fd = epoll_create(m_max_client)) < 0)
+    if ( 0 > (m_epoll_fd = epoll_create(m_max_client)) )
     {
         perror("epoll_create error");
         return 1;
     }
 
     m_server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (m_server_fd == -1)
+    if ( -1 == m_server_fd )
     {
         perror("socket error :");
         close(m_server_fd);
         return false;
     }
+
+    struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(stoi(m_bind));
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (bind (m_server_fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
+    if ( -1 == bind (m_server_fd, (struct sockaddr *)&addr, sizeof(addr)) )
     {
         close(m_server_fd);
         return false;
@@ -120,12 +118,7 @@ void* InetDomainSocketTcpServer::epoll_thread(void *argv)
     while ( server->m_run_thread )
     {
         trigger_count = epoll_wait(epoll_fd, events, EPOLL_SIZE, -1);
-        if (trigger_count)
-        {
-            perror("epoll wait error");
-        }
-
-        for (int i = 0; i < trigger_count; i++)
+        for ( int i = 0; i < trigger_count; i++ )
         {
             if ( events[i].data.fd == server_fd )
             {
@@ -147,9 +140,9 @@ void* InetDomainSocketTcpServer::epoll_thread(void *argv)
             }
             else
             {
-                memset(buffer, 0x00, BUFFER_LENGTH);
-                int readn = read(events[i].data.fd, buffer, BUFFER_LENGTH);
-                if (readn <= 0)
+                bzero(buffer, sizeof(buffer));
+                int readn = read(events[i].data.fd, buffer, sizeof(buffer));
+                if ( 0 >= readn )
                 {
                     epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, events);
                     close(events[i].data.fd);
@@ -159,13 +152,24 @@ void* InetDomainSocketTcpServer::epoll_thread(void *argv)
                             it!=listeners.end(); ++it )
                     {
                         IAnyServerListener *listener = (*it);
-                        listener->onClientDisconnected(client_fd);
+                        listener->onClientDisconnected(events[i].data.fd);
                     }
                 }
                 else
                 {
-                    printf("read data %s\n", buffer);
+                    list<IAnyServerListener*> listeners = server->m_listeners;
+                    for ( list<IAnyServerListener*>::iterator it = listeners.begin();
+                            it!=listeners.end(); ++it )
+                    {
+                        IAnyServerListener *listener = (*it);
+                        listener->onReceive(events[i].data.fd, buffer, readn);
+                    }
+#ifdef CONFIG_ECHO_RESPONSE
+                    /**
+                     * Test echo
+                     */
                     write(events[i].data.fd, buffer, readn);
+#endif
                 }
             }
         }

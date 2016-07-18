@@ -22,7 +22,7 @@ AnyServerConfiguration::~AnyServerConfiguration()
 bool AnyServerConfiguration::init(const string config_file)
 {
     LOG_DEBUG("\n");
-    if ( Utilities::isExistFile(config_file) )
+    if ( FileSystem::isExistFile(config_file) )
     {
         return __parse__(config_file);
     }

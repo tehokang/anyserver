@@ -1,5 +1,5 @@
-#ifndef __INET_DOMAIN_SOCKET_SERVER_H__
-#define __INET_DOMAIN_SOCKET_SERVER_H__
+#ifndef __INET_DOMAIN_SOCKET_TCP_SERVER_H__
+#define __INET_DOMAIN_SOCKET_TCP_SERVER_H__
 
 #include "anyserver.h"
 #include <sys/epoll.h>

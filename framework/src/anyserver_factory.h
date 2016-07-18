@@ -21,6 +21,10 @@ public:
     virtual bool start();
     virtual void stop();
 
+    virtual void setEventListener(IAnyServerListener *listener)
+    {
+        m_server_listener = listener;
+    }
 protected:
     virtual void __deinit__();
 
@@ -31,6 +35,8 @@ private:
     typedef shared_ptr<AnyServer> AnyServerPtr;
     typedef list<AnyServerPtr> AnyServerList;
     AnyServerList m_servers;
+
+    IAnyServerListener *m_server_listener;
 };
 
 } // end of namespace

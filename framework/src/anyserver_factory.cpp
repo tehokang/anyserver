@@ -2,18 +2,23 @@
 #include "anyserver_factory.h"
 #include "anyserver_configuration.h"
 #include "inet_domainsocket_tcp_server.h"
+#include "inet_domainsocket_udp_server.h"
 
 namespace anyserver
 {
 
 AnyServerFactory::AnyServerFactory()
     : m_anyserver_configuration(new AnyServerConfiguration())
+    , m_server_listener(nullptr)
 {
     LOG_DEBUG("\n");
 }
 
 AnyServerFactory::~AnyServerFactory()
 {
+    LOG_DEBUG("\n");
+    __deinit__();
+
     SAFE_DELETE(m_anyserver_configuration);
     m_servers.clear();
 }
@@ -48,11 +53,25 @@ bool AnyServerFactory::init(const string config_file)
                     break;
                 case AnyServerConfiguration::INETDS:
                     {
-                        AnyServerPtr server = AnyServerPtr(
-                                new InetDomainSocketTcpServer(
-                                        server_type.header,
-                                        server_type.bind,
-                                        server_info.capabilities.max_client));
+                        AnyServerPtr server;
+                        if ( server_type.tcp )
+                        {
+                            server = AnyServerPtr(
+                                    new InetDomainSocketTcpServer(
+                                            server_type.header,
+                                            server_type.bind,
+                                            server_info.capabilities.max_client));
+
+                        }
+                        else
+                        {
+                            server = AnyServerPtr(
+                                    new InetDomainSocketUdpServer(
+                                            server_type.header,
+                                            server_type.bind,
+                                            server_info.capabilities.max_client));
+                        }
+                        server->addEventListener(m_server_listener);
                         m_servers.push_back(server);
                     }
                     break;
@@ -85,6 +104,11 @@ bool AnyServerFactory::init(const string config_file)
 
 void AnyServerFactory::__deinit__()
 {
+    for ( AnyServerList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
+    {
+        AnyServerPtr server = (*it);
+        server->removeEventListener(m_server_listener);
+    }
     LOG_DEBUG("\n");
 }
 

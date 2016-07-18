@@ -29,6 +29,8 @@ AnyServerController::AnyServerController(int argc, char **argv)
 AnyServerController::~AnyServerController()
 {
     LOG_DEBUG("\n");
+    __deinit__();
+
     SAFE_DELETE(m_anyserver_factory);
 }
 
@@ -47,6 +49,7 @@ bool AnyServerController::init()
 
     m_anyserver_factory = new AnyServerFactory();
     RETURN_FALSE_IF_NULL(m_anyserver_factory);
+    m_anyserver_factory->setEventListener(this);
     RETURN_FALSE_IF_FALSE(m_anyserver_factory->init(m_config_file));
 
     return true;
@@ -55,6 +58,7 @@ bool AnyServerController::init()
 void AnyServerController::__deinit__()
 {
     LOG_DEBUG("\n");
+    m_anyserver_factory->setEventListener(nullptr);
 }
 
 bool AnyServerController::start()
@@ -86,6 +90,7 @@ void AnyServerController::setLogLevel(bool debug, bool info, bool warn, bool err
 void AnyServerController::onClientConnected(int fd, string ip_address, int port)
 {
     LOG_DEBUG("\n");
+    LOG_DEBUG("client [fd:%d] connected from %s:%d \n", fd, ip_address.data(), port);
 }
 
 void AnyServerController::onClientDisconnected(int fd)
@@ -93,9 +98,16 @@ void AnyServerController::onClientDisconnected(int fd)
     LOG_DEBUG("\n");
 }
 
-void AnyServerController::onReceive(int fd)
+void AnyServerController::onReceive(int fd, char *msg, unsigned int msg_len)
 {
     LOG_DEBUG("\n");
+    LOG_DEBUG("[TCP] Received msg[fd:%d] : %s (length: %d) \n", fd, msg, msg_len);
+}
+
+void AnyServerController::onReceive(int sfd, struct sockaddr *client_addr, char *msg, unsigned int msg_len)
+{
+    LOG_DEBUG("\n");
+    LOG_DEBUG("[UDP] Received msg[fd:%d] : %s (length: %d) \n", sfd, msg, msg_len);
 }
 
 }

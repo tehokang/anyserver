@@ -1,12 +1,12 @@
-#ifndef __UTILITIES_H__
-#define __UTILITIES_H__
+#ifndef __FILE_SYSTEM_H__
+#define __FILE_SYSTEM_H__
 
 #include <string>
 #include <iostream>
 #include <fstream>
 using namespace std;
 
-class Utilities
+class FileSystem
 {
 public:
     static bool isExistFile(const string &file)
@@ -21,8 +21,8 @@ public:
     }
 
 private:
-    Utilities();
-    ~Utilities();
+    FileSystem();
+    ~FileSystem();
 };
 
 

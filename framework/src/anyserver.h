@@ -3,7 +3,12 @@
 
 #include <string>
 #include <list>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 using namespace std;
+
+#define CONFIG_ECHO_RESPONSE
 
 namespace anyserver
 {
@@ -11,9 +16,23 @@ namespace anyserver
 class IAnyServerListener
 {
 public:
+    /**
+     * @brief Tcp client connection/disconnection/receiving
+     * @param fd
+     * @param ip_address
+     * @param port
+     */
     virtual void onClientConnected(int fd, string ip_address, int port) = 0;
     virtual void onClientDisconnected(int fd) = 0;
-    virtual void onReceive(int fd) = 0;
+    virtual void onReceive(int fd, char *msg, unsigned int msg_len) = 0;
+
+    /**
+     * @brief Udp client receiving (except for connection/disconnection)
+     * @param sfd
+     * @param ip_address
+     * @param port
+     */
+    virtual void onReceive(int sfd, struct sockaddr *client_addr, char *msg, unsigned int msg_len) = 0;
 };
 
 class AnyServer

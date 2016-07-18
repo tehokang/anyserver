@@ -5,6 +5,7 @@
 #include "anyserver_configuration.h"
 
 #include <list>
+#include <memory>
 using namespace std;
 
 namespace anyserver
@@ -17,9 +18,11 @@ public:
     virtual ~AnyServerFactory();
 
     virtual bool init(const string config_file);
-    virtual void deinit();
     virtual bool start();
     virtual void stop();
+
+protected:
+    virtual void __deinit__();
 
 private:
     AnyServerConfiguration *m_anyserver_configuration;

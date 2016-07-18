@@ -7,9 +7,11 @@
 #define OVERRIDE
 #endif
 
-#define SAFE_DELETE(x)    do{if(x){delete x;x=nullptr;}}while(0)
+#define SAFE_DELETE(x) do{if(x){delete x;x=nullptr;}}while(0)
+#define SAFE_FREE(x) do{if(x){free(x);x=nullptr;}}while(0)
 
 #include "anylogger.h"
+#include <string.h>
 
 #define __SHORT_FILE__ \
 (strrchr(__FILE__,'/') \

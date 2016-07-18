@@ -45,7 +45,14 @@ bool AnyLogger::m_warning = true;
 bool AnyLogger::m_error = true;
 bool AnyLogger::m_filewrite = false;
 unsigned int AnyLogger::m_filesize = 0;
+
+#if defined(__linux__)
+pthread_mutex_t AnyLogger::m_filelogging_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+#elif defined(__APPLE__)
 pthread_mutex_t AnyLogger::m_filelogging_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
+#else /* @todo : Window, FreeBSD */
+
+#endif
 
 FILE *AnyLogger::m_log_fp = NULL;
 string AnyLogger::m_log_filename(1024, '\0');

@@ -10,6 +10,7 @@ namespace anyserver
 
 class IAnyServerListener
 {
+public:
     virtual void onClientConnected(int fd, string ip_address) = 0;
     virtual void onClientDisconnected(int fd) = 0;
     virtual void onReceive(int fd) = 0;
@@ -25,7 +26,7 @@ public:
     void removeEventListener(IAnyServerListener *listener);
 
     virtual bool init() = 0;
-    virtual void deinit() = 0;
+    virtual void __deinit__() = 0;
     virtual bool start() = 0;
     virtual void stop() = 0;
 

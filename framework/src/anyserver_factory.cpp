@@ -15,6 +15,7 @@ AnyServerFactory::AnyServerFactory()
 AnyServerFactory::~AnyServerFactory()
 {
     SAFE_DELETE(m_anyserver_configuration);
+    m_servers.clear();
 }
 
 bool AnyServerFactory::init(const string config_file)
@@ -36,6 +37,7 @@ bool AnyServerFactory::init(const string config_file)
             it!=server_info.server_types.end(); ++it )
     {
         const SType &server_type = (*it);
+        LOG_DEBUG("%s enable : %d \n", server_type.header.data(), server_type.enable);
         if ( true == server_type.enable )
         {
             switch ( server_type.kinds )
@@ -81,7 +83,7 @@ bool AnyServerFactory::init(const string config_file)
     return true;
 }
 
-void AnyServerFactory::deinit()
+void AnyServerFactory::__deinit__()
 {
     LOG_DEBUG("\n");
 }
@@ -89,6 +91,15 @@ void AnyServerFactory::deinit()
 bool AnyServerFactory::start()
 {
     LOG_DEBUG("\n");
+    for ( AnyServerList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
+    {
+        AnyServerPtr server = (*it);
+        if ( false == server->start() )
+        {
+            LOG_ERROR("server[%s] failed to start \n", server->getName().data());
+            return false;
+        }
+    }
     return true;
 }
 

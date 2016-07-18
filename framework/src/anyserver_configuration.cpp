@@ -1,6 +1,6 @@
 #include "json/json.h"
 #include "anymacro.h"
-#include "utilities.h"
+#include "utilities/filesystem.h"
 #include "anyserver_configuration.h"
 
 #include <iostream>
@@ -59,7 +59,7 @@ bool AnyServerConfiguration::__parse__(string file)
     {
         string name = (*it);
 
-        list<ServerType> server_types = m_server_info.server_types;
+        list<ServerType> &server_types = m_server_info.server_types;
         for ( list<ServerType>::iterator it=server_types.begin();
                 it!=server_types.end(); ++it )
         {

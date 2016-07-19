@@ -137,6 +137,12 @@ void* InetDomainSocketUdpServer::communication_thread(void *argv)
             LOG_WARNING("ERROR in sendto");
         }
 #endif
+        for ( list<IAnyServerListener*>::iterator it = listeners.begin();
+                it!=listeners.end(); ++it )
+        {
+            IAnyServerListener *listener = (*it);
+            listener->onClientDisconnected(server_fd);
+        }
     }
     return nullptr;
 }

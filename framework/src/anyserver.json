@@ -1,34 +1,13 @@
 {
   "_comment": "",
   "@name": "GameServer",
-  "type":
-  {
-    "websocket" : 
-    {
-      "enable" : false,
-      "bind" : 9999,
-      "tcp" : true
-    },    
-    "http" : 
-    {
-      "enable" : false,
-      "bind" : 9999, 
-      "tcp" : true
-    }, 
-    "inet_domainsocket" : 
-    {
-      "enable" : true,
-      "bind" : 9999, 
-      "tcp" : true
-    },
-    "unix_domainsocket" :
-    {
-      "enable" : false,
-      "bind" : "uds.tmp",
-      "tcp" : true
-    }
-  },
-  
+  "server_list": [
+    { "type" : "websocket", "enable" : false, "bind" : 9999, "tcp" : true },    
+    { "type" : "http", "enable" : false, "bind" : 9999, "tcp" : true }, 
+    { "type" : "inet_domainsocket", "enable" : true, "bind" : 9998, "tcp" : true },
+    { "type" : "inet_domainsocket", "enable" : true, "bind" : 9999, "tcp" : false },
+    { "type" : "unix_domainsocket", "enable" : false, "bind" : "uds.tmp", "tcp" : true }
+  ],
   "capabilities" :
   {
     "max_client" : 200,

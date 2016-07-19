@@ -4,6 +4,10 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <memory>
+#include <map>
+
+#include "json/json.h"
 using namespace std;
 
 namespace anyserver
@@ -16,11 +20,19 @@ public:
     virtual ~AnyServerConfiguration();
     bool init(const string config_file);
 
-    typedef enum { NONE, WEBSOCKET, INETDS, UNIXDS, HTTP } ServerKinds;
-    class ServerType
+    typedef enum
+    {
+        WEBSOCKET,
+        INETDS,
+        UNIXDS,
+        HTTP,
+        SERVER_KINDS_NUM
+    } ServerKinds;
+
+    class ServerInfo
     {
     public:
-        ServerType(const string _header, const ServerKinds _kinds)
+        ServerInfo(const string _header, const ServerKinds _kinds)
             : header(_header), bind(""), enable(false), kinds(_kinds), tcp(true)
         {
         }
@@ -30,6 +42,8 @@ public:
         bool tcp;
         ServerKinds kinds;
     };
+    typedef shared_ptr<ServerInfo> ServerInfoPtr;
+    typedef list<ServerInfoPtr> ServerInfoList;
 
     class Capabilities
     {
@@ -43,21 +57,17 @@ public:
         bool enable_security;
     };
 
-    class ServerInfo
+    class Configuration
     {
     public:
-        ServerInfo()
+        Configuration()
             : name(""), enable_log(true), log_file(""), version(""), copyright("")
         {
-            server_types.push_back(ServerType("websocket", WEBSOCKET));
-            server_types.push_back(ServerType("http", HTTP));
-            server_types.push_back(ServerType("inet_domainsocket", INETDS));
-            server_types.push_back(ServerType("unix_domainsocket", UNIXDS));
         };
-        ~ServerInfo(){};
+        ~Configuration(){};
 
         string name;
-        list<ServerType> server_types;
+        ServerInfoList server_infos;
         Capabilities capabilities;
         bool enable_log;
         string log_file;
@@ -65,12 +75,20 @@ public:
         string copyright;
     };
 
-    const ServerInfo& getServerInfo() { return m_server_info; };
+    const Configuration& getConfiguration() { return m_configuration; };
 
 protected:
     virtual bool __parse__(const string config_file);
-    ServerInfo m_server_info;
-    const string m_config_file;
+    virtual void __subparse_server_list__(Json::Value &root);
+    virtual void __subparse_capabilities__(Json::Value &root);
+    virtual void __subparse_log__(Json::Value &root);
+    virtual void __subparse_common__(Json::Value &root);
+
+    Configuration m_configuration;
+    /**
+     * @todo How to make constant type
+     */
+    map<string, ServerKinds> m_server_kinds;
 
 };
 

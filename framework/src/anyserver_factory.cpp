@@ -34,18 +34,18 @@ bool AnyServerFactory::init(const string config_file)
     /**
      * @todo create servers and save the server into list
      */
-    typedef AnyServerConfiguration::ServerInfo SInfo;
-    const SInfo server_info = m_anyserver_configuration->getServerInfo();
+    typedef AnyServerConfiguration::Configuration SConfiguration;
+    const SConfiguration configuration = m_anyserver_configuration->getConfiguration();
 
-    typedef AnyServerConfiguration::ServerType SType;
-    for ( list<SType>::const_iterator it=server_info.server_types.begin();
-            it!=server_info.server_types.end(); ++it )
+    typedef AnyServerConfiguration::ServerInfoPtr SInfo;
+    for ( list<SInfo>::const_iterator it=configuration.server_infos.begin();
+            it!=configuration.server_infos.end(); ++it )
     {
-        const SType &server_type = (*it);
-        LOG_DEBUG("%s enable : %d \n", server_type.header.data(), server_type.enable);
-        if ( true == server_type.enable )
+        const SInfo &server_info = (*it);
+        LOG_DEBUG("%s enable : %d \n", server_info->header.data(), server_info->enable);
+        if ( true == server_info->enable )
         {
-            switch ( server_type.kinds )
+            switch ( server_info->kinds )
             {
                 case AnyServerConfiguration::WEBSOCKET:
                     break;
@@ -54,22 +54,22 @@ bool AnyServerFactory::init(const string config_file)
                 case AnyServerConfiguration::INETDS:
                     {
                         AnyServerPtr server;
-                        if ( server_type.tcp )
+                        if ( server_info->tcp )
                         {
                             server = AnyServerPtr(
                                     new InetDomainSocketTcpServer(
-                                            server_type.header,
-                                            server_type.bind,
-                                            server_info.capabilities.max_client));
+                                            server_info->header,
+                                            server_info->bind,
+                                            configuration.capabilities.max_client));
 
                         }
                         else
                         {
                             server = AnyServerPtr(
                                     new InetDomainSocketUdpServer(
-                                            server_type.header,
-                                            server_type.bind,
-                                            server_info.capabilities.max_client));
+                                            server_info->header,
+                                            server_info->bind,
+                                            configuration.capabilities.max_client));
                         }
                         server->addEventListener(m_server_listener);
                         m_servers.push_back(server);
@@ -77,10 +77,9 @@ bool AnyServerFactory::init(const string config_file)
                     break;
                 case AnyServerConfiguration::UNIXDS:
                     break;
-                case AnyServerConfiguration::NONE:
                 default:
                     LOG_DEBUG("Unknown and unsupported server : %s \n",
-                            server_type.header.data());
+                            server_info->header.data());
                     break;
             }
         }

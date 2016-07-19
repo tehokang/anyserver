@@ -13,12 +13,14 @@ TARGET ?= $(TARGET_NAME)
 SRCS := $(shell find $(BUILD_SRC_DIR) -name "*.cpp" ! -name ".*" 2>/dev/null)
 INCS := $(addprefix -I, $(abspath $(shell find $(BUILD_SRC_DIR)/ -type d 2>/dev/null)))
 
-CXXFLAGS := $(INCS) -std=c++11
+CXXFLAGS := $(INCS) -std=c++11 -fexceptions
 LDFLAGS := -lpthread
 DEFINES := -DSERVER_PORT=$(SERVER_PORT)
 
 ifeq ($(CONFIG_DEBUG),YES)
-CXXFLAGS += -DCONFIG_DEBUG
+CXXFLAGS += -DCONFIG_DEBUG -O -g
+else
+CXXFLAGS += -O2
 endif
 
 OBJS := $(SRCS:.cpp=.o)

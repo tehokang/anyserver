@@ -144,16 +144,6 @@ void* InetDomainSocketUdpServer::communication_thread(void *argv)
             IAnyServerListener *listener = (*it);
             listener->onClientDisconnected(server_fd);
         }
-<<<<<<< HEAD
-=======
-#endif
-        for ( list<IAnyServerListener*>::iterator it = listeners.begin();
-                it!=listeners.end(); ++it )
-        {
-            IAnyServerListener *listener = (*it);
-            listener->onClientDisconnected(server_fd);
-        }
->>>>>>> 1238aae296018f2979389f0426d8b21c1a2869a2
     }
     close(server_fd);
     return nullptr;

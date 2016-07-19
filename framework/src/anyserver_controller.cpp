@@ -73,6 +73,7 @@ bool AnyServerController::start()
 void AnyServerController::stop()
 {
     LOG_DEBUG("\n");
+    m_anyserver_factory->stop();
 }
 
 void AnyServerController::onReceivedPosixSignal(int signal_id)
@@ -91,6 +92,12 @@ void AnyServerController::onClientConnected(int fd, string ip_address, int port)
 {
     LOG_DEBUG("\n");
     LOG_DEBUG("client [fd:%d] connected from %s:%d \n", fd, ip_address.data(), port);
+}
+
+void AnyServerController::onClientConnected(int fd, string ip_address, string bind)
+{
+    LOG_DEBUG("\n");
+    LOG_DEBUG("client [fd:%d] connected from %s:%s \n", fd, ip_address.data(), bind.data());
 }
 
 void AnyServerController::onClientDisconnected(int fd)

@@ -2,11 +2,7 @@
 #include "anymacro.h"
 
 #include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
 
 #define EPOLL_SIZE      20
 
@@ -27,6 +23,7 @@ InetDomainSocketTcpServer::InetDomainSocketTcpServer(
 InetDomainSocketTcpServer::~InetDomainSocketTcpServer()
 {
     LOG_DEBUG("\n");
+    __deinit__();
     SAFE_FREE(m_events);
 }
 
@@ -73,8 +70,8 @@ bool InetDomainSocketTcpServer::init()
 
 void InetDomainSocketTcpServer::__deinit__()
 {
-    int status = 0;
-    pthread_join(m_epoll_thread, reinterpret_cast<void **>(&status));
+    LOG_DEBUG("\n");
+    stop();
 }
 
 bool InetDomainSocketTcpServer::start()
@@ -140,7 +137,7 @@ void* InetDomainSocketTcpServer::epoll_thread(void *argv)
             }
             else
             {
-                bzero(buffer, sizeof(buffer));
+                memset(buffer, 0x00, sizeof(buffer));
                 int readn = read(events[i].data.fd, buffer, sizeof(buffer));
                 if ( 0 >= readn )
                 {
@@ -163,17 +160,18 @@ void* InetDomainSocketTcpServer::epoll_thread(void *argv)
                     {
                         IAnyServerListener *listener = (*it);
                         listener->onReceive(events[i].data.fd, buffer, readn);
-                    }
 #ifdef CONFIG_ECHO_RESPONSE
-                    /**
-                     * Test echo
-                     */
-                    write(events[i].data.fd, buffer, readn);
+                        /**
+                         * Test echo
+                         */
+                        write(events[i].data.fd, buffer, readn);
 #endif
+                    }
                 }
             }
         }
     }
+    close(server_fd);
     return nullptr;
 }
 

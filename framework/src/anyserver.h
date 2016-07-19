@@ -4,7 +4,6 @@
 #include <string>
 #include <list>
 #include <sys/socket.h>
-#include <netinet/in.h>
 
 using namespace std;
 
@@ -23,6 +22,7 @@ public:
      * @param port
      */
     virtual void onClientConnected(int fd, string ip_address, int port) = 0;
+    virtual void onClientConnected(int fd, string ip_address, string bind) = 0;
     virtual void onClientDisconnected(int fd) = 0;
     virtual void onReceive(int fd, char *msg, unsigned int msg_len) = 0;
 

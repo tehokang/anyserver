@@ -3,6 +3,8 @@
 #include "anyserver_configuration.h"
 #include "inet_domainsocket_tcp_server.h"
 #include "inet_domainsocket_udp_server.h"
+#include "unix_domainsocket_tcp_server.h"
+#include "unix_domainsocket_udp_server.h"
 
 namespace anyserver
 {
@@ -34,18 +36,18 @@ bool AnyServerFactory::init(const string config_file)
     /**
      * @todo create servers and save the server into list
      */
-    typedef AnyServerConfiguration::ServerInfo SInfo;
-    const SInfo server_info = m_anyserver_configuration->getServerInfo();
+    typedef AnyServerConfiguration::Configuration SConfiguration;
+    const SConfiguration configuration = m_anyserver_configuration->getConfiguration();
 
-    typedef AnyServerConfiguration::ServerType SType;
-    for ( list<SType>::const_iterator it=server_info.server_types.begin();
-            it!=server_info.server_types.end(); ++it )
+    typedef AnyServerConfiguration::ServerInfoPtr SInfo;
+    for ( list<SInfo>::const_iterator it=configuration.server_infos.begin();
+            it!=configuration.server_infos.end(); ++it )
     {
-        const SType &server_type = (*it);
-        LOG_DEBUG("%s enable : %d \n", server_type.header.data(), server_type.enable);
-        if ( true == server_type.enable )
+        const SInfo &server_info = (*it);
+        LOG_DEBUG("%s enable : %d \n", server_info->header.data(), server_info->enable);
+        if ( true == server_info->enable )
         {
-            switch ( server_type.kinds )
+            switch ( server_info->kinds )
             {
                 case AnyServerConfiguration::WEBSOCKET:
                     break;
@@ -54,33 +56,54 @@ bool AnyServerFactory::init(const string config_file)
                 case AnyServerConfiguration::INETDS:
                     {
                         AnyServerPtr server;
-                        if ( server_type.tcp )
+                        if ( server_info->tcp )
                         {
                             server = AnyServerPtr(
                                     new InetDomainSocketTcpServer(
-                                            server_type.header,
-                                            server_type.bind,
-                                            server_info.capabilities.max_client));
+                                            server_info->header,
+                                            server_info->bind,
+                                            configuration.capabilities.max_client));
 
                         }
                         else
                         {
                             server = AnyServerPtr(
                                     new InetDomainSocketUdpServer(
-                                            server_type.header,
-                                            server_type.bind,
-                                            server_info.capabilities.max_client));
+                                            server_info->header,
+                                            server_info->bind,
+                                            configuration.capabilities.max_client));
                         }
                         server->addEventListener(m_server_listener);
                         m_servers.push_back(server);
                     }
                     break;
                 case AnyServerConfiguration::UNIXDS:
+                    {
+                        AnyServerPtr server;
+                        if ( server_info->tcp )
+                        {
+                            server = AnyServerPtr(
+                                    new UnixDomainSocketTcpServer(
+                                            server_info->header,
+                                            server_info->bind,
+                                            configuration.capabilities.max_client));
+
+                        }
+                        else
+                        {
+                            server = AnyServerPtr(
+                                    new UnixDomainSocketUdpServer(
+                                            server_info->header,
+                                            server_info->bind,
+                                            configuration.capabilities.max_client));
+                        }
+                        server->addEventListener(m_server_listener);
+                        m_servers.push_back(server);
+                    }
                     break;
-                case AnyServerConfiguration::NONE:
                 default:
                     LOG_DEBUG("Unknown and unsupported server : %s \n",
-                            server_type.header.data());
+                            server_info->header.data());
                     break;
             }
         }
@@ -94,7 +117,7 @@ bool AnyServerFactory::init(const string config_file)
         AnyServerPtr server = (*it);
         if ( false == server->init() )
         {
-            LOG_ERROR("server[%s] failed to initialize \n", server->getName().data());
+            LOG_ERROR("server[%s][tcp:%d] failed to initialize \n", server->getName().data());
             return false;
         }
     }
@@ -130,6 +153,14 @@ bool AnyServerFactory::start()
 void AnyServerFactory::stop()
 {
     LOG_DEBUG("\n");
+    for ( AnyServerList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
+    {
+        AnyServerPtr server = (*it);
+        if ( nullptr != server )
+        {
+            server->stop();
+        }
+    }
 }
 
 

@@ -2,10 +2,8 @@
 #include "anymacro.h"
 
 #include <netdb.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 namespace anyserver
 {
@@ -22,6 +20,7 @@ InetDomainSocketUdpServer::InetDomainSocketUdpServer(
 InetDomainSocketUdpServer::~InetDomainSocketUdpServer()
 {
     LOG_DEBUG("\n");
+    __deinit__();
 }
 
 bool InetDomainSocketUdpServer::init()
@@ -41,7 +40,7 @@ bool InetDomainSocketUdpServer::init()
     setsockopt(m_server_fd, SOL_SOCKET, SO_REUSEADDR,
            (const void *)&optval , sizeof(int));
 
-    bzero((char *) &serveraddr, sizeof(serveraddr));
+    memset((char *) &serveraddr, 0x00, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET;
     serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
     serveraddr.sin_port = htons((unsigned short)stoi(m_bind));
@@ -59,6 +58,7 @@ bool InetDomainSocketUdpServer::init()
 void InetDomainSocketUdpServer::__deinit__()
 {
     LOG_DEBUG("\n");
+    stop();
 }
 
 bool InetDomainSocketUdpServer::start()
@@ -95,7 +95,7 @@ void* InetDomainSocketUdpServer::communication_thread(void *argv)
 
     while ( server->m_run_thread )
     {
-        bzero(buffer, sizeof(buffer));
+        memset(buffer, 0x00, sizeof(buffer));
         int readn = recvfrom(server_fd, buffer, sizeof(buffer), 0,
                 (struct sockaddr *) &clientaddr, &clientlen);
         if (readn < 0) LOG_WARNING("ERROR in recvfrom");
@@ -126,18 +126,26 @@ void* InetDomainSocketUdpServer::communication_thread(void *argv)
         {
             IAnyServerListener *listener = (*it);
             listener->onReceive(server_fd, (struct sockaddr*)&clientaddr, buffer, readn);
-        }
 #ifdef CONFIG_ECHO_RESPONSE
-        /**
-         * Test echo
-         */
-        if ( 0 > sendto(server_fd, buffer, strlen(buffer), 0,
-                (struct sockaddr *) &clientaddr, clientlen) )
-        {
-            LOG_WARNING("ERROR in sendto");
-        }
+            /**
+             * Test echo
+             */
+            if ( 0 > sendto(server_fd, buffer, strlen(buffer), 0,
+                    (struct sockaddr *) &clientaddr, clientlen) )
+            {
+                LOG_WARNING("ERROR in sendto");
+            }
 #endif
+        }
+
+        for ( list<IAnyServerListener*>::iterator it = listeners.begin();
+                it!=listeners.end(); ++it )
+        {
+            IAnyServerListener *listener = (*it);
+            listener->onClientDisconnected(server_fd);
+        }
     }
+    close(server_fd);
     return nullptr;
 }
 

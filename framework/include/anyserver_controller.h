@@ -28,6 +28,7 @@ public:
     virtual void setLogLevel(bool debug, bool info, bool warn, bool error);
 
     virtual void onClientConnected(int fd, string ip_address, int port) override;
+    virtual void onClientConnected(int fd, string ip_address, string bind) override;
     virtual void onClientDisconnected(int fd) override;
     virtual void onReceive(int fd, char *msg, unsigned int msg_len) override;
     virtual void onReceive(int fd, struct sockaddr *client_addr, char *msg, unsigned int msg_len) override;

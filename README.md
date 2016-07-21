@@ -1,2 +1,5 @@
 # anyserver
-anyserver is to make some kinds of server, for example websocket server, http, inet domain and unix domain server.
+anyserver is a component to make kinds of server, for example websocket, http, inet domain for external communication and unix domain server for IPC.
+
+
+

@@ -43,7 +43,6 @@ size_t AnyServer::addClientInfo(const AnyServer::ClientInfoPtr client)
     return client->getClientId();
 }
 
-/* To remove TcpClientInfo */
 size_t AnyServer::removeClientInfo(const int fd)
 {
     for ( list<AnyServer::ClientInfoPtr>::iterator it=m_client_list.begin();

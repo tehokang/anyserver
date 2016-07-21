@@ -119,6 +119,11 @@ public:
     const ClientInfoPtr findClientInfo(const int fd);
     const ClientInfoPtr findClientInfo(const size_t client_id);
     const ClientInfoList getClientInfoList() { return m_client_list; };
+    bool sendToClient(size_t client_id, char *msg, unsigned int msg_len)
+    {
+
+        return true;
+    }
 
 protected:
     virtual void __deinit__() = 0;

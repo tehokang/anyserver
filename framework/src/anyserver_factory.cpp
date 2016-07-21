@@ -165,10 +165,12 @@ void AnyServerFactory::stop()
 void AnyServerFactory::onClientConnected(size_t server_id, size_t client_id)
 {
     LOG_DEBUG("client[0x%x] connected to server[0x%x] \n", client_id, server_id);
+    showClientList();
 }
 
 void AnyServerFactory::onClientDisconnected(size_t server_id, size_t client_id)
 {
+    showClientList();
     LOG_DEBUG("client[0x%x] disconnected from server[0x%x] \n", client_id, server_id);
 }
 

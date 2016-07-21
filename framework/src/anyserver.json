@@ -5,7 +5,6 @@
     { "type" : "websocket", "enable" : false, "bind" : 9999, "tcp" : true },    
     { "type" : "http", "enable" : false, "bind" : 9999, "tcp" : true }, 
     { "type" : "inet_domainsocket", "enable" : true, "bind" : 9999, "tcp" : true },
-    { "type" : "inet_domainsocket", "enable" : true, "bind" : 9999, "tcp" : true },
     { "type" : "inet_domainsocket", "enable" : true, "bind" : 9999, "tcp" : false },
     { "type" : "unix_domainsocket", "enable" : true, "bind" : "/tmp/uds_tcp.tmp", "tcp" : true },
     { "type" : "unix_domainsocket", "enable" : true, "bind" : "/tmp/uds_udp.tmp", "tcp" : false }

@@ -45,11 +45,11 @@ bool AnyServerController::init()
     signal_ids.push_back(SIGPIPE);
     posix_signal_interceptor.HandleSignals(
             signal_ids,
-            std::bind1st(std::mem_fun(&AnyServerController::onReceivedPosixSignal),this));
+            std::bind1st(std::mem_fun(&AnyServerController::onReceivedPosixSignal), this));
 
     m_anyserver_factory = new AnyServerFactory();
     RETURN_FALSE_IF_NULL(m_anyserver_factory);
-    m_anyserver_factory->setEventListener(this);
+    m_anyserver_factory->addEventListener(this);
     RETURN_FALSE_IF_FALSE(m_anyserver_factory->init(m_config_file));
 
     return true;
@@ -58,7 +58,7 @@ bool AnyServerController::init()
 void AnyServerController::__deinit__()
 {
     LOG_DEBUG("\n");
-    m_anyserver_factory->setEventListener(nullptr);
+    m_anyserver_factory->removeEventListener(nullptr);
 }
 
 bool AnyServerController::start()
@@ -88,33 +88,20 @@ void AnyServerController::setLogLevel(bool debug, bool info, bool warn, bool err
     AnyLogger::setLogLevel(info, debug, warn, error);
 }
 
-void AnyServerController::onClientConnected(int fd, string ip_address, int port)
+void AnyServerController::onClientConnected(size_t server_id, size_t client_id)
 {
-    LOG_DEBUG("\n");
-    LOG_DEBUG("client [fd:%d] connected from %s:%d \n", fd, ip_address.data(), port);
+    LOG_DEBUG("client[0x%x] connected to server[0x%x] \n", client_id, server_id);
 }
 
-void AnyServerController::onClientConnected(int fd, string ip_address, string bind)
+void AnyServerController::onClientDisconnected(size_t server_id, size_t client_id)
 {
-    LOG_DEBUG("\n");
-    LOG_DEBUG("client [fd:%d] connected from %s:%s \n", fd, ip_address.data(), bind.data());
+    LOG_DEBUG("client[0x%x] disconnected from server[0x%x] \n", client_id, server_id);
 }
 
-void AnyServerController::onClientDisconnected(int fd)
+void AnyServerController::onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
 {
-    LOG_DEBUG("\n");
-}
-
-void AnyServerController::onReceive(int fd, char *msg, unsigned int msg_len)
-{
-    LOG_DEBUG("\n");
-    LOG_DEBUG("[TCP] Received msg[fd:%d] : %s (length: %d) \n", fd, msg, msg_len);
-}
-
-void AnyServerController::onReceive(int sfd, struct sockaddr *client_addr, char *msg, unsigned int msg_len)
-{
-    LOG_DEBUG("\n");
-    LOG_DEBUG("[UDP] Received msg[fd:%d] : %s (length: %d) \n", sfd, msg, msg_len);
+    LOG_DEBUG("Received msg[client:0x%x,server:0x%x] : %s (length: %d) \n",
+            client_id, server_id, msg, msg_len);
 }
 
 }

@@ -1,8 +1,9 @@
 #include "unix_domainsocket_tcp_server.h"
 #include "anymacro.h"
 
-#include <unistd.h>
 #include <sys/un.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 #define EPOLL_SIZE      20
 
@@ -34,8 +35,8 @@ bool UnixDomainSocketTcpServer::init()
     m_events = (struct epoll_event *)malloc(sizeof(*m_events) * EPOLL_SIZE);
     if ( 0 > (m_epoll_fd = epoll_create(m_max_client)) )
     {
-        perror("epoll_create error");
-        return 1;
+        perror("epoll_create error ");
+        return false;
     }
 
     if (access(m_bind.data(), F_OK) == 0)
@@ -46,31 +47,23 @@ bool UnixDomainSocketTcpServer::init()
     m_server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if ( -1 == m_server_fd )
     {
-        perror("socket error :");
+        perror("socket error ");
         close(m_server_fd);
         return false;
     }
 
-    struct sockaddr_un addr;
-    addr.sun_family = AF_UNIX;
-    strcpy(addr.sun_path, m_bind.data());
-    if ( -1 == bind (m_server_fd, (struct sockaddr *)&addr, sizeof(addr)) )
-    {
-        close(m_server_fd);
-        return false;
-    }
-
-    if ( -1 == listen(m_server_fd, 5) )
-    {
-        perror("listen error : ");
-        return false;
-    }
+    struct sockaddr_un serveraddr;
+    serveraddr.sun_family = AF_UNIX;
+    strcpy(serveraddr.sun_path, m_bind.data());
 
     m_ev.events = EPOLLIN;
     m_ev.data.fd = m_server_fd;
-    if ( 0 > epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, m_server_fd, &m_ev) )
+
+    if ( 0 > bind (m_server_fd, (struct sockaddr *)&serveraddr, sizeof(serveraddr))
+            || 0 > listen(m_server_fd, 5)
+            ||  0 > epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, m_server_fd, &m_ev) )
     {
-        perror("epoll_ctl, adding listenfd\n");
+        perror("bind/listen/epoll_ctl, adding listenfd ");
         return false;
     }
 
@@ -117,6 +110,7 @@ void* UnixDomainSocketTcpServer::epoll_thread(void *argv)
     struct epoll_event *events = server->m_events;
     int &epoll_fd = server->m_epoll_fd;
     int &server_fd = server->m_server_fd;
+    size_t &server_id = server->m_server_id;
 
     enum { BUFFER_LENGTH = 2048 };
     char buffer[BUFFER_LENGTH] = {0, };
@@ -133,12 +127,14 @@ void* UnixDomainSocketTcpServer::epoll_thread(void *argv)
                 ev.data.fd = client_fd;
                 epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &ev);
 
+                size_t client_id = server->addClientInfo(ClientInfoPtr(new TcpClientInfo(client_fd, &clientaddr)));
+
                 list<IAnyServerListener*> listeners = server->m_listeners;
                 for ( list<IAnyServerListener*>::iterator it = listeners.begin();
                         it!=listeners.end(); ++it )
                 {
                     IAnyServerListener *listener = (*it);
-                    listener->onClientConnected(client_fd, "localhost", server->m_bind);
+                    listener->onClientConnected(server_id, client_id);
                 }
             }
             else
@@ -150,27 +146,31 @@ void* UnixDomainSocketTcpServer::epoll_thread(void *argv)
                     epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, events);
                     close(events[i].data.fd);
 
+                    size_t client_id = server->removeClientInfo(events[i].data.fd);
+
                     list<IAnyServerListener*> listeners = server->m_listeners;
                     for ( list<IAnyServerListener*>::iterator it = listeners.begin();
                             it!=listeners.end(); ++it )
                     {
                         IAnyServerListener *listener = (*it);
-                        listener->onClientDisconnected(events[i].data.fd);
+                        listener->onClientDisconnected(server_id, client_id);
                     }
                 }
                 else
                 {
+                    ClientInfoPtr client = server->findClientInfo(events[i].data.fd);
                     list<IAnyServerListener*> listeners = server->m_listeners;
                     for ( list<IAnyServerListener*>::iterator it = listeners.begin();
                             it!=listeners.end(); ++it )
                     {
                         IAnyServerListener *listener = (*it);
-                        listener->onReceive(events[i].data.fd, buffer, readn);
-#ifdef CONFIG_ECHO_RESPONSE
+                        listener->onReceived(server_id, client->getClientId(), buffer, readn);
+#ifdef CONFIG_TEST_ECHO_RESPONSE
                         /**
                          * Test echo
                          */
-                        write(events[i].data.fd, buffer, readn);
+                        ssize_t written = write(events[i].data.fd, buffer, readn);
+                        (void)written;
 #endif
                     }
                 }

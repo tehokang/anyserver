@@ -82,7 +82,7 @@ void AnyServerConfiguration::__subparse_server_list__(Json::Value &root)
         map<string, ServerKinds>::const_iterator it = m_server_kinds.find(server["type"].asString());
         if ( it != m_server_kinds.end() )
         {
-            ServerInfoPtr new_server = ServerInfoPtr(new ServerInfo(it->first, it->second));
+            ServerInfoPtr new_server = ServerInfoPtr(new ServerInfo(string(it->first), it->second));
             new_server->enable = server["enable"].asBool();
             new_server->bind = server["bind"].asString();
             new_server->tcp = server["tcp"].asBool();

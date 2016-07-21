@@ -13,7 +13,7 @@ public:
     virtual void onReceivedSystemSignal(int signal) = 0;
 };
 
-class AnyServerController : public IAnyServerListener
+class AnyServerController : public IAnyServerFactoryListener
 {
 public:
     AnyServerController(const string config_file);
@@ -27,11 +27,10 @@ public:
     virtual void stop();
     virtual void setLogLevel(bool debug, bool info, bool warn, bool error);
 
-    virtual void onClientConnected(int fd, string ip_address, int port) override;
-    virtual void onClientConnected(int fd, string ip_address, string bind) override;
-    virtual void onClientDisconnected(int fd) override;
-    virtual void onReceive(int fd, char *msg, unsigned int msg_len) override;
-    virtual void onReceive(int fd, struct sockaddr *client_addr, char *msg, unsigned int msg_len) override;
+    virtual void onClientConnected(size_t server_id, size_t client_id) override;
+    virtual void onClientDisconnected(size_t server_id, size_t client_id) override;
+    virtual void onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len) override;
+
 protected:
     void onReceivedPosixSignal(int signal_id);
 

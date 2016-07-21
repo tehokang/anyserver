@@ -35,20 +35,15 @@ bool UnixDomainSocketUdpServer::init()
         unlink(m_bind.data());
     }
 
-    m_server_fd = socket(AF_UNIX, SOCK_DGRAM, 0);
-    if ( m_server_fd < 0 )
-    {
-        LOG_WARNING("ERROR opening socket");
-        return false;
-    }
-
     memset((char *) &serveraddr, 0x00, sizeof(serveraddr));
     serveraddr.sun_family = AF_UNIX;
     strcpy(serveraddr.sun_path, m_bind.data());
 
-    if ( 0 > bind(m_server_fd, (struct sockaddr *) &serveraddr, sizeof(serveraddr)) )
+    m_server_fd = socket(AF_UNIX, SOCK_DGRAM, 0);
+    if ( 0 > m_server_fd
+            || 0 > bind(m_server_fd, (struct sockaddr *) &serveraddr, sizeof(serveraddr)) )
     {
-        LOG_WARNING("ERROR on binding");
+        perror("socket/bind error ");
         return false;
     }
     return true;
@@ -90,6 +85,8 @@ void* UnixDomainSocketUdpServer::communication_thread(void *argv)
     enum { BUFFER_LENGTH = 2048 };
     char buffer[BUFFER_LENGTH] = {0, };
     int &server_fd = server->m_server_fd;
+    size_t &server_id = server->m_server_id;
+
     unsigned int clientlen = sizeof(clientaddr);
 
     while ( server->m_run_thread )
@@ -97,44 +94,46 @@ void* UnixDomainSocketUdpServer::communication_thread(void *argv)
         memset(buffer, 0x00, sizeof(buffer));
         int readn = recvfrom(server_fd, buffer, sizeof(buffer), 0,
                 (struct sockaddr *) &clientaddr, &clientlen);
-        if (readn < 0) LOG_WARNING("ERROR in recvfrom \n");
+        if (readn < 0) perror("ERROR in recvfrom \n");
 
-        printf( "client sun_path : %s\n", clientaddr.sun_path);
-
+        size_t client_id = server->addClientInfo(ClientInfoPtr(new UdpClientInfo(&clientaddr)));
         list<IAnyServerListener*> listeners = server->m_listeners;
         for ( list<IAnyServerListener*>::iterator it = listeners.begin();
                 it!=listeners.end(); ++it )
         {
             IAnyServerListener *listener = (*it);
-            listener->onClientConnected(server_fd, "localhost", server->m_bind);
+            listener->onClientConnected(server_id, client_id);
         }
 
-        LOG_DEBUG("server received %d/%d bytes: %s\n", strlen(buffer), readn, buffer);
+        LOG_DEBUG("server[0x%x] received %d bytes: %s from client[0x%x] %s  \n",
+                server_id, readn, buffer, client_id, clientaddr.sun_path);
 
         for ( list<IAnyServerListener*>::iterator it = listeners.begin();
                 it!=listeners.end(); ++it )
         {
             IAnyServerListener *listener = (*it);
-            listener->onReceive(server_fd, (struct sockaddr*)&clientaddr, buffer, readn);
-#ifdef CONFIG_ECHO_RESPONSE
-            /**
-             * Test echo
-             */
-            if ( 0 > sendto(server_fd, buffer, strlen(buffer), 0,
-                    (struct sockaddr *) &clientaddr, clientlen) )
-            {
-                LOG_WARNING("ERROR in sendto \n");
-                perror("fail to sendto ");
-            }
+            listener->onReceived(server_id, client_id, buffer, readn);
+        }
+
+#ifdef CONFIG_TEST_ECHO_RESPONSE
+        /**
+         * Test echo
+         */
+        ClientInfoPtr client = server->findClientInfo(client_id);
+        if ( 0 > sendto(server_fd, buffer, strlen(buffer), 0,
+                (struct sockaddr *) &clientaddr, clientlen) )
+        {
+            perror("Error in sendto ");
+        }
+
+        client_id = server->removeClientInfo(client_id);
+        for ( list<IAnyServerListener*>::iterator it = listeners.begin();
+                it!=listeners.end(); ++it )
+        {
+            IAnyServerListener *listener = (*it);
+            listener->onClientDisconnected(server_id, client_id);
+        }
 #endif
-        }
-
-        for ( list<IAnyServerListener*>::iterator it = listeners.begin();
-                it!=listeners.end(); ++it )
-        {
-            IAnyServerListener *listener = (*it);
-            listener->onClientDisconnected(server_fd);
-        }
     }
     close(server_fd);
     return nullptr;

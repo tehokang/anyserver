@@ -1,4 +1,5 @@
 #include "anyserver.h"
+#include "anymacro.h"
 
 namespace anyserver
 {
@@ -8,8 +9,9 @@ AnyServer::AnyServer(const string name, const string bind, const unsigned int ma
     , m_bind(bind)
     , m_max_client(max_client)
     , m_security(false)
+    , m_server_id(hash<string>()(m_name + bind))
 {
-
+    LOG_DEBUG("[%s] server unique id : 0x%x \n", m_name.data(), m_server_id);
 }
 
 AnyServer::~AnyServer()
@@ -35,4 +37,72 @@ void AnyServer::removeEventListener(IAnyServerListener *listener)
     }
 }
 
+size_t AnyServer::addClientInfo(const AnyServer::ClientInfoPtr client)
+{
+    m_client_list.push_back(client);
+    return client->getClientId();
 }
+
+/* To remove TcpClientInfo */
+size_t AnyServer::removeClientInfo(const int fd)
+{
+    for ( list<AnyServer::ClientInfoPtr>::iterator it=m_client_list.begin();
+            it!=m_client_list.end(); ++it )
+    {
+        auto *tcp_client = static_cast<AnyServer::TcpClientInfo*>(((*it)).get());
+        if ( fd == tcp_client->m_fd )
+        {
+            size_t client_id = tcp_client->getClientId();
+            LOG_DEBUG("Removed a client in list [cid:0x%x] \n", client_id);
+            m_client_list.remove(*it);
+            LOG_DEBUG("Remaining client : %d \n", m_client_list.size());
+            return client_id;
+        }
+    }
+    return 0;
+}
+
+size_t AnyServer::removeClientInfo(const size_t client_id)
+{
+    for ( list<AnyServer::ClientInfoPtr>::iterator it=m_client_list.begin();
+            it!=m_client_list.end(); ++it )
+    {
+        if ( client_id == (*it)->getClientId() )
+        {
+            LOG_DEBUG("Removed a client in list [cid:0x%x] \n", client_id);
+            m_client_list.remove(*it);
+            LOG_DEBUG("Remaining client : %d \n", m_client_list.size());
+            return client_id;
+        }
+    }
+    return 0;
+}
+
+const AnyServer::ClientInfoPtr AnyServer::findClientInfo(const int fd)
+{
+    for ( list<AnyServer::ClientInfoPtr>::iterator it=m_client_list.begin();
+            it!=m_client_list.end(); ++it )
+    {
+        auto *tcp_client = static_cast<TcpClientInfo*>(((*it)).get());
+        if ( fd == tcp_client->m_fd )
+        {
+            return (*it);
+        }
+    }
+    return nullptr;
+}
+
+const AnyServer::ClientInfoPtr AnyServer::findClientInfo(const size_t client_id)
+{
+    for ( list<AnyServer::ClientInfoPtr>::iterator it=m_client_list.begin();
+            it!=m_client_list.end(); ++it )
+    {
+        if ( client_id == (*it)->getClientId() )
+        {
+            return (*it);
+        }
+    }
+    return nullptr;
+}
+
+} // end of namespace

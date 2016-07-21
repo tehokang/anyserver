@@ -35,16 +35,20 @@ bool InetDomainSocketTcpServer::init()
     if ( 0 > (m_epoll_fd = epoll_create(m_max_client)) )
     {
         perror("epoll_create error");
-        return 1;
+        return false;
     }
 
     m_server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if ( -1 == m_server_fd )
+    if ( 0 > m_server_fd )
     {
-        perror("socket error :");
+        perror("socket error ");
         close(m_server_fd);
         return false;
     }
+
+    int optval = 1;
+    setsockopt(m_server_fd, SOL_SOCKET, SO_REUSEADDR,
+           (const void *)&optval , sizeof(int));
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -53,6 +57,7 @@ bool InetDomainSocketTcpServer::init()
     if ( -1 == bind (m_server_fd, (struct sockaddr *)&addr, sizeof(addr)) )
     {
         close(m_server_fd);
+        perror("bind error ");
         return false;
     }
     listen(m_server_fd, 5);
@@ -61,7 +66,7 @@ bool InetDomainSocketTcpServer::init()
     m_ev.data.fd = m_server_fd;
     if ( 0 > epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, m_server_fd, &m_ev) )
     {
-        perror("epoll_ctl, adding listenfd\n");
+        perror("epoll_ctl, adding listenfd ");
         return false;
     }
 
@@ -108,6 +113,7 @@ void* InetDomainSocketTcpServer::epoll_thread(void *argv)
     struct epoll_event *events = server->m_events;
     int &epoll_fd = server->m_epoll_fd;
     int &server_fd = server->m_server_fd;
+    size_t &server_id = server->m_server_id;
 
     enum { BUFFER_LENGTH = 2048 };
     char buffer[BUFFER_LENGTH] = {0, };
@@ -119,20 +125,19 @@ void* InetDomainSocketTcpServer::epoll_thread(void *argv)
         {
             if ( events[i].data.fd == server_fd )
             {
-                printf("Accept\n");
                 client_fd = accept(server_fd, (struct sockaddr *)&clientaddr, &clilen);
                 ev.events = EPOLLIN;
                 ev.data.fd = client_fd;
                 epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &ev);
+
+                size_t client_id = server->addClientInfo(ClientInfoPtr(new TcpClientInfo(client_fd, &clientaddr)));
 
                 list<IAnyServerListener*> listeners = server->m_listeners;
                 for ( list<IAnyServerListener*>::iterator it = listeners.begin();
                         it!=listeners.end(); ++it )
                 {
                     IAnyServerListener *listener = (*it);
-                    listener->onClientConnected(client_fd,
-                            inet_ntoa(clientaddr.sin_addr),
-                            clientaddr.sin_port);
+                    listener->onClientConnected(server_id, client_id);
                 }
             }
             else
@@ -144,29 +149,32 @@ void* InetDomainSocketTcpServer::epoll_thread(void *argv)
                     epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, events);
                     close(events[i].data.fd);
 
+                    size_t client_id = server->removeClientInfo(events[i].data.fd);
+
                     list<IAnyServerListener*> listeners = server->m_listeners;
                     for ( list<IAnyServerListener*>::iterator it = listeners.begin();
                             it!=listeners.end(); ++it )
                     {
                         IAnyServerListener *listener = (*it);
-                        listener->onClientDisconnected(events[i].data.fd);
+                        listener->onClientDisconnected(server_id, client_id);
                     }
                 }
                 else
                 {
+                    ClientInfoPtr client = server->findClientInfo(events[i].data.fd);
                     list<IAnyServerListener*> listeners = server->m_listeners;
                     for ( list<IAnyServerListener*>::iterator it = listeners.begin();
                             it!=listeners.end(); ++it )
                     {
                         IAnyServerListener *listener = (*it);
-                        listener->onReceive(events[i].data.fd, buffer, readn);
-#ifdef CONFIG_ECHO_RESPONSE
-                        /**
-                         * Test echo
-                         */
-                        write(events[i].data.fd, buffer, readn);
-#endif
+                        listener->onReceived(server_id, client->getClientId(), buffer, readn);
                     }
+#ifdef CONFIG_TEST_ECHO_RESPONSE
+                    /**
+                     * Test echo
+                     */
+                    write(events[i].data.fd, buffer, readn);
+#endif
                 }
             }
         }

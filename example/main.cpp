@@ -1,5 +1,6 @@
 #include "anyserver_controller.h"
 #include <unistd.h>
+#include <csignal>
 
 using namespace anyserver;
 
@@ -47,7 +48,15 @@ public:
 
     virtual void onReceivedSystemSignal(int signal)
     {
-        printf("received signal : %d \n", signal);
+        switch ( signal )
+        {
+            case SIGPIPE:
+                printf("SIGPIPE will be ignored \n");
+                return;
+            default:
+                printf("received signal : %d \n", signal);
+                break;
+        }
         m_run = false;
     }
 

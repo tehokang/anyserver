@@ -11,7 +11,6 @@ namespace anyserver
 
 AnyServerFactory::AnyServerFactory()
     : m_anyserver_configuration(new AnyServerConfiguration())
-    , m_server_listener(nullptr)
 {
     LOG_DEBUG("\n");
 }
@@ -73,7 +72,7 @@ bool AnyServerFactory::init(const string config_file)
                                             server_info->bind,
                                             configuration.capabilities.max_client));
                         }
-                        server->addEventListener(m_server_listener);
+                        server->addEventListener(this);
                         m_servers.push_back(server);
                     }
                     break;
@@ -97,7 +96,7 @@ bool AnyServerFactory::init(const string config_file)
                                             server_info->bind,
                                             configuration.capabilities.max_client));
                         }
-                        server->addEventListener(m_server_listener);
+                        server->addEventListener(this);
                         m_servers.push_back(server);
                     }
                     break;
@@ -117,7 +116,7 @@ bool AnyServerFactory::init(const string config_file)
         AnyServerPtr server = (*it);
         if ( false == server->init() )
         {
-            LOG_ERROR("server[%s][tcp:%d] failed to initialize \n", server->getName().data());
+            LOG_ERROR("server[%s] failed to initialize \n", server->getName().data());
             return false;
         }
     }
@@ -130,7 +129,7 @@ void AnyServerFactory::__deinit__()
     for ( AnyServerList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
     {
         AnyServerPtr server = (*it);
-        server->removeEventListener(m_server_listener);
+        server->removeEventListener(this);
     }
     LOG_DEBUG("\n");
 }
@@ -163,6 +162,43 @@ void AnyServerFactory::stop()
     }
 }
 
+void AnyServerFactory::onClientConnected(size_t server_id, size_t client_id)
+{
+    LOG_DEBUG("client[0x%x] connected to server[0x%x] \n", client_id, server_id);
+}
 
+void AnyServerFactory::onClientDisconnected(size_t server_id, size_t client_id)
+{
+    LOG_DEBUG("client[0x%x] disconnected from server[0x%x] \n", client_id, server_id);
+}
+
+void AnyServerFactory::onReceived(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
+{
+    LOG_DEBUG("server[0x%x] get message[%s] (len=%d) from client[0x%x] \n", server_id, msg, msg_len, client_id);
+
+    for ( list<IAnyServerFactoryListener*>::iterator it = m_server_listeners.begin();
+             it!=m_server_listeners.end(); ++it )
+    {
+        IAnyServerFactoryListener *listener = (*it);
+    }
+}
+
+void AnyServerFactory::showClientList()
+{
+    for ( AnyServerList::iterator it=m_servers.begin();
+            it!=m_servers.end(); ++it )
+    {
+        AnyServerPtr server = (*it);
+        LOG_DEBUG("[Server : %s] \n", server->getName().data());
+        AnyServer::ClientInfoList client_list = server->getClientInfoList();
+        for ( AnyServer::ClientInfoList::iterator it=client_list.begin();
+                it!=client_list.end(); ++it )
+        {
+            AnyServer::ClientInfoPtr client = (*it);
+            LOG_DEBUG("Client : 0x%x \n", client->getClientId());
+        }
+        LOG_DEBUG("\n");
+    }
+}
 
 } // end of namespace

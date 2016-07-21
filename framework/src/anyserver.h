@@ -1,13 +1,19 @@
 #ifndef __ANYSERVER_H__
 #define __ANYSERVER_H__
 
+#include "anymacro.h"
+
 #include <string>
 #include <list>
+#include <memory>
 #include <sys/socket.h>
+#include <sys/un.h>
+#include <arpa/inet.h>
+#include <functional>
 
 using namespace std;
 
-#define CONFIG_ECHO_RESPONSE
+#define CONFIG_TEST_ECHO_RESPONSE
 
 namespace anyserver
 {
@@ -15,24 +21,9 @@ namespace anyserver
 class IAnyServerListener
 {
 public:
-    /**
-     * @brief Tcp client connection/disconnection/receiving
-     * @param fd
-     * @param ip_address
-     * @param port
-     */
-    virtual void onClientConnected(int fd, string ip_address, int port) = 0;
-    virtual void onClientConnected(int fd, string ip_address, string bind) = 0;
-    virtual void onClientDisconnected(int fd) = 0;
-    virtual void onReceive(int fd, char *msg, unsigned int msg_len) = 0;
-
-    /**
-     * @brief Udp client receiving (except for connection/disconnection)
-     * @param sfd
-     * @param ip_address
-     * @param port
-     */
-    virtual void onReceive(int sfd, struct sockaddr *client_addr, char *msg, unsigned int msg_len) = 0;
+    virtual void onClientConnected(size_t server_id, size_t client_id) = 0; // inet
+    virtual void onClientDisconnected(size_t server_id, size_t client_id) = 0;
+    virtual void onReceived(size_t server_id, size_t client_id, char *msg, unsigned int msg_len) = 0;
 };
 
 class AnyServer
@@ -41,11 +32,11 @@ public:
     AnyServer(const string name, const string bind, const unsigned int max_client);
     virtual ~AnyServer();
 
+    size_t getServerId() { return m_server_id; };
     void addEventListener(IAnyServerListener *listener);
     void removeEventListener(IAnyServerListener *listener);
 
     virtual bool init() = 0;
-    virtual void __deinit__() = 0;
     virtual bool start() = 0;
     virtual void stop() = 0;
 
@@ -54,12 +45,93 @@ public:
 
     const unsigned int getMaxClient() { return m_max_client; };
     const string getName() { return m_name; };
+
+    class ClientInfo
+    {
+    public:
+        ClientInfo(bool tcp)
+            : m_tcp(tcp)
+            , m_client_id(hash<size_t*>()(&m_client_id))
+        {
+            /* Nothing to do */
+        };
+        size_t getClientId() { return m_client_id; };
+    protected:
+        const bool m_tcp;
+        size_t m_client_id;
+    };
+
+    typedef shared_ptr<ClientInfo> ClientInfoPtr;
+    typedef list<ClientInfoPtr> ClientInfoList;
+
+    class TcpClientInfo : public ClientInfo
+    {
+    public:
+        TcpClientInfo(int fd, struct sockaddr_in* sockaddr)
+            : ClientInfo(true)
+            , m_fd(fd)
+        {
+            memcpy(&m_sockaddr_in, sockaddr, sizeof(sockaddr));
+            LOG_DEBUG("client[0x%x] New client [%s:%d] \n",
+                    m_client_id, inet_ntoa(m_sockaddr_in.sin_addr), m_sockaddr_in.sin_port);
+        }
+
+        TcpClientInfo(int fd, struct sockaddr_un* sockaddr)
+            : ClientInfo(true)
+            , m_fd(fd)
+        {
+            memcpy(&m_sockaddr_un, sockaddr, sizeof(sockaddr));
+            LOG_DEBUG("client[0x%x] New client [%s] \n",
+                    m_client_id, m_sockaddr_un.sun_path);
+        }
+
+        int m_fd;
+        struct sockaddr_in m_sockaddr_in;
+        struct sockaddr_un m_sockaddr_un;
+    };
+
+    class UdpClientInfo : public ClientInfo
+    {
+    public:
+        UdpClientInfo(struct sockaddr_in* sockaddr)
+            : ClientInfo(false)
+        {
+            memcpy(&m_sockaddr_in, sockaddr, sizeof(sockaddr));
+            LOG_DEBUG("client[0x%x] New client [%s:%d] \n",
+                    m_client_id, inet_ntoa(m_sockaddr_in.sin_addr), m_sockaddr_in.sin_port);
+        }
+
+        UdpClientInfo(struct sockaddr_un* sockaddr)
+            : ClientInfo(false)
+        {
+            memcpy(&m_sockaddr_un, sockaddr, sizeof(sockaddr));
+            LOG_DEBUG("client[0x%x] New client [%s] \n",
+                    m_client_id, m_sockaddr_un.sun_path);
+
+        }
+        struct sockaddr_in m_sockaddr_in;
+        struct sockaddr_un m_sockaddr_un;
+    };
+
+    size_t addClientInfo(const ClientInfoPtr client);
+    size_t removeClientInfo(const int fd);
+    size_t removeClientInfo(const size_t client_id);
+    const ClientInfoPtr findClientInfo(const int fd);
+    const ClientInfoPtr findClientInfo(const size_t client_id);
+    const ClientInfoList getClientInfoList() { return m_client_list; };
+
 protected:
+    virtual void __deinit__() = 0;
+
     list<IAnyServerListener*> m_listeners;
     const unsigned int m_max_client;
     bool m_security;
     const string m_bind;
     const string m_name;
+
+    size_t m_server_id;
+
+    ClientInfoList m_client_list;
 };
 
 } // end of namespace

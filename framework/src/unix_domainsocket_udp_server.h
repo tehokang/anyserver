@@ -14,11 +14,12 @@ public:
             const string name, const string bind, const unsigned int max_client=200);
     virtual ~UnixDomainSocketUdpServer();
 
-protected:
     virtual bool init() override;
-    virtual void __deinit__() override;
     virtual bool start() override;
     virtual void stop() override;
+
+protected:
+    virtual void __deinit__() override;
 
 private:
     /**

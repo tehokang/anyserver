@@ -12,9 +12,10 @@ TARGET ?= $(TARGET_NAME)
 
 SRCS := $(shell find $(BUILD_SRC_DIR) -name "*.cpp" ! -name ".*" 2>/dev/null)
 INCS := $(addprefix -I, $(abspath $(shell find $(BUILD_SRC_DIR)/ -type d 2>/dev/null)))
+LIBS := $(addprefix -L, $(abspath $(shell find $(BUILD_SRC_DIR)/ -type d 2>/dev/null)))
 
 CXXFLAGS := $(INCS) -std=c++11 -fexceptions
-LDFLAGS := -lpthread
+LDFLAGS := $(LIBS) -lpthread -lwebsockets
 DEFINES := -DSERVER_PORT=$(SERVER_PORT)
 
 ifeq ($(CONFIG_DEBUG),YES)

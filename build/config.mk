@@ -28,6 +28,7 @@ endif
 ECHO := @echo
 BUILD_SRC_DIR := $(PWD)/../
 BUILD_OUT_DIR := $(PWD)/out/
+
 TARGET_NAME := anyserver
 
 CONFIG_DEBUG := YES

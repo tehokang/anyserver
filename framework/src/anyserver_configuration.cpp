@@ -108,6 +108,33 @@ void AnyServerConfiguration::__subparse_capabilities__(Json::Value &root)
     LOG_DEBUG("[Capabilities] \n");
     LOG_DEBUG("max_client : %d \n", m_configuration.capabilities.max_client);
     LOG_DEBUG("enable_security : %d \n", m_configuration.capabilities.enable_security);
+
+    if ( true == m_configuration.capabilities.enable_security )
+    {
+        const Json::Value ssl_cert_files = capabilities["ssl_cert_files"];
+        for ( int i=0; i<ssl_cert_files.size(); i++ )
+        {
+            const Json::Value file = ssl_cert_files[i];
+            m_configuration.capabilities.m_ssl_cert_list.push_back(file["path"].asString());
+            LOG_DEBUG("ssl_cert_file[%d] : %s \n", i, file["path"].asString().data());
+        }
+
+        const Json::Value ssl_private_key_files = capabilities["ssl_private_key_files"];
+        for ( int i=0; i<ssl_private_key_files.size(); i++ )
+        {
+            const Json::Value file = ssl_private_key_files[i];
+            m_configuration.capabilities.m_ssl_private_key_list.push_back(file["path"].asString());
+            LOG_DEBUG("ssl_private_key_file[%d] : %s \n", i, file["path"].asString().data());
+        }
+
+        const Json::Value ssl_ca_files = capabilities["ssl_ca_files"];
+        for ( int i=0; i<ssl_ca_files.size(); i++ )
+        {
+            const Json::Value file = ssl_ca_files[i];
+            m_configuration.capabilities.m_ssl_ca_list.push_back(file["path"].asString());
+            LOG_DEBUG("ssl_ca_file[%d] : %s \n", i, file["path"].asString().data());
+        }
+    }
 }
 
 void AnyServerConfiguration::__subparse_log__(Json::Value &root)

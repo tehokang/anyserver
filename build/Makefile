@@ -11,8 +11,8 @@ SILENT ?= @
 TARGET ?= $(TARGET_NAME)
 
 SRCS := $(shell find $(BUILD_SRC_DIR) -name "*.cpp" ! -name ".*" 2>/dev/null)
-INCS := $(addprefix -I, $(abspath $(shell find $(BUILD_SRC_DIR)/ -type d 2>/dev/null)))
-LIBS := $(addprefix -L, $(abspath $(shell find $(BUILD_SRC_DIR)/ -type d 2>/dev/null)))
+INCS := $(addprefix -I, $(abspath $(shell find $(BUILD_SRC_DIR)/ -type d ! -name ".*" 2>/dev/null)))
+LIBS := $(addprefix -L, $(abspath $(shell find $(BUILD_SRC_DIR)/ -type d ! -name ".*" 2>/dev/null)))
 
 CXXFLAGS := $(INCS) -std=c++11 -fexceptions
 LDFLAGS := $(LIBS) -lpthread -lwebsockets
@@ -34,6 +34,7 @@ prepare:
 	@if [ ! -d $(BUILD_OUT_DIR) ]; then \
 		mkdir -p $(BUILD_OUT_DIR); \
 	fi;
+	cp -dprf $(3RD_PARTY_DIR)/libwebsockets/lib/$(TARGET_ARCH)/* $(BUILD_OUT_DIR)
 
 .PHONY: distclean
 distclean: clean

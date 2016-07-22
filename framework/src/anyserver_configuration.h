@@ -55,6 +55,9 @@ public:
         }
         unsigned int max_client;
         bool enable_security;
+        list<string> m_ssl_cert_list;
+        list<string> m_ssl_private_key_list;
+        list<string> m_ssl_ca_list;
     };
 
     class Configuration

@@ -28,7 +28,10 @@ endif
 ECHO := @echo
 BUILD_SRC_DIR := $(PWD)/../
 BUILD_OUT_DIR := $(PWD)/out/
+FRAMEWORK_DIR := $(BUILD_SRC_DIR)/framework
+3RD_PARTY_DIR := $(FRAMEWORK_DIR)/src/3rdparty/
 
+TARGET_ARCH := x86
 TARGET_NAME := anyserver
 
 CONFIG_DEBUG := YES

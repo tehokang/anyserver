@@ -64,6 +64,21 @@ public:
     typedef shared_ptr<ClientInfo> ClientInfoPtr;
     typedef list<ClientInfoPtr> ClientInfoList;
 
+    class WebSocketTcpClientInfo : public ClientInfo
+    {
+    public:
+        WebSocketTcpClientInfo(int fd, struct sockaddr_in* sockaddr)
+            : ClientInfo(true)
+            , m_fd(fd)
+        {
+            memcpy(&m_sockaddr_in, sockaddr, sizeof(sockaddr));
+            LOG_DEBUG("client[0x%x] New client [%s:%d] \n",
+                    m_client_id, inet_ntoa(m_sockaddr_in.sin_addr), m_sockaddr_in.sin_port);
+        }
+        int m_fd;
+        struct sockaddr_in m_sockaddr_in;
+    };
+
     class TcpClientInfo : public ClientInfo
     {
     public:

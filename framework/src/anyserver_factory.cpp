@@ -1,6 +1,7 @@
 #include "anymacro.h"
 #include "anyserver_factory.h"
 #include "anyserver_configuration.h"
+#include "websocket_tcp_server.h"
 #include "inet_domainsocket_tcp_server.h"
 #include "inet_domainsocket_udp_server.h"
 #include "unix_domainsocket_tcp_server.h"
@@ -49,6 +50,15 @@ bool AnyServerFactory::init(const string config_file)
             switch ( server_info->kinds )
             {
                 case AnyServerConfiguration::WEBSOCKET:
+                    {
+                        AnyServerPtr server = AnyServerPtr(
+                                new WebSocketTcpServer(
+                                        server_info->header,
+                                        server_info->bind,
+                                        configuration.capabilities.max_client));
+                        server->addEventListener(this);
+                        m_servers.push_back(server);
+                    }
                     break;
                 case AnyServerConfiguration::HTTP:
                     break;

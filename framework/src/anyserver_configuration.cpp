@@ -86,12 +86,24 @@ void AnyServerConfiguration::__subparse_server_list__(Json::Value &root)
             new_server->enable = server["enable"].asBool();
             new_server->bind = server["bind"].asString();
             new_server->tcp = server["tcp"].asBool();
+            new_server->max_client = server["max_client"].asUInt();
 
-            LOG_DEBUG("server : %s, enable : %d, bind : %s, tcp : %d \n",
+            LOG_DEBUG("server : %s, enable : %d, bind : %s, tcp : %d, max : %d \n",
                     new_server->header.data(), new_server->enable,
-                    new_server->bind.data(), new_server->tcp);
+                    new_server->bind.data(), new_server->tcp,
+                    new_server->max_client);
 
             m_configuration.server_infos.push_back(new_server);
+        }
+        else
+        {
+            LOG_WARNING("Unknown and unsupported server : %s \n", server["type"].asString().data());
+            LOG_WARNING("anyserver support types of following server \n");
+            for (std::map<string,ServerKinds>::iterator it =m_server_kinds.begin();
+                    it!=m_server_kinds.end(); ++it)
+            {
+                LOG_WARNING("- \"%s\" \n", (it->first).data());
+            }
         }
     }
 }
@@ -102,11 +114,10 @@ void AnyServerConfiguration::__subparse_capabilities__(Json::Value &root)
       * @note Parse capabilities of server
       */
     const Json::Value capabilities = root["capabilities"];
-    m_configuration.capabilities.max_client = capabilities["max_client"].asUInt();
     m_configuration.capabilities.enable_security = capabilities["security"].asBool();
 
     LOG_DEBUG("[Capabilities] \n");
-    LOG_DEBUG("max_client : %d \n", m_configuration.capabilities.max_client);
+
     LOG_DEBUG("enable_security : %d \n", m_configuration.capabilities.enable_security);
 
     if ( true == m_configuration.capabilities.enable_security )

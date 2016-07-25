@@ -9,8 +9,8 @@ namespace anyserver
 {
 
 InetDomainSocketUdpServer::InetDomainSocketUdpServer(
-        const string name, const string bind, const unsigned int max_client)
-    : AnyServer(name, bind, max_client)
+        const string name, const string bind, const bool tcp, const unsigned int max_client)
+    : AnyServer(name, bind, tcp, max_client)
     , m_run_thread(false)
     , m_server_fd(0)
 {
@@ -103,23 +103,12 @@ void* InetDomainSocketUdpServer::communication_thread(void *argv)
         if (hostaddrp == NULL) LOG_WARNING("ERROR on inet_ntoa\n");
 
         size_t client_id = server->addClientInfo(ClientInfoPtr(new UdpClientInfo(&clientaddr)));
-        list<IAnyServerListener*> listeners = server->m_listeners;
-        for ( list<IAnyServerListener*>::iterator it = listeners.begin();
-                it!=listeners.end(); ++it )
-        {
-            IAnyServerListener *listener = (*it);
-            listener->onClientConnected(server_id, client_id);
-        }
+        NOTIFY_CLIENT_CONNECTED(server_id, client_id);
 
         LOG_DEBUG("server[0x%x] received %d bytes: %s from client[0x%x] %s (%s) \n",
                 server_id, readn, buffer, client_id, hostp->h_name, hostaddrp);
+        NOTIFY_SERVER_RECEIVED(server_id, client_id, (char*)buffer, readn);
 
-        for ( list<IAnyServerListener*>::iterator it = listeners.begin();
-                it!=listeners.end(); ++it )
-        {
-            IAnyServerListener *listener = (*it);
-            listener->onReceived(server_id, client_id, buffer, readn);
-        }
 #ifdef CONFIG_TEST_ECHO_RESPONSE
         /**
          * Test echo
@@ -132,12 +121,7 @@ void* InetDomainSocketUdpServer::communication_thread(void *argv)
         }
 
         client_id = server->removeClientInfo(client_id);
-        for ( list<IAnyServerListener*>::iterator it = listeners.begin();
-                it!=listeners.end(); ++it )
-        {
-            IAnyServerListener *listener = (*it);
-            listener->onClientDisconnected(server_id, client_id);
-        }
+        NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
 #endif
     }
     close(server_fd);

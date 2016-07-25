@@ -11,8 +11,8 @@ namespace anyserver
 {
 
 UnixDomainSocketTcpServer::UnixDomainSocketTcpServer(
-        const string name, const string bind, const unsigned int max_client)
-    : AnyServer(name, bind, max_client)
+        const string name, const string bind, const bool tcp, const unsigned int max_client)
+    : AnyServer(name, bind, tcp, max_client)
     , m_events(nullptr)
     , m_run_thread(false)
     , m_epoll_fd(0)
@@ -129,13 +129,7 @@ void* UnixDomainSocketTcpServer::epoll_thread(void *argv)
 
                 size_t client_id = server->addClientInfo(ClientInfoPtr(new TcpClientInfo(client_fd, &clientaddr)));
 
-                list<IAnyServerListener*> listeners = server->m_listeners;
-                for ( list<IAnyServerListener*>::iterator it = listeners.begin();
-                        it!=listeners.end(); ++it )
-                {
-                    IAnyServerListener *listener = (*it);
-                    listener->onClientConnected(server_id, client_id);
-                }
+                NOTIFY_CLIENT_CONNECTED(server_id, client_id);
             }
             else
             {
@@ -147,32 +141,20 @@ void* UnixDomainSocketTcpServer::epoll_thread(void *argv)
                     close(events[i].data.fd);
 
                     size_t client_id = server->removeClientInfo(events[i].data.fd);
-
-                    list<IAnyServerListener*> listeners = server->m_listeners;
-                    for ( list<IAnyServerListener*>::iterator it = listeners.begin();
-                            it!=listeners.end(); ++it )
-                    {
-                        IAnyServerListener *listener = (*it);
-                        listener->onClientDisconnected(server_id, client_id);
-                    }
+                    NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
                 }
                 else
                 {
                     ClientInfoPtr client = server->findClientInfo(events[i].data.fd);
-                    list<IAnyServerListener*> listeners = server->m_listeners;
-                    for ( list<IAnyServerListener*>::iterator it = listeners.begin();
-                            it!=listeners.end(); ++it )
-                    {
-                        IAnyServerListener *listener = (*it);
-                        listener->onReceived(server_id, client->getClientId(), buffer, readn);
+                    NOTIFY_SERVER_RECEIVED(server_id, client->getClientId(), buffer, readn);
+
 #ifdef CONFIG_TEST_ECHO_RESPONSE
-                        /**
-                         * Test echo
-                         */
-                        ssize_t written = write(events[i].data.fd, buffer, readn);
-                        (void)written;
+                    /**
+                     * Test echo
+                     */
+                    ssize_t written = write(events[i].data.fd, buffer, readn);
+                    (void)written;
 #endif
-                    }
                 }
             }
         }

@@ -100,7 +100,7 @@ void AnyServerController::onClientDisconnected(size_t server_id, size_t client_i
 
 void AnyServerController::onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
 {
-    LOG_DEBUG("Received msg[client:0x%x,server:0x%x] : %s (length: %d) \n",
+    LOG_DEBUG("Received msg[client:0x%x, server:0x%x] : %s (length: %d) \n",
             client_id, server_id, msg, msg_len);
 }
 

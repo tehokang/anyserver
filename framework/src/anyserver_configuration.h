@@ -33,13 +33,15 @@ public:
     {
     public:
         ServerInfo(const string _header, const ServerKinds _kinds)
-            : header(_header), bind(""), enable(false), kinds(_kinds), tcp(true)
+            : header(_header), bind(""), enable(false)
+            , kinds(_kinds), tcp(true), max_client(200)
         {
         }
         string header;
         string bind;
         bool enable;
         bool tcp;
+        unsigned int max_client;
         ServerKinds kinds;
     };
     typedef shared_ptr<ServerInfo> ServerInfoPtr;
@@ -49,11 +51,11 @@ public:
     {
     public:
         Capabilities()
-            : max_client(200), enable_security(false)
+            :  enable_security(false)
         {
 
         }
-        unsigned int max_client;
+
         bool enable_security;
         list<string> m_ssl_cert_list;
         list<string> m_ssl_private_key_list;
@@ -79,7 +81,7 @@ public:
     };
 
     const Configuration& getConfiguration() { return m_configuration; };
-
+    map<string, ServerKinds> getSupportedServer() { return m_server_kinds; };
 protected:
     virtual bool __parse__(const string config_file);
     virtual void __subparse_server_list__(Json::Value &root);

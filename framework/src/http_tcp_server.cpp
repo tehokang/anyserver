@@ -1,9 +1,9 @@
-#include "websocket_tcp_server.h"
+#include "http_tcp_server.h"
 
 namespace anyserver
 {
-struct lws_context *WebSocketTcpServer::m_context = nullptr;
-WebSocketTcpServer::WebSocketTcpServer(
+struct lws_context *HttpTcpServer::m_context = nullptr;
+HttpTcpServer::HttpTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
     : AnyServer(name, bind, tcp, max_client)
     , m_run_thread(false)
@@ -28,14 +28,14 @@ WebSocketTcpServer::WebSocketTcpServer(
     m_protocols[DUMMY].rx_buffer_size = 0;
 }
 
-WebSocketTcpServer::~WebSocketTcpServer()
+HttpTcpServer::~HttpTcpServer()
 {
     LOG_DEBUG("\n");
     __deinit__();
     lws_context_destroy(m_context);
 }
 
-bool WebSocketTcpServer::init()
+bool HttpTcpServer::init()
 {
     LOG_DEBUG("\n");
     memset(&m_context_create_info, 0x00, sizeof(m_context_create_info));
@@ -61,11 +61,11 @@ bool WebSocketTcpServer::init()
     return true;
 }
 
-bool WebSocketTcpServer::start()
+bool HttpTcpServer::start()
 {
     LOG_DEBUG("\n");
     if ( 0 != pthread_create(
-            &m_websocket_thread, NULL, WebSocketTcpServer::websocket_thread, (void*)this) )
+            &m_http_thread, NULL, HttpTcpServer::http_thread, (void*)this) )
     {
         LOG_ERROR("Failed to create thread \n");
         return false;
@@ -73,22 +73,22 @@ bool WebSocketTcpServer::start()
     return true;
 }
 
-void WebSocketTcpServer::stop()
+void HttpTcpServer::stop()
 {
     LOG_DEBUG("\n");
     m_run_thread = false;
 }
 
-void WebSocketTcpServer::__deinit__()
+void HttpTcpServer::__deinit__()
 {
     LOG_DEBUG("\n");
     stop();
 }
 
-void* WebSocketTcpServer::websocket_thread(void *argv)
+void* HttpTcpServer::http_thread(void *argv)
 {
     LOG_DEBUG("\n");
-    WebSocketTcpServer *server = static_cast<WebSocketTcpServer*>(argv);
+    HttpTcpServer *server = static_cast<HttpTcpServer*>(argv);
     server->m_run_thread = true;
 
     while ( server->m_run_thread )
@@ -98,29 +98,22 @@ void* WebSocketTcpServer::websocket_thread(void *argv)
     return nullptr;
 }
 
-int WebSocketTcpServer::callback_http(struct lws *wsi,
-        enum lws_callback_reasons reason,
-        void *user, void *in, size_t len)
-{
-    /**
-     * @warning Nothing to do
-     */
-    return 0;
-}
-
-int WebSocketTcpServer::callback_websocket(struct lws *wsi,
+/**
+ * @ref https://gitlab.com/libwebsockets/libwebsockets/blob/6b5de70f4fb1eadac6730f3b4ecfe156bd38567a/test-server/test-server-http.c
+ */
+int HttpTcpServer::callback_http(struct lws *wsi,
         enum lws_callback_reasons reason,
         void *user, void *in, size_t len)
 {
     if ( nullptr == m_context ) return 0;
 
-    WebSocketTcpServer *server = static_cast<WebSocketTcpServer*>(lws_context_user(m_context));
+    HttpTcpServer *server = static_cast<HttpTcpServer*>(lws_context_user(m_context));
     size_t &server_id = server->m_server_id;
 
     switch ( reason )
     {
-        case LWS_CALLBACK_ESTABLISHED:
-            LOG_DEBUG("LWS_CALLBACK_ESTABLISHED \n");
+        case LWS_CALLBACK_SERVER_NEW_CLIENT_INSTANTIATED:
+            LOG_DEBUG("LWS_CALLBACK_SERVER_NEW_CLIENT_INSTANTIATED \n");
             {
                 int client_fd = lws_get_socket_fd(wsi);
                 struct sockaddr_in clientaddr;
@@ -130,50 +123,80 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
                     perror("getpeername error ");
                 }
 
-                size_t client_id = server->addClientInfo(ClientInfoPtr(new WebSocketTcpClientInfo(client_fd, &clientaddr, wsi)));
+                size_t client_id = server->addClientInfo(ClientInfoPtr(new HttpTcpClientInfo(client_fd, &clientaddr, wsi)));
                 NOTIFY_CLIENT_CONNECTED(server_id, client_id);
             }
             break;
-        case LWS_CALLBACK_RECEIVE:
-            LOG_DEBUG("LWS_CALLBACK_RECEIVE \n");
-            {
-                LOG_DEBUG("received data: %s\n", (char *) in);
-                int client_fd = lws_get_socket_fd(wsi);
-                ClientInfoPtr client = server->findClientInfo(client_fd);
-                NOTIFY_SERVER_RECEIVED(server_id, client->getClientId(), (char*)in, len);
-
-#ifdef CONFIG_TEST_ECHO_RESPONSE
-                /**
-                 * Test echo
-                 */
-                lws_write(wsi, (unsigned char*)in, len, LWS_WRITE_TEXT);
-#endif
-            }
-            break;
-        case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:
-            LOG_DEBUG("LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION \n");
-            break;
-        case LWS_CALLBACK_WS_PEER_INITIATED_CLOSE:
-            LOG_DEBUG("LWS_CALLBACK_WS_PEER_INITIATED_CLOSE \n");
-            break;
-        case LWS_CALLBACK_CLOSED:
-            LOG_DEBUG("LWS_CALLBACK_CLOSED \n");
+        case LWS_CALLBACK_CLOSED_HTTP:
+            LOG_DEBUG("LWS_CALLBACK_CLOSED_HTTP \n");
             {
                 int client_fd = lws_get_socket_fd(wsi);
                 size_t client_id = server->removeClientInfo(client_fd);
                 NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
             }
             break;
+        case LWS_CALLBACK_HTTP:
+            LOG_DEBUG("LWS_CALLBACK_HTTP [in: %s]\n", in);
+            {
+                int client_fd = lws_get_socket_fd(wsi);
+                ClientInfoPtr client = server->findClientInfo(client_fd);
+                NOTIFY_SERVER_RECEIVED(server_id, client->getClientId(), (char*)in, len);
+            }
+#ifdef CONFIG_TEST_ECHO_RESPONSE
+            {
+                /**
+                 * Test echo
+                 */
+                char the_response[] = "Hello, World!";
+                int strl = strlen(the_response);
+
+                unsigned char *p;
+                unsigned char *end;
+                static unsigned char buffer[8*1024];
+
+                p = buffer + LWS_SEND_BUFFER_PRE_PADDING;
+                end = p + sizeof(buffer) - LWS_SEND_BUFFER_PRE_PADDING;
+
+                if ( lws_add_http_header_status(wsi, 200, &p, end) ) return 1;
+                if ( lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_SERVER,
+                        (unsigned char *)"libwebsockets", 13, &p, end) ) return 1;
+                if ( lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
+                        (unsigned char *)"text/plain", 10, &p, end) ) return 1;
+                if ( lws_add_http_header_content_length(wsi, strl, &p, end) ) return 1;
+                if ( lws_finalize_http_header(wsi, &p, end) ) return 1;
+
+                lws_write(wsi, buffer + LWS_SEND_BUFFER_PRE_PADDING,
+                        p - (buffer + LWS_SEND_BUFFER_PRE_PADDING), LWS_WRITE_HTTP_HEADERS);
+                lws_write(wsi, (unsigned char*)the_response,
+                        strl, LWS_WRITE_HTTP);
+            }
+#endif
+            break;
+        case LWS_CALLBACK_HTTP_BODY:
+            LOG_DEBUG("LWS_CALLBACK_HTTP_BODY [in: %s] \n", in);
+            break;
+        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
+            LOG_DEBUG("LWS_CALLBACK_HTTP_BODY_COMPLETION [in: %s] \n", in);
+            break;
+        case LWS_CALLBACK_HTTP_WRITEABLE:
+            LOG_DEBUG("LWS_CALLBACK_HTTP_WRITEABLE \n");
+            break;
         case LWS_CALLBACK_PROTOCOL_INIT:
             LOG_DEBUG("LWS_CALLBACK_PROTOCOL_INIT \n");
             break;
-        case LWS_CALLBACK_PROTOCOL_DESTROY:
-            LOG_DEBUG("LWS_CALLBACK_PROTOCOL_DESTROY \n");
+        case LWS_CALLBACK_GET_THREAD_ID:
             break;
         default:
             LOG_WARNING("Unhandled callback reason [%d] \n", reason);
             break;
     }
+    return 0;
+}
+
+int HttpTcpServer::callback_websocket(struct lws *wsi,
+        enum lws_callback_reasons reason,
+        void *user, void *in, size_t len)
+{
     return 0;
 }
 

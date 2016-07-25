@@ -11,7 +11,8 @@ class UnixDomainSocketTcpServer : public AnyServer
 {
 public:
     UnixDomainSocketTcpServer(
-            const string name, const string bind, const unsigned int max_client=200);
+            const string name, const string bind,
+            const bool tcp, const unsigned int max_client=200);
     virtual ~UnixDomainSocketTcpServer();
 
     virtual bool init() override;

@@ -10,7 +10,8 @@ class InetDomainSocketUdpServer : public AnyServer
 {
 public:
     InetDomainSocketUdpServer(
-            const string name, const string bind, const unsigned int max_client=200);
+            const string name, const string bind,
+            const bool tcp, const unsigned int max_client=200);
     virtual ~InetDomainSocketUdpServer();
 
     virtual bool init() override;

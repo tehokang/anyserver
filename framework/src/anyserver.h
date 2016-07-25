@@ -29,7 +29,7 @@ public:
 class AnyServer
 {
 public:
-    AnyServer(const string name, const string bind, const unsigned int max_client);
+    AnyServer(const string name, const string bind, const bool tcp, const unsigned int max_client);
     virtual ~AnyServer();
 
     size_t getServerId() { return m_server_id; };
@@ -67,9 +67,10 @@ public:
     class WebSocketTcpClientInfo : public ClientInfo
     {
     public:
-        WebSocketTcpClientInfo(int fd, struct sockaddr_in* sockaddr)
+        WebSocketTcpClientInfo(int fd, struct sockaddr_in* sockaddr, void *wsi)
             : ClientInfo(true)
             , m_fd(fd)
+            , m_wsi(wsi)
         {
             memcpy(&m_sockaddr_in, sockaddr, sizeof(sockaddr));
             LOG_DEBUG("client[0x%x] New client [%s:%d] \n",
@@ -77,6 +78,24 @@ public:
         }
         int m_fd;
         struct sockaddr_in m_sockaddr_in;
+        void *m_wsi;
+    };
+
+    class HttpTcpClientInfo : public ClientInfo
+    {
+    public:
+        HttpTcpClientInfo(int fd, struct sockaddr_in* sockaddr, void *wsi)
+            : ClientInfo(true)
+            , m_fd(fd)
+            , m_wsi(wsi)
+        {
+            memcpy(&m_sockaddr_in, sockaddr, sizeof(sockaddr));
+            LOG_DEBUG("client[0x%x] New client [%s:%d] \n",
+                    m_client_id, inet_ntoa(m_sockaddr_in.sin_addr), m_sockaddr_in.sin_port);
+        }
+        int m_fd;
+        struct sockaddr_in m_sockaddr_in;
+        void *m_wsi;
     };
 
     class TcpClientInfo : public ClientInfo
@@ -145,17 +164,50 @@ protected:
 
     list<IAnyServerListener*> m_listeners;
     const unsigned int m_max_client;
+    const bool m_tcp;
     bool m_security;
     const string m_bind;
     const string m_name;
 
     size_t m_server_id;
+    int m_seed;
 
     ClientInfoList m_client_list;
 };
 
+#define NOTIFY_CLIENT_CONNECTED(sid, cid) \
+    do { \
+        list<IAnyServerListener*> listeners = server->m_listeners; \
+        for ( list<IAnyServerListener*>::iterator it = listeners.begin(); \
+                it!=listeners.end(); ++it ) \
+        { \
+            IAnyServerListener *listener = (*it); \
+            listener->onClientConnected(sid, cid); \
+        } \
+    }while(0)
+
+#define NOTIFY_CLIENT_DISCONNECTED(sid, cid) \
+    do { \
+        list<IAnyServerListener*> listeners = server->m_listeners; \
+        for ( list<IAnyServerListener*>::iterator it = listeners.begin(); \
+                it!=listeners.end(); ++it ) \
+        { \
+            IAnyServerListener *listener = (*it); \
+            listener->onClientDisconnected(sid, cid); \
+        } \
+    }while(0)
+
+#define NOTIFY_SERVER_RECEIVED(sid, cid, buf, buf_len) \
+    do { \
+        list<IAnyServerListener*> listeners = server->m_listeners; \
+        for ( list<IAnyServerListener*>::iterator it = listeners.begin(); \
+                it!=listeners.end(); ++it ) \
+        { \
+            IAnyServerListener *listener = (*it); \
+            listener->onReceived(sid, cid, buf, buf_len); \
+        } \
+    }while(0)
+
 } // end of namespace
-
-
 
 #endif

@@ -2,6 +2,7 @@
 #include "anyserver_factory.h"
 #include "anyserver_configuration.h"
 #include "websocket_tcp_server.h"
+#include "http_tcp_server.h"
 #include "inet_domainsocket_tcp_server.h"
 #include "inet_domainsocket_udp_server.h"
 #include "unix_domainsocket_tcp_server.h"
@@ -24,6 +25,18 @@ AnyServerFactory::~AnyServerFactory()
     SAFE_DELETE(m_anyserver_configuration);
     m_servers.clear();
 }
+
+#define ADD_SERVER(sinfo, TYPE, slist) \
+    do { \
+        AnyServerPtr server = AnyServerPtr( \
+                new TYPE( \
+                        sinfo->header, \
+                        sinfo->bind, \
+                        sinfo->tcp, \
+                        sinfo->max_client)); \
+        server->addEventListener(this); \
+        slist.push_back(server); \
+    } while(0)
 
 bool AnyServerFactory::init(const string config_file)
 {
@@ -51,39 +64,41 @@ bool AnyServerFactory::init(const string config_file)
             {
                 case AnyServerConfiguration::WEBSOCKET:
                     {
-                        AnyServerPtr server = AnyServerPtr(
-                                new WebSocketTcpServer(
-                                        server_info->header,
-                                        server_info->bind,
-                                        configuration.capabilities.max_client));
-                        server->addEventListener(this);
-                        m_servers.push_back(server);
+                        if ( server_info->tcp )
+                        {
+                            ADD_SERVER(server_info, WebSocketTcpServer, m_servers);
+                        }
+                        else
+                        {
+                            LOG_ERROR("Not support UDP websocket server yet \n");
+                            return false;
+                        }
                     }
                     break;
                 case AnyServerConfiguration::HTTP:
+                    {
+                        if ( server_info->tcp )
+                        {
+                            ADD_SERVER(server_info, HttpTcpServer, m_servers);
+                        }
+                        else
+                        {
+                            LOG_ERROR("Not support UDP http server yet \n");
+                            return false;
+                        }
+                    }
                     break;
                 case AnyServerConfiguration::INETDS:
                     {
                         AnyServerPtr server;
                         if ( server_info->tcp )
                         {
-                            server = AnyServerPtr(
-                                    new InetDomainSocketTcpServer(
-                                            server_info->header,
-                                            server_info->bind,
-                                            configuration.capabilities.max_client));
-
+                            ADD_SERVER(server_info, InetDomainSocketTcpServer, m_servers);
                         }
                         else
                         {
-                            server = AnyServerPtr(
-                                    new InetDomainSocketUdpServer(
-                                            server_info->header,
-                                            server_info->bind,
-                                            configuration.capabilities.max_client));
+                            ADD_SERVER(server_info, InetDomainSocketUdpServer, m_servers);
                         }
-                        server->addEventListener(this);
-                        m_servers.push_back(server);
                     }
                     break;
                 case AnyServerConfiguration::UNIXDS:
@@ -91,28 +106,19 @@ bool AnyServerFactory::init(const string config_file)
                         AnyServerPtr server;
                         if ( server_info->tcp )
                         {
-                            server = AnyServerPtr(
-                                    new UnixDomainSocketTcpServer(
-                                            server_info->header,
-                                            server_info->bind,
-                                            configuration.capabilities.max_client));
-
+                            ADD_SERVER(server_info, UnixDomainSocketTcpServer, m_servers);
                         }
                         else
                         {
-                            server = AnyServerPtr(
-                                    new UnixDomainSocketUdpServer(
-                                            server_info->header,
-                                            server_info->bind,
-                                            configuration.capabilities.max_client));
+                            ADD_SERVER(server_info, UnixDomainSocketUdpServer, m_servers);
                         }
-                        server->addEventListener(this);
-                        m_servers.push_back(server);
                     }
                     break;
                 default:
-                    LOG_DEBUG("Unknown and unsupported server : %s \n",
-                            server_info->header.data());
+                    {
+                        LOG_DEBUG("Unknown and unsupported server : %s \n",
+                                server_info->header.data());
+                    }
                     break;
             }
         }
@@ -174,14 +180,28 @@ void AnyServerFactory::stop()
 
 void AnyServerFactory::onClientConnected(size_t server_id, size_t client_id)
 {
-    LOG_DEBUG("client[0x%x] connected to server[0x%x] \n", client_id, server_id);
     showClientList();
+
+    LOG_DEBUG("client[0x%x] connected to server[0x%x] \n", client_id, server_id);
+    for ( list<IAnyServerFactoryListener*>::iterator it = m_server_listeners.begin();
+             it!=m_server_listeners.end(); ++it )
+    {
+        IAnyServerFactoryListener *listener = (*it);
+        listener->onClientConnected(server_id, client_id);
+    }
 }
 
 void AnyServerFactory::onClientDisconnected(size_t server_id, size_t client_id)
 {
     showClientList();
+
     LOG_DEBUG("client[0x%x] disconnected from server[0x%x] \n", client_id, server_id);
+    for ( list<IAnyServerFactoryListener*>::iterator it = m_server_listeners.begin();
+             it!=m_server_listeners.end(); ++it )
+    {
+        IAnyServerFactoryListener *listener = (*it);
+        listener->onClientDisconnected(server_id, client_id);
+    }
 }
 
 void AnyServerFactory::onReceived(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
@@ -192,6 +212,7 @@ void AnyServerFactory::onReceived(size_t server_id, size_t client_id, char *msg,
              it!=m_server_listeners.end(); ++it )
     {
         IAnyServerFactoryListener *listener = (*it);
+        listener->onReceive(server_id, client_id, msg, msg_len);
     }
 }
 

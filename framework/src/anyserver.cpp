@@ -4,12 +4,13 @@
 namespace anyserver
 {
 
-AnyServer::AnyServer(const string name, const string bind, const unsigned int max_client)
+AnyServer::AnyServer(const string name, const string bind, const bool tcp, const unsigned int max_client)
     : m_name(name)
     , m_bind(bind)
     , m_max_client(max_client)
+    , m_tcp(tcp)
     , m_security(false)
-    , m_server_id(hash<string>()(m_name + bind))
+    , m_server_id(hash<string>()(m_name + bind + to_string(tcp)))
 {
     LOG_DEBUG("[%s] server unique id : 0x%x \n", m_name.data(), m_server_id);
 }

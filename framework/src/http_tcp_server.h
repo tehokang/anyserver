@@ -1,5 +1,5 @@
-#ifndef __WEBSOCKET_TCP_SERVER_H__
-#define __WEBSOCKET_TCP_SERVER_H__
+#ifndef __HTTP_TCP_SERVER_H__
+#define __HTTP_TCP_SERVER_H__
 
 #include "anyserver.h"
 #include "libwebsockets.h"
@@ -7,11 +7,11 @@
 namespace anyserver
 {
 
-class WebSocketTcpServer : public AnyServer
+class HttpTcpServer : public AnyServer
 {
 public:
-    WebSocketTcpServer(const string name, const string bind, const bool tcp, const unsigned int max_client=200);
-    virtual ~WebSocketTcpServer();
+    HttpTcpServer(const string name, const string bind, const bool tcp, const unsigned int max_client=200);
+    virtual ~HttpTcpServer();
 
     virtual bool init() override;
     virtual bool start() override;
@@ -19,8 +19,8 @@ public:
 protected:
     virtual void __deinit__() override;
 
-    static void* websocket_thread(void *argv);
-    pthread_t m_websocket_thread;
+    static void* http_thread(void *argv);
+    pthread_t m_http_thread;
 
     enum { HTTP, WEBSOCKET, DUMMY, MAX_SERVER };
 private:

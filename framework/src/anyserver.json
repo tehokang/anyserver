@@ -6,42 +6,47 @@
       "type" : "websocket", 
       "enable" : true, 
       "bind" : 10000, 
-      "tcp" : true
+      "tcp" : true,
+      "max_client" : 200
     },    
     {
-      "type" : "http", 
-      "enable" : false, 
+      "type" : "http",
+      "enable" : true, 
       "bind" : 10001, 
-      "tcp" : true 
+      "tcp" : true,
+      "max_client" : 200
     }, 
     { 
       "type" : "inet_domainsocket", 
       "enable" : true, 
       "bind" : 10002, 
-      "tcp" : true 
+      "tcp" : true,
+      "max_client" : 200
     },
     {
       "type" : "inet_domainsocket", 
       "enable" : true, 
       "bind" : 10002, 
-      "tcp" : false 
+      "tcp" : false,
+      "max_client" : 200
     },
     { 
       "type" : "unix_domainsocket", 
       "enable" : true, 
       "bind" : "/tmp/uds_tcp.tmp", 
-      "tcp" : true 
+      "tcp" : true,
+      "max_client" : 200
     },
     { 
       "type" : "unix_domainsocket", 
       "enable" : true, 
       "bind" : "/tmp/uds_udp.tmp", 
-      "tcp" : false 
+      "tcp" : false,
+      "max_client" : 200
     }
   ],
   "capabilities" :
   {
-    "max_client" : 200,
     "security" : false, 
     "ssl_cert_files" : [
       { "path" : "test.pem" }

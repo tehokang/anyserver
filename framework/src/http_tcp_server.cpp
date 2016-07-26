@@ -109,6 +109,7 @@ int HttpTcpServer::callback_http(struct lws *wsi,
 
     HttpTcpServer *server = static_cast<HttpTcpServer*>(lws_context_user(m_context));
     size_t &server_id = server->m_server_id;
+    static string req_body;
 
     switch ( reason )
     {
@@ -137,21 +138,42 @@ int HttpTcpServer::callback_http(struct lws *wsi,
             break;
         case LWS_CALLBACK_HTTP:
             LOG_DEBUG("LWS_CALLBACK_HTTP [in: %s]\n", in);
+            /**
+             * @note At this time, http_tcp_server support only POST message
+             **/
+            if ( 0 <  lws_hdr_total_length(wsi, WSI_TOKEN_POST_URI) )
+            {
+                LOG_DEBUG("Post message from client \n");
+                int n=0;
+                char arg[128] = {0x00, };
+                while ( 0 < lws_hdr_copy_fragment(wsi, arg, sizeof(arg), WSI_TOKEN_HTTP_URI_ARGS, n) )
+                {
+                    LOG_DEBUG("arg[%d] : %s \n", n, arg);
+                    n++;
+                }
+            }
+            break;
+        case LWS_CALLBACK_HTTP_BODY:
+            LOG_DEBUG("LWS_CALLBACK_HTTP_BODY [in: %s, len: %d] \n", in, len);
+            req_body += string((const char*)in);
+            break;
+        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
+            LOG_DEBUG("LWS_CALLBACK_HTTP_BODY_COMPLETION [in: %s] \n", req_body.data());
             {
                 int client_fd = lws_get_socket_fd(wsi);
                 ClientInfoPtr client = server->findClientInfo(client_fd);
-                NOTIFY_SERVER_RECEIVED(server_id, client->getClientId(), (char*)in, len);
+                NOTIFY_SERVER_RECEIVED(server_id, client->getClientId(),
+                        (char*)req_body.data(), req_body.length());
             }
 #ifdef CONFIG_TEST_ECHO_RESPONSE
             {
                 /**
                  * Test echo
                  */
-                char the_response[] = "Hello, World!";
-                int strl = strlen(the_response);
+                unsigned char *response = (unsigned char*)req_body.data();
+                int response_len = req_body.length();
 
-                unsigned char *p;
-                unsigned char *end;
+                unsigned char *p, *end;
                 static unsigned char buffer[8*1024];
 
                 p = buffer + LWS_SEND_BUFFER_PRE_PADDING;
@@ -162,21 +184,17 @@ int HttpTcpServer::callback_http(struct lws *wsi,
                         (unsigned char *)"libwebsockets", 13, &p, end) ) return 1;
                 if ( lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
                         (unsigned char *)"text/plain", 10, &p, end) ) return 1;
-                if ( lws_add_http_header_content_length(wsi, strl, &p, end) ) return 1;
+                if ( lws_add_http_header_content_length(wsi, response_len, &p, end) ) return 1;
                 if ( lws_finalize_http_header(wsi, &p, end) ) return 1;
 
                 lws_write(wsi, buffer + LWS_SEND_BUFFER_PRE_PADDING,
                         p - (buffer + LWS_SEND_BUFFER_PRE_PADDING), LWS_WRITE_HTTP_HEADERS);
-                lws_write(wsi, (unsigned char*)the_response,
-                        strl, LWS_WRITE_HTTP);
+                lws_write(wsi, (unsigned char*)response, response_len, LWS_WRITE_HTTP);
+
+                req_body = "";
+                return -1;
             }
 #endif
-            break;
-        case LWS_CALLBACK_HTTP_BODY:
-            LOG_DEBUG("LWS_CALLBACK_HTTP_BODY [in: %s] \n", in);
-            break;
-        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
-            LOG_DEBUG("LWS_CALLBACK_HTTP_BODY_COMPLETION [in: %s] \n", in);
             break;
         case LWS_CALLBACK_HTTP_WRITEABLE:
             LOG_DEBUG("LWS_CALLBACK_HTTP_WRITEABLE \n");

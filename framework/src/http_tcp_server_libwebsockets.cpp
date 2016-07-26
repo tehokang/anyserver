@@ -99,7 +99,7 @@ void* HttpTcpServer::http_thread(void *argv)
 }
 
 /**
- * @ref https://gitlab.com/libwebsockets/libwebsockets/blob/6b5de70f4fb1eadac6730f3b4ecfe156bd38567a/test-server/test-server-http.c
+ * @ref https://goo.gl/bLpeLH
  */
 int HttpTcpServer::callback_http(struct lws *wsi,
         enum lws_callback_reasons reason,

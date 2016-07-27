@@ -23,16 +23,16 @@ namespace anyserver
         switch ( logtype ) \
         { \
             case DEBUG: \
-                fprintf(out, "\033[1;37;40m"); \
+                fprintf(out, "\033[1;32;40m [DEBUG] "); \
                 break; \
             case INFO: \
-                fprintf(out, "\033[1;30;47m"); \
+                fprintf(out, "\033[1;32;40m [INFO] "); \
                 break; \
             case ERROR: \
-                fprintf(out, "\033[1;37;41m"); \
+                fprintf(out, "\033[1;31;40m [ERROR] " ); \
                 break; \
             case WARNING: \
-                fprintf(out, "\033[1;30;43m"); \
+                fprintf(out, "\033[1;35;40m [WARN] "); \
                 break; \
         } \
     }while(0)

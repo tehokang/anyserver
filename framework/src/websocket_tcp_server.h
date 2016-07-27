@@ -47,6 +47,7 @@ private:
             enum lws_callback_reasons reason,
             void *user, void *in, size_t len);
 
+    static void __log__(int level, const char *line);
     static struct lws_context *m_context;
 
     bool m_run_thread;

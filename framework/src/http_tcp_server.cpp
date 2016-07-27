@@ -26,6 +26,11 @@ HttpTcpServer::HttpTcpServer(
     m_protocols[DUMMY].user = nullptr;
     m_protocols[DUMMY].per_session_data_size = 0;
     m_protocols[DUMMY].rx_buffer_size = 0;
+
+    lws_set_log_level(
+            LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_INFO |
+            LLL_DEBUG | LLL_PARSER | LLL_HEADER | LLL_EXT | LLL_CLIENT | LLL_LATENCY,
+            __log__);
 }
 
 HttpTcpServer::~HttpTcpServer()
@@ -110,6 +115,25 @@ void HttpTcpServer::__deinit__()
 {
     LOG_DEBUG("\n");
     stop();
+}
+
+void HttpTcpServer::__log__(int level, const char *line)
+{
+    switch( level )
+    {
+        case LLL_ERR : LOG_ERROR("%s", line); break;
+        case LLL_WARN: LOG_WARNING("%s", line); break;
+        case LLL_NOTICE:
+        case LLL_INFO: LOG_INFO("%s", line); break;
+        case LLL_DEBUG:
+        case LLL_PARSER:
+        case LLL_HEADER:
+        case LLL_EXT:
+        case LLL_CLIENT:
+        case LLL_LATENCY: LOG_DEBUG("%s", line) break;
+        default:
+            break;
+    }
 }
 
 void* HttpTcpServer::http_thread(void *argv)

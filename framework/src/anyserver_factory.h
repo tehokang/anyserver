@@ -30,6 +30,7 @@ public:
     virtual bool start();
     virtual void stop();
     virtual void showClientList();
+    virtual bool sendToClient(size_t server_id, size_t client_id, char *msg, unsigned int msg_len);
 
     virtual void addEventListener(IAnyServerFactoryListener *listener)
     {

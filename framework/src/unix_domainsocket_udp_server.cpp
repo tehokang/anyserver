@@ -76,10 +76,12 @@ void UnixDomainSocketUdpServer::stop()
 
 bool UnixDomainSocketUdpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
 {
+    LOG_DEBUG("\n");
     auto client = static_pointer_cast<UnixUdpClientInfo>(findClientInfo(client_id));
     if ( 0 > sendto(m_server_fd, msg, msg_len, 0,
             (struct sockaddr*)client->getSockAddrUn(), sizeof(struct sockaddr_un)) )
     {
+        LOG_ERROR("Failed to send a message \n");
         return false;
     }
     return true;
@@ -115,20 +117,9 @@ void* UnixDomainSocketUdpServer::communication_thread(void *argv)
                 server_id, readn, buffer, client_id, clientaddr.sun_path);
         NOTIFY_SERVER_RECEIVED(server_id, client_id, buffer, readn);
 
-#ifdef CONFIG_TEST_ECHO_RESPONSE
-        /**
-         * Test echo
-         */
-        ClientInfoPtr client = server->findClientInfo(client_id);
-        if ( 0 > sendto(server_fd, buffer, strlen(buffer), 0,
-                (struct sockaddr *) &clientaddr, clientlen) )
-        {
-            perror("Error in sendto ");
-        }
-
         client_id = server->removeClientInfo(client_id);
         NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
-#endif
+
     }
     close(server_fd);
     return nullptr;

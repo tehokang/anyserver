@@ -86,6 +86,7 @@ void WebSocketTcpServer::stop()
 
 bool WebSocketTcpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
 {
+    LOG_DEBUG("\n");
     auto client = static_pointer_cast<WebSocketTcpClientInfo>(findClientInfo(client_id));
     if ( -1 == lws_write((struct lws *)client->getWsi(), (unsigned char*)msg, msg_len, LWS_WRITE_TEXT) )
     {
@@ -175,13 +176,6 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
                 int client_fd = lws_get_socket_fd(wsi);
                 ClientInfoPtr client = server->findClientInfo(client_fd);
                 NOTIFY_SERVER_RECEIVED(server_id, client->getClientId(), (char*)in, len);
-
-#ifdef CONFIG_TEST_ECHO_RESPONSE
-                /**
-                 * Test echo
-                 */
-                lws_write(wsi, (unsigned char*)in, len, LWS_WRITE_TEXT);
-#endif
             }
             break;
         case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:

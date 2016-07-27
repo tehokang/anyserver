@@ -97,6 +97,7 @@ void UnixDomainSocketTcpServer::stop()
 
 bool UnixDomainSocketTcpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
 {
+    LOG_DEBUG("\n");
     auto client = static_pointer_cast<UnixTcpClientInfo>(findClientInfo(client_id));
     if ( -1 == write(client->getFd(), msg, msg_len) )
     {
@@ -157,14 +158,6 @@ void* UnixDomainSocketTcpServer::epoll_thread(void *argv)
                 {
                     ClientInfoPtr client = server->findClientInfo(events[i].data.fd);
                     NOTIFY_SERVER_RECEIVED(server_id, client->getClientId(), buffer, readn);
-
-#ifdef CONFIG_TEST_ECHO_RESPONSE
-                    /**
-                     * Test echo
-                     */
-                    ssize_t written = write(events[i].data.fd, buffer, readn);
-                    (void)written;
-#endif
                 }
             }
         }

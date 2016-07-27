@@ -13,8 +13,6 @@
 
 using namespace std;
 
-#define CONFIG_TEST_ECHO_RESPONSE
-
 namespace anyserver
 {
 
@@ -78,7 +76,7 @@ public:
         {
             memcpy(&m_sockaddr_in, sockaddr, sizeof(sockaddr));
             LOG_DEBUG("client[0x%x] New client [%s:%d] \n",
-                    m_client_id, inet_ntoa(m_sockaddr_in.sin_addr), m_sockaddr_in.sin_port);
+                    m_client_id, inet_ntoa(m_sockaddr_in.sin_addr), ntohs(m_sockaddr_in.sin_port));
         }
 
         TcpClientInfo(int fd, struct sockaddr_un* sockaddr)
@@ -104,15 +102,15 @@ public:
         UdpClientInfo(struct sockaddr_in* sockaddr)
             : ClientInfo(false)
         {
-            memcpy(&m_sockaddr_in, sockaddr, sizeof(sockaddr));
+            memcpy(&m_sockaddr_in, sockaddr, sizeof(struct sockaddr_in));
             LOG_DEBUG("client[0x%x] New client [%s:%d] \n",
-                    m_client_id, inet_ntoa(m_sockaddr_in.sin_addr), m_sockaddr_in.sin_port);
+                    m_client_id, inet_ntoa(m_sockaddr_in.sin_addr), ntohs(m_sockaddr_in.sin_port));
         }
 
         UdpClientInfo(struct sockaddr_un* sockaddr)
             : ClientInfo(false)
         {
-            memcpy(&m_sockaddr_un, sockaddr, sizeof(sockaddr));
+            memcpy(&m_sockaddr_un, sockaddr, sizeof(struct sockaddr_un));
             LOG_DEBUG("client[0x%x] New client [%s] \n",
                     m_client_id, m_sockaddr_un.sun_path);
 

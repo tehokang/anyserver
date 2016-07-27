@@ -63,6 +63,10 @@
     "enable" : true,
     "file" : "./log.txt"
   },
+  "test" :
+  {
+    "echo" : true
+  },
   "version": "0.0.1",
   "copyright": "All right reserved by TehoKang"
 }

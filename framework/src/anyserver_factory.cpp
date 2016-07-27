@@ -180,6 +180,7 @@ void AnyServerFactory::stop()
 
 void AnyServerFactory::onClientConnected(size_t server_id, size_t client_id)
 {
+    LOG_DEBUG("\n");
     showClientList();
 
     LOG_DEBUG("client[0x%x] connected to server[0x%x] \n", client_id, server_id);
@@ -193,6 +194,7 @@ void AnyServerFactory::onClientConnected(size_t server_id, size_t client_id)
 
 void AnyServerFactory::onClientDisconnected(size_t server_id, size_t client_id)
 {
+    LOG_DEBUG("\n");
     showClientList();
 
     LOG_DEBUG("client[0x%x] disconnected from server[0x%x] \n", client_id, server_id);
@@ -214,10 +216,17 @@ void AnyServerFactory::onReceived(size_t server_id, size_t client_id, char *msg,
         IAnyServerFactoryListener *listener = (*it);
         listener->onReceive(server_id, client_id, msg, msg_len);
     }
+
+    RETURN_IF_NULL(m_anyserver_configuration);
+    if ( true == m_anyserver_configuration->getConfiguration().enable_echo_test )
+    {
+        sendToClient(server_id, client_id, msg, msg_len);
+    }
 }
 
 void AnyServerFactory::showClientList()
 {
+    LOG_DEBUG("\n");
     for ( AnyServerList::iterator it=m_servers.begin();
             it!=m_servers.end(); ++it )
     {
@@ -232,6 +241,22 @@ void AnyServerFactory::showClientList()
         }
         LOG_DEBUG("\n");
     }
+}
+
+bool AnyServerFactory::sendToClient(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
+{
+    LOG_DEBUG("server_id : 0x%x \n", server_id);
+    for ( AnyServerList::iterator it=m_servers.begin();
+            it!=m_servers.end(); ++it )
+    {
+        AnyServerPtr server = (*it);
+        if ( server_id == server->getServerId() )
+        {
+            LOG_DEBUG("Found server to send message : 0x%x (msg : %s)\n", server_id, msg);
+            return server->sendToClient(client_id, msg, msg_len);
+        }
+    }
+    return false;
 }
 
 } // end of namespace

@@ -66,7 +66,9 @@ public:
     {
     public:
         Configuration()
-            : name(""), enable_log(true), log_file(""), version(""), copyright("")
+            : name(""), enable_log(true)
+            , log_file(""), version("")
+            , copyright(""), enable_echo_test(false)
         {
         };
         ~Configuration(){};
@@ -75,6 +77,7 @@ public:
         ServerInfoList server_infos;
         Capabilities capabilities;
         bool enable_log;
+        bool enable_echo_test;
         string log_file;
         string version;
         string copyright;
@@ -87,6 +90,7 @@ protected:
     virtual void __subparse_server_list__(Json::Value &root);
     virtual void __subparse_capabilities__(Json::Value &root);
     virtual void __subparse_log__(Json::Value &root);
+    virtual void __subparse_test__(Json::Value &root);
     virtual void __subparse_common__(Json::Value &root);
 
     Configuration m_configuration;

@@ -58,6 +58,7 @@ bool AnyServerConfiguration::__parse__(string file)
         __subparse_server_list__(root);
         __subparse_capabilities__(root);
         __subparse_log__(root);
+        __subparse_test__(root);
     }
     catch(exception &e)
     {
@@ -151,12 +152,21 @@ void AnyServerConfiguration::__subparse_capabilities__(Json::Value &root)
 void AnyServerConfiguration::__subparse_log__(Json::Value &root)
 {
     /**
-      * @note Parse log configuration
-      */
+     * @note Parse log configuration
+     */
     m_configuration.enable_log = root["log"]["enable"].asBool();
     m_configuration.log_file = root["log"]["file"].asString();
     LOG_DEBUG("enable_log : %d \n", m_configuration.enable_log);
     LOG_DEBUG("log_file : %s \n", m_configuration.log_file.data());
+}
+
+void AnyServerConfiguration::__subparse_test__(Json::Value &root)
+{
+    /**
+     * @note Parse test object
+     */
+    m_configuration.enable_echo_test = root["test"]["echo"].asBool();
+    LOG_DEBUG("enable echo test : %d \n", m_configuration.enable_echo_test);
 }
 
 void AnyServerConfiguration::__subparse_common__(Json::Value &root)

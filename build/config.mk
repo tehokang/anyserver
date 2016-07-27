@@ -36,5 +36,6 @@ FRAMEWORK_DIR := $(BUILD_SRC_DIR)/framework
 TARGET := anyserver
 TARGET_ARCH := x86
 TARGET_LIB := lib$(TARGET)
+CONFIG_FILE := $(TARGET).json
 CONFIG_DEBUG := YES
 

@@ -35,6 +35,7 @@ prepare:
 	fi;
 	cp -dprf $(3RD_PARTY_DIR)/libwebsockets/lib/$(TARGET_ARCH)/* $(BUILD_OUT_DIR)
 	cp -dprf $(3RD_PARTY_DIR)/libmicrohttpd/lib/$(TARGET_ARCH)/* $(BUILD_OUT_DIR)
+	cp -f $(FRAMEWORK_DIR)/src/$(CONFIG_FILE) $(BUILD_OUT_DIR)/
 
 .PHONY: distclean
 distclean: clean

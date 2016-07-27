@@ -98,6 +98,16 @@ void InetDomainSocketTcpServer::stop()
     m_run_thread = false;
 }
 
+bool InetDomainSocketTcpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
+{
+    auto client = static_pointer_cast<InetTcpClientInfo>(findClientInfo(client_id));
+    if ( -1 == write(client->getFd(), msg, msg_len) )
+    {
+        return false;
+    }
+    return true;
+}
+
 void* InetDomainSocketTcpServer::epoll_thread(void *argv)
 {
     LOG_DEBUG("\n");
@@ -130,7 +140,7 @@ void* InetDomainSocketTcpServer::epoll_thread(void *argv)
                 ev.data.fd = client_fd;
                 epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &ev);
 
-                size_t client_id = server->addClientInfo(ClientInfoPtr(new TcpClientInfo(client_fd, &clientaddr)));
+                size_t client_id = server->addClientInfo(ClientInfoPtr(new InetTcpClientInfo(client_fd, &clientaddr)));
                 NOTIFY_CLIENT_CONNECTED(server_id, client_id);
             }
             else

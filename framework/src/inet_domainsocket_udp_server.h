@@ -17,6 +17,21 @@ public:
     virtual bool init() override;
     virtual bool start() override;
     virtual void stop() override;
+    virtual bool sendToClient(size_t client_id, char *msg, unsigned int msg_len) override;
+
+    class InetUdpClientInfo : public UdpClientInfo
+    {
+    public:
+        InetUdpClientInfo(struct sockaddr_in* sockaddr)
+            : UdpClientInfo(sockaddr)
+        {
+        }
+
+        InetUdpClientInfo(struct sockaddr_un* sockaddr)
+            : UdpClientInfo(sockaddr)
+        {
+        }
+    };
 
 protected:
     virtual void __deinit__() override;

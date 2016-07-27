@@ -50,7 +50,7 @@ size_t AnyServer::removeClientInfo(const int fd)
             it!=m_client_list.end(); ++it )
     {
         auto *tcp_client = static_cast<AnyServer::TcpClientInfo*>(((*it)).get());
-        if ( fd == tcp_client->m_fd )
+        if ( fd == tcp_client->getFd() )
         {
             size_t client_id = tcp_client->getClientId();
             LOG_DEBUG("Removed a client in list [cid:0x%x] \n", client_id);
@@ -84,7 +84,7 @@ const AnyServer::ClientInfoPtr AnyServer::findClientInfo(const int fd)
             it!=m_client_list.end(); ++it )
     {
         auto *tcp_client = static_cast<TcpClientInfo*>(((*it)).get());
-        if ( fd == tcp_client->m_fd )
+        if ( fd == tcp_client->getFd() )
         {
             return (*it);
         }

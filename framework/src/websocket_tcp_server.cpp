@@ -79,6 +79,16 @@ void WebSocketTcpServer::stop()
     m_run_thread = false;
 }
 
+bool WebSocketTcpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
+{
+    auto client = static_pointer_cast<WebSocketTcpClientInfo>(findClientInfo(client_id));
+    if ( -1 == lws_write((struct lws *)client->getWsi(), (unsigned char*)msg, msg_len, LWS_WRITE_TEXT) )
+    {
+        return false;
+    }
+    return true;
+}
+
 void WebSocketTcpServer::__deinit__()
 {
     LOG_DEBUG("\n");

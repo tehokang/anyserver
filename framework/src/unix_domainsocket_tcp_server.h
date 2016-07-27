@@ -18,6 +18,22 @@ public:
     virtual bool init() override;
     virtual bool start() override;
     virtual void stop() override;
+    virtual bool sendToClient(size_t client_id, char *msg, unsigned int msg_len) override;
+
+    class UnixTcpClientInfo : public TcpClientInfo
+    {
+    public:
+        UnixTcpClientInfo(int fd, struct sockaddr_in* sockaddr)
+            : TcpClientInfo(fd, sockaddr)
+        {
+        }
+
+        UnixTcpClientInfo(int fd, struct sockaddr_un* sockaddr)
+            : TcpClientInfo(fd, sockaddr)
+        {
+        }
+    };
+
 protected:
     virtual void __deinit__() override;
 

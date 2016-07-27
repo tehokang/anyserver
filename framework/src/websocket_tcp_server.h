@@ -16,6 +16,21 @@ public:
     virtual bool init() override;
     virtual bool start() override;
     virtual void stop() override;
+    virtual bool sendToClient(size_t client_id, char *msg, unsigned int msg_len) override;
+
+    class WebSocketTcpClientInfo : public TcpClientInfo
+    {
+    public:
+        WebSocketTcpClientInfo(int fd, struct sockaddr_in* sockaddr, void *wsi)
+            : TcpClientInfo(fd, sockaddr)
+            , m_wsi(wsi)
+        {
+        }
+        void* getWsi() { return m_wsi; };
+    protected:
+        void *m_wsi;
+    };
+
 protected:
     virtual void __deinit__() override;
 

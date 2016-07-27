@@ -39,6 +39,7 @@ public:
     virtual bool init() = 0;
     virtual bool start() = 0;
     virtual void stop() = 0;
+    virtual bool sendToClient(size_t client_id, char *msg, unsigned int msg_len) = 0;
 
     virtual void enableSecurity() { m_security = true; };
     virtual void disableSecurity() { m_security = false; };
@@ -55,6 +56,10 @@ public:
         {
             /* Nothing to do */
         };
+        virtual ~ClientInfo()
+        {
+            /* Nothing to do */
+        }
         size_t getClientId() { return m_client_id; };
     protected:
         const bool m_tcp;
@@ -63,40 +68,6 @@ public:
 
     typedef shared_ptr<ClientInfo> ClientInfoPtr;
     typedef list<ClientInfoPtr> ClientInfoList;
-
-    class WebSocketTcpClientInfo : public ClientInfo
-    {
-    public:
-        WebSocketTcpClientInfo(int fd, struct sockaddr_in* sockaddr, void *wsi)
-            : ClientInfo(true)
-            , m_fd(fd)
-            , m_wsi(wsi)
-        {
-            memcpy(&m_sockaddr_in, sockaddr, sizeof(sockaddr));
-            LOG_DEBUG("client[0x%x] New client [%s:%d] \n",
-                    m_client_id, inet_ntoa(m_sockaddr_in.sin_addr), m_sockaddr_in.sin_port);
-        }
-        int m_fd;
-        struct sockaddr_in m_sockaddr_in;
-        void *m_wsi;
-    };
-
-    class HttpTcpClientInfo : public ClientInfo
-    {
-    public:
-        HttpTcpClientInfo(int fd, struct sockaddr_in* sockaddr, void *wsi)
-            : ClientInfo(true)
-            , m_fd(fd)
-            , m_wsi(wsi)
-        {
-            memcpy(&m_sockaddr_in, sockaddr, sizeof(sockaddr));
-            LOG_DEBUG("client[0x%x] New client [%s:%d] \n",
-                    m_client_id, inet_ntoa(m_sockaddr_in.sin_addr), m_sockaddr_in.sin_port);
-        }
-        int m_fd;
-        struct sockaddr_in m_sockaddr_in;
-        void *m_wsi;
-    };
 
     class TcpClientInfo : public ClientInfo
     {
@@ -118,7 +89,10 @@ public:
             LOG_DEBUG("client[0x%x] New client [%s] \n",
                     m_client_id, m_sockaddr_un.sun_path);
         }
-
+        int getFd() { return m_fd; };
+        struct sockaddr_in *getSockAddrIn() { return &m_sockaddr_in; };
+        struct sockaddr_un *getSockAddrUn() { return &m_sockaddr_un; };
+    protected:
         int m_fd;
         struct sockaddr_in m_sockaddr_in;
         struct sockaddr_un m_sockaddr_un;
@@ -143,6 +117,9 @@ public:
                     m_client_id, m_sockaddr_un.sun_path);
 
         }
+        struct sockaddr_in *getSockAddrIn() { return &m_sockaddr_in; };
+        struct sockaddr_un *getSockAddrUn() { return &m_sockaddr_un; };
+    protected:
         struct sockaddr_in m_sockaddr_in;
         struct sockaddr_un m_sockaddr_un;
     };
@@ -153,11 +130,6 @@ public:
     const ClientInfoPtr findClientInfo(const int fd);
     const ClientInfoPtr findClientInfo(const size_t client_id);
     const ClientInfoList getClientInfoList() { return m_client_list; };
-    bool sendToClient(size_t client_id, char *msg, unsigned int msg_len)
-    {
-
-        return true;
-    }
 
 protected:
     virtual void __deinit__() = 0;

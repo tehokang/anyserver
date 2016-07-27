@@ -79,6 +79,33 @@ void HttpTcpServer::stop()
     m_run_thread = false;
 }
 
+bool HttpTcpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
+{
+    auto client = static_pointer_cast<HttpTcpClientInfo>(findClientInfo(client_id));
+    struct lws *wsi = static_cast<struct lws *>(client->m_wsi);
+
+    unsigned char buffer[8*1024];
+    memset(buffer, 0x00, sizeof(buffer));
+    unsigned char *p = buffer + LWS_SEND_BUFFER_PRE_PADDING;
+    unsigned char *end = p + sizeof(buffer) - LWS_SEND_BUFFER_PRE_PADDING;
+
+    if ( lws_add_http_header_status(wsi, 200, &p, end) ) return 1;
+    if ( lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_SERVER,
+            (unsigned char *)"libwebsockets", 13, &p, end) ) return 1;
+    if ( lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
+            (unsigned char *)"text/plain", 10, &p, end) ) return 1;
+    if ( lws_add_http_header_content_length(wsi, msg_len, &p, end) ) return 1;
+    if ( lws_finalize_http_header(wsi, &p, end) ) return 1;
+
+    if ( -1 == lws_write(wsi, buffer + LWS_SEND_BUFFER_PRE_PADDING,
+            p - (buffer + LWS_SEND_BUFFER_PRE_PADDING), LWS_WRITE_HTTP_HEADERS) ||
+            -1 == lws_write(wsi, (unsigned char*)msg, msg_len, LWS_WRITE_HTTP) )
+    {
+        return false;
+    }
+    return true;
+}
+
 void HttpTcpServer::__deinit__()
 {
     LOG_DEBUG("\n");
@@ -190,12 +217,10 @@ int HttpTcpServer::callback_http(struct lws *wsi,
                 lws_write(wsi, buffer + LWS_SEND_BUFFER_PRE_PADDING,
                         p - (buffer + LWS_SEND_BUFFER_PRE_PADDING), LWS_WRITE_HTTP_HEADERS);
                 lws_write(wsi, (unsigned char*)response, response_len, LWS_WRITE_HTTP);
-
-                req_body = "";
-                return -1;
             }
 #endif
-            break;
+            req_body = "";
+            return -1;
         case LWS_CALLBACK_HTTP_WRITEABLE:
             LOG_DEBUG("LWS_CALLBACK_HTTP_WRITEABLE \n");
             break;

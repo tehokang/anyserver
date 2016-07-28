@@ -30,8 +30,8 @@ VERSION := 0.0.1
 BUILD_SRC_DIR := $(PWD)/../
 BUILD_OUT_DIR := $(PWD)/out/
 EXAMPLE_DIR := $(BUILD_SRC_DIR)/example/
-FRAMEWORK_DIR := $(BUILD_SRC_DIR)/framework
-3RD_PARTY_DIR := $(FRAMEWORK_DIR)/src/3rdparty/
+FRAMEWORK_DIR := $(BUILD_SRC_DIR)/framework/
+EXTERNAL_DIR := $(BUILD_SRC_DIR)/external/
 
 TARGET := anyserver
 TARGET_ARCH := x86

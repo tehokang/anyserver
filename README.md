@@ -29,8 +29,9 @@ Like websocket, http, inet domain for external communication and also unix domai
 # How to port this library
 
 # External Dependencies
-jsoncpp
-libwebsockets
+jsoncpp for codec of json
+libwebsockets for http and websocket server
+libmicrohttpd for backup of http
 
 # Example
 

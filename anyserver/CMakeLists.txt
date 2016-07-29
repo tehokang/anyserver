@@ -46,6 +46,11 @@ link_directories(
 
 add_library(${project_name} SHARED ${SOURCES})
 
+add_custom_command(
+	TARGET ${project_name}
+	POST_BUILD
+	COMMAND cp -f ${rootdir}/src/${project_name}.json ${CMAKE_BINARY_DIR}
+)
 # Version configuration
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)

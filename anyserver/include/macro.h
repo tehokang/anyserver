@@ -10,7 +10,7 @@
 #define SAFE_DELETE(x) do{if(x){delete x;x=nullptr;}}while(0)
 #define SAFE_FREE(x) do{if(x){free(x);x=nullptr;}}while(0)
 
-#include "anylogger.h"
+#include "logger.h"
 #include <string.h>
 
 #define __SHORT_FILE__ \
@@ -34,15 +34,15 @@
 #else
 
 /* USE-CASE of ARCHON LOGGER */
-#define LOG_DEBUG(fmt, ...) AnyLogger::debug \
+#define LOG_DEBUG(fmt, ...) Logger::debug \
         (__SHORT_FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
-#define LOG_INFO(fmt, ...)  AnyLogger::info \
+#define LOG_INFO(fmt, ...)  Logger::info \
         (__SHORT_FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
-#define LOG_WARNING(fmt, ...) AnyLogger::warning \
+#define LOG_WARNING(fmt, ...) Logger::warning \
         (__SHORT_FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
-#define LOG_ERROR(fmt, ...) AnyLogger::error \
+#define LOG_ERROR(fmt, ...) Logger::error \
         (__SHORT_FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
-#define LOG_KEY(fmt, ...) AnyLogger::debug \
+#define LOG_KEY(fmt, ...) Logger::debug \
         (__SHORT_FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
 
 #define REMOTE_DEBUG LOG_DEBUG

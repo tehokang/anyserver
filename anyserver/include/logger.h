@@ -27,7 +27,7 @@ namespace anyserver
  *        6:cyan,   7:white }
  *
  */
-class AnyLogger
+class Logger
 {
 public:
     enum LOG_TYPE
@@ -56,10 +56,10 @@ public:
 
 protected:
     /**
-     * @warning DO NOT CREATE AnyLogger INSTANCE
+     * @warning DO NOT CREATE Logger INSTANCE
      **/
-    AnyLogger();
-    ~AnyLogger();
+    Logger();
+    ~Logger();
 
     static string getDate();
 

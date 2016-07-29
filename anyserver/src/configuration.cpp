@@ -1,6 +1,6 @@
-#include "anymacro.h"
+#include "macro.h"
 #include "filesystem.h"
-#include "anyserver_configuration.h"
+#include "configuration.h"
 
 #include <iostream>
 #include <fstream>
@@ -9,7 +9,7 @@
 namespace anyserver
 {
 
-AnyServerConfiguration::AnyServerConfiguration()
+Configuration::Configuration()
 {
     LOG_DEBUG("\n");
     m_server_kinds["websocket"] = ServerKinds::WEBSOCKET;
@@ -18,12 +18,12 @@ AnyServerConfiguration::AnyServerConfiguration()
     m_server_kinds["unix_domainsocket"] = ServerKinds::UNIXDS;
 }
 
-AnyServerConfiguration::~AnyServerConfiguration()
+Configuration::~Configuration()
 {
     LOG_DEBUG("\n");
 }
 
-bool AnyServerConfiguration::init(const string config_file)
+bool Configuration::init(const string config_file)
 {
     LOG_DEBUG("\n");
     if ( false == FileSystem::isExistFile(config_file) )
@@ -34,7 +34,7 @@ bool AnyServerConfiguration::init(const string config_file)
     return __parse__(config_file);
 }
 
-bool AnyServerConfiguration::__parse__(string file)
+bool Configuration::__parse__(string file)
 {
     LOG_DEBUG("\n");
     Json::Value root;
@@ -68,7 +68,7 @@ bool AnyServerConfiguration::__parse__(string file)
     return true;
 }
 
-void AnyServerConfiguration::__subparse_server_list__(Json::Value &root)
+void Configuration::__subparse_server_list__(Json::Value &root)
 {
     /**
      * @note Parse type of server supporting
@@ -109,7 +109,7 @@ void AnyServerConfiguration::__subparse_server_list__(Json::Value &root)
     }
 }
 
-void AnyServerConfiguration::__subparse_capabilities__(Json::Value &root)
+void Configuration::__subparse_capabilities__(Json::Value &root)
 {
     /**
       * @note Parse capabilities of server
@@ -149,7 +149,7 @@ void AnyServerConfiguration::__subparse_capabilities__(Json::Value &root)
     }
 }
 
-void AnyServerConfiguration::__subparse_log__(Json::Value &root)
+void Configuration::__subparse_log__(Json::Value &root)
 {
     /**
      * @note Parse log configuration
@@ -160,7 +160,7 @@ void AnyServerConfiguration::__subparse_log__(Json::Value &root)
     LOG_DEBUG("log_file : %s \n", m_configuration.log_file.data());
 }
 
-void AnyServerConfiguration::__subparse_test__(Json::Value &root)
+void Configuration::__subparse_test__(Json::Value &root)
 {
     /**
      * @note Parse test object
@@ -169,7 +169,7 @@ void AnyServerConfiguration::__subparse_test__(Json::Value &root)
     LOG_DEBUG("enable echo test : %d \n", m_configuration.enable_echo_test);
 }
 
-void AnyServerConfiguration::__subparse_common__(Json::Value &root)
+void Configuration::__subparse_common__(Json::Value &root)
 {
     /**
      * @note Parse version of server

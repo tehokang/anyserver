@@ -13,11 +13,11 @@ using namespace std;
 namespace anyserver
 {
 
-class AnyServerConfiguration
+class Configuration
 {
 public:
-    AnyServerConfiguration();
-    virtual ~AnyServerConfiguration();
+    Configuration();
+    virtual ~Configuration();
     bool init(const string config_file);
 
     typedef enum
@@ -62,16 +62,16 @@ public:
         list<string> m_ssl_ca_list;
     };
 
-    class Configuration
+    class JsonConfiguration
     {
     public:
-        Configuration()
+        JsonConfiguration()
             : name(""), enable_log(true)
             , log_file(""), version("")
             , copyright(""), enable_echo_test(false)
         {
         };
-        ~Configuration(){};
+        ~JsonConfiguration(){};
 
         string name;
         ServerInfoList server_infos;
@@ -83,7 +83,7 @@ public:
         string copyright;
     };
 
-    const Configuration& getConfiguration() { return m_configuration; };
+    const JsonConfiguration& getJsonConfiguration() { return m_configuration; };
     map<string, ServerKinds> getSupportedServer() { return m_server_kinds; };
 protected:
     virtual bool __parse__(const string config_file);
@@ -93,7 +93,7 @@ protected:
     virtual void __subparse_test__(Json::Value &root);
     virtual void __subparse_common__(Json::Value &root);
 
-    Configuration m_configuration;
+    JsonConfiguration m_configuration;
     /**
      * @todo How to make constant type
      */

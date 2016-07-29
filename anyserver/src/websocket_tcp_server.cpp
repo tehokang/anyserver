@@ -5,7 +5,7 @@ namespace anyserver
 struct lws_context *WebSocketTcpServer::m_context = nullptr;
 WebSocketTcpServer::WebSocketTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
-    : AnyServer(name, bind, tcp, max_client)
+    : BaseServer(name, bind, tcp, max_client)
     , m_run_thread(false)
 {
     LOG_DEBUG("\n");

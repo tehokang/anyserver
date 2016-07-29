@@ -1,5 +1,5 @@
-#include "anylogger.h"
-#include "anymacro.h"
+#include "logger.h"
+#include "macro.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -39,24 +39,24 @@ namespace anyserver
 
 #define END_OF_ANSI(out) fprintf(out, "\033[0m");
 
-bool AnyLogger::m_info = true;
-bool AnyLogger::m_debug = true;
-bool AnyLogger::m_warning = true;
-bool AnyLogger::m_error = true;
-bool AnyLogger::m_filewrite = false;
-unsigned int AnyLogger::m_filesize = 0;
+bool Logger::m_info = true;
+bool Logger::m_debug = true;
+bool Logger::m_warning = true;
+bool Logger::m_error = true;
+bool Logger::m_filewrite = false;
+unsigned int Logger::m_filesize = 0;
 
 #if defined(__linux__)
-pthread_mutex_t AnyLogger::m_filelogging_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+pthread_mutex_t Logger::m_filelogging_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 #elif defined(__APPLE__)
-pthread_mutex_t AnyLogger::m_filelogging_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
+pthread_mutex_t Logger::m_filelogging_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
 #else /* @todo : Window, FreeBSD */
 
 #endif
 
-FILE *AnyLogger::m_log_fp = NULL;
-string AnyLogger::m_log_filename(1024, '\0');
-string AnyLogger::m_log_rootpath(1024, '\0');
+FILE *Logger::m_log_fp = NULL;
+string Logger::m_log_filename(1024, '\0');
+string Logger::m_log_rootpath(1024, '\0');
 
 #define LOGGING_WITH_DATE
 
@@ -65,7 +65,7 @@ string AnyLogger::m_log_rootpath(1024, '\0');
 #else
 #define _LOG_PREFIX_ "[%s:%s:%d] "
 #endif
-string AnyLogger::getDate()
+string Logger::getDate()
 {
     char date[16] = {0,};
     time_t now_t = time(0);
@@ -74,7 +74,7 @@ string AnyLogger::getDate()
     return string(date);
 }
 
-void AnyLogger::setLogLevel(bool info, bool debug, bool warn, bool error, \
+void Logger::setLogLevel(bool info, bool debug, bool warn, bool error, \
              bool filewrite, unsigned int filesize, string rootpath)
 {
     m_info = info;
@@ -86,7 +86,7 @@ void AnyLogger::setLogLevel(bool info, bool debug, bool warn, bool error, \
     m_log_rootpath = rootpath;
 }
 
-void AnyLogger::__save_logfile__(FILE *out, const string filename, const string funcname, \
+void Logger::__save_logfile__(FILE *out, const string filename, const string funcname, \
              const unsigned int linenumber, const string format, va_list arglist)
 {
     pthread_mutex_lock( &m_filelogging_mutex );
@@ -147,7 +147,7 @@ void AnyLogger::__save_logfile__(FILE *out, const string filename, const string 
     pthread_mutex_unlock( &m_filelogging_mutex );
 }
 
-void AnyLogger::__log__(LOG_TYPE logtype, FILE *out, const string filename, \
+void Logger::__log__(LOG_TYPE logtype, FILE *out, const string filename, \
              const string funcname, const unsigned int linenumber, const string format, \
              va_list arglist)
 {
@@ -174,7 +174,7 @@ void AnyLogger::__log__(LOG_TYPE logtype, FILE *out, const string filename, \
         __save_logfile__(out, filename, funcname, linenumber, format, arglist);
 }
 
-void AnyLogger::info(const string filename, const unsigned int linenumber, \
+void Logger::info(const string filename, const unsigned int linenumber, \
              const string funcname, const string format, ...)
 {
     if ( m_info )
@@ -188,7 +188,7 @@ void AnyLogger::info(const string filename, const unsigned int linenumber, \
     }
 }
 
-void AnyLogger::debug(const string filename, const unsigned int linenumber, \
+void Logger::debug(const string filename, const unsigned int linenumber, \
              const string funcname, const string format, ...)
 {
     if ( m_debug )
@@ -202,7 +202,7 @@ void AnyLogger::debug(const string filename, const unsigned int linenumber, \
     }
 }
 
-void AnyLogger::warning(const string filename, const unsigned int linenumber, \
+void Logger::warning(const string filename, const unsigned int linenumber, \
              const string funcname, const string format, ...)
 {
     if ( m_warning )
@@ -216,7 +216,7 @@ void AnyLogger::warning(const string filename, const unsigned int linenumber, \
     }
 }
 
-void AnyLogger::error(const string filename, const unsigned int linenumber, \
+void Logger::error(const string filename, const unsigned int linenumber, \
              const string funcname, const string format, ...)
 {
     if ( m_error )

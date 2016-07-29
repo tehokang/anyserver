@@ -1,7 +1,7 @@
-#ifndef __ANYSERVER_H__
-#define __ANYSERVER_H__
+#ifndef __BASE_SERVER_H__
+#define __BASE_SERVER_H__
 
-#include "anymacro.h"
+#include "macro.h"
 
 #include <string>
 #include <list>
@@ -16,7 +16,7 @@ using namespace std;
 namespace anyserver
 {
 
-class IAnyServerListener
+class IBaseServerListener
 {
 public:
     virtual void onClientConnected(size_t server_id, size_t client_id) = 0; // inet
@@ -24,15 +24,15 @@ public:
     virtual void onReceived(size_t server_id, size_t client_id, char *msg, unsigned int msg_len) = 0;
 };
 
-class AnyServer
+class BaseServer
 {
 public:
-    AnyServer(const string name, const string bind, const bool tcp, const unsigned int max_client);
-    virtual ~AnyServer();
+    BaseServer(const string name, const string bind, const bool tcp, const unsigned int max_client);
+    virtual ~BaseServer();
 
     size_t getServerId() { return m_server_id; };
-    void addEventListener(IAnyServerListener *listener);
-    void removeEventListener(IAnyServerListener *listener);
+    void addEventListener(IBaseServerListener *listener);
+    void removeEventListener(IBaseServerListener *listener);
 
     virtual bool init() = 0;
     virtual bool start() = 0;
@@ -132,7 +132,7 @@ public:
 protected:
     virtual void __deinit__() = 0;
 
-    list<IAnyServerListener*> m_listeners;
+    list<IBaseServerListener*> m_listeners;
     const unsigned int m_max_client;
     const bool m_tcp;
     bool m_security;
@@ -147,33 +147,33 @@ protected:
 
 #define NOTIFY_CLIENT_CONNECTED(sid, cid) \
     do { \
-        list<IAnyServerListener*> listeners = server->m_listeners; \
-        for ( list<IAnyServerListener*>::iterator it = listeners.begin(); \
+        list<IBaseServerListener*> listeners = server->m_listeners; \
+        for ( list<IBaseServerListener*>::iterator it = listeners.begin(); \
                 it!=listeners.end(); ++it ) \
         { \
-            IAnyServerListener *listener = (*it); \
+            IBaseServerListener *listener = (*it); \
             listener->onClientConnected(sid, cid); \
         } \
     }while(0)
 
 #define NOTIFY_CLIENT_DISCONNECTED(sid, cid) \
     do { \
-        list<IAnyServerListener*> listeners = server->m_listeners; \
-        for ( list<IAnyServerListener*>::iterator it = listeners.begin(); \
+        list<IBaseServerListener*> listeners = server->m_listeners; \
+        for ( list<IBaseServerListener*>::iterator it = listeners.begin(); \
                 it!=listeners.end(); ++it ) \
         { \
-            IAnyServerListener *listener = (*it); \
+            IBaseServerListener *listener = (*it); \
             listener->onClientDisconnected(sid, cid); \
         } \
     }while(0)
 
 #define NOTIFY_SERVER_RECEIVED(sid, cid, buf, buf_len) \
     do { \
-        list<IAnyServerListener*> listeners = server->m_listeners; \
-        for ( list<IAnyServerListener*>::iterator it = listeners.begin(); \
+        list<IBaseServerListener*> listeners = server->m_listeners; \
+        for ( list<IBaseServerListener*>::iterator it = listeners.begin(); \
                 it!=listeners.end(); ++it ) \
         { \
-            IAnyServerListener *listener = (*it); \
+            IBaseServerListener *listener = (*it); \
             listener->onReceived(sid, cid, buf, buf_len); \
         } \
     }while(0)

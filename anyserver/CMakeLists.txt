@@ -12,17 +12,15 @@ endif ("${CMAKE_BUILD_TYPE}" MATCHES "release")
 
 set(rootdir ${CMAKE_SOURCE_DIR}/anyserver)
 set(SOURCES 
-	${rootdir}/src/anylogger.cpp
 	${rootdir}/src/anyserver.cpp
-	${rootdir}/src/anyserver_configuration.cpp
-	${rootdir}/src/anyserver_controller.cpp
-	${rootdir}/src/anyserver_factory.cpp
+	${rootdir}/src/logger.cpp
+	${rootdir}/src/base_server.cpp
+	${rootdir}/src/configuration.cpp
+	${rootdir}/src/controller.cpp
+	${rootdir}/src/server_factory.cpp
 	${rootdir}/src/http_tcp_server.cpp
 	${rootdir}/src/inet_domainsocket_tcp_server.cpp
 	${rootdir}/src/inet_domainsocket_udp_server.cpp
-	${rootdir}/src/session.cpp
-	${rootdir}/src/session_communicator.cpp
-	${rootdir}/src/session_processor.cpp
 	${rootdir}/src/unix_domainsocket_tcp_server.cpp
 	${rootdir}/src/unix_domainsocket_udp_server.cpp
 	${rootdir}/src/websocket_tcp_server.cpp

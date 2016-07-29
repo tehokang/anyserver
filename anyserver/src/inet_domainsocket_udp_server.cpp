@@ -1,5 +1,5 @@
 #include "inet_domainsocket_udp_server.h"
-#include "anymacro.h"
+#include "macro.h"
 
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -10,7 +10,7 @@ namespace anyserver
 
 InetDomainSocketUdpServer::InetDomainSocketUdpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
-    : AnyServer(name, bind, tcp, max_client)
+    : BaseServer(name, bind, tcp, max_client)
     , m_run_thread(false)
     , m_server_fd(0)
 {

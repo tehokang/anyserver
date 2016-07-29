@@ -1,5 +1,5 @@
 #include "unix_domainsocket_tcp_server.h"
-#include "anymacro.h"
+#include "macro.h"
 
 #include <sys/un.h>
 #include <arpa/inet.h>
@@ -12,7 +12,7 @@ namespace anyserver
 
 UnixDomainSocketTcpServer::UnixDomainSocketTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
-    : AnyServer(name, bind, tcp, max_client)
+    : BaseServer(name, bind, tcp, max_client)
     , m_events(nullptr)
     , m_run_thread(false)
     , m_epoll_fd(0)

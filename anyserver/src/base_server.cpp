@@ -1,10 +1,10 @@
-#include "anyserver.h"
-#include "anymacro.h"
+#include "base_server.h"
+#include "macro.h"
 
 namespace anyserver
 {
 
-AnyServer::AnyServer(const string name, const string bind, const bool tcp, const unsigned int max_client)
+BaseServer::BaseServer(const string name, const string bind, const bool tcp, const unsigned int max_client)
     : m_name(name)
     , m_bind(bind)
     , m_max_client(max_client)
@@ -15,19 +15,19 @@ AnyServer::AnyServer(const string name, const string bind, const bool tcp, const
     LOG_DEBUG("[%s] server unique id : 0x%x \n", m_name.data(), m_server_id);
 }
 
-AnyServer::~AnyServer()
+BaseServer::~BaseServer()
 {
     m_listeners.clear();
 }
 
-void AnyServer::addEventListener(IAnyServerListener *listener)
+void BaseServer::addEventListener(IBaseServerListener *listener)
 {
     m_listeners.push_back(listener);
 }
 
-void AnyServer::removeEventListener(IAnyServerListener *listener)
+void BaseServer::removeEventListener(IBaseServerListener *listener)
 {
-    for ( list<IAnyServerListener*>::iterator it = m_listeners.begin();
+    for ( list<IBaseServerListener*>::iterator it = m_listeners.begin();
             it!=m_listeners.end(); ++it )
     {
         if ( listener == (*it) )
@@ -38,18 +38,18 @@ void AnyServer::removeEventListener(IAnyServerListener *listener)
     }
 }
 
-size_t AnyServer::addClientInfo(const AnyServer::ClientInfoPtr client)
+size_t BaseServer::addClientInfo(const BaseServer::ClientInfoPtr client)
 {
     m_client_list.push_back(client);
     return client->getClientId();
 }
 
-size_t AnyServer::removeClientInfo(const int fd)
+size_t BaseServer::removeClientInfo(const int fd)
 {
-    for ( list<AnyServer::ClientInfoPtr>::iterator it=m_client_list.begin();
+    for ( list<BaseServer::ClientInfoPtr>::iterator it=m_client_list.begin();
             it!=m_client_list.end(); ++it )
     {
-        auto *tcp_client = static_cast<AnyServer::TcpClientInfo*>(((*it)).get());
+        auto *tcp_client = static_cast<BaseServer::TcpClientInfo*>(((*it)).get());
         if ( fd == tcp_client->getFd() )
         {
             size_t client_id = tcp_client->getClientId();
@@ -62,9 +62,9 @@ size_t AnyServer::removeClientInfo(const int fd)
     return 0;
 }
 
-size_t AnyServer::removeClientInfo(const size_t client_id)
+size_t BaseServer::removeClientInfo(const size_t client_id)
 {
-    for ( list<AnyServer::ClientInfoPtr>::iterator it=m_client_list.begin();
+    for ( list<BaseServer::ClientInfoPtr>::iterator it=m_client_list.begin();
             it!=m_client_list.end(); ++it )
     {
         if ( client_id == (*it)->getClientId() )
@@ -78,9 +78,9 @@ size_t AnyServer::removeClientInfo(const size_t client_id)
     return 0;
 }
 
-const AnyServer::ClientInfoPtr AnyServer::findClientInfo(const int fd)
+const BaseServer::ClientInfoPtr BaseServer::findClientInfo(const int fd)
 {
-    for ( list<AnyServer::ClientInfoPtr>::iterator it=m_client_list.begin();
+    for ( list<BaseServer::ClientInfoPtr>::iterator it=m_client_list.begin();
             it!=m_client_list.end(); ++it )
     {
         auto *tcp_client = static_cast<TcpClientInfo*>(((*it)).get());
@@ -92,9 +92,9 @@ const AnyServer::ClientInfoPtr AnyServer::findClientInfo(const int fd)
     return nullptr;
 }
 
-const AnyServer::ClientInfoPtr AnyServer::findClientInfo(const size_t client_id)
+const BaseServer::ClientInfoPtr BaseServer::findClientInfo(const size_t client_id)
 {
-    for ( list<AnyServer::ClientInfoPtr>::iterator it=m_client_list.begin();
+    for ( list<BaseServer::ClientInfoPtr>::iterator it=m_client_list.begin();
             it!=m_client_list.end(); ++it )
     {
         if ( client_id == (*it)->getClientId() )

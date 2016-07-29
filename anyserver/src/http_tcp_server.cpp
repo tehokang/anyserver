@@ -5,7 +5,7 @@ namespace anyserver
 struct lws_context *HttpTcpServer::m_context = nullptr;
 HttpTcpServer::HttpTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
-    : AnyServer(name, bind, tcp, max_client)
+    : BaseServer(name, bind, tcp, max_client)
     , m_run_thread(false)
 {
     LOG_DEBUG("\n");

@@ -166,6 +166,7 @@ void Configuration::__subparse_log__(Json::Value &root)
     LOG_DEBUG("enable_log_info : %d \n", m_configuration.log.enable_info);
     LOG_DEBUG("enable_log_error : %d \n", m_configuration.log.enable_error);
     LOG_DEBUG("enable_log_warn : %d \n", m_configuration.log.enable_warn);
+    LOG_DEBUG("enable_filewrite : %d \n", m_configuration.log.enable_filewrite);
     LOG_DEBUG("log_directory : %s \n", m_configuration.log.directory.data());
     LOG_DEBUG("filesize : %d \n", m_configuration.log.filesize);
 }

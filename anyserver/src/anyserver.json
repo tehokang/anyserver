@@ -61,12 +61,17 @@
   "log" : 
   {
     "enable" : true,
-    "file" : "./log.txt"
+    "enable_debug" : true, 
+    "enable_info" : true,
+    "enable_error" : true, 
+    "enable_warn" : true,
+    "enable_filewrite" : false,
+    "directory" : "/tmp",
+    "filesize" : 80000000
   },
   "test" :
   {
     "echo" : true
   },
-  "version": "0.0.1",
   "copyright": "All right reserved by TehoKang"
 }

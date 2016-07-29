@@ -1,14 +1,12 @@
 #ifndef __ANYSERVER_H__
 #define __ANYSERVER_H__
 
-#include "posix_signal_interceptor.h"
-
 #include <string>
 using namespace std;
 
 namespace anyserver
 {
-
+class PosixSignalInterceptor;
 class Controller;
 class AnyServer
 {
@@ -25,7 +23,7 @@ private:
     void onReceivedPosixSignal(int signal_id);
 
     bool m_run;
-    PosixSignalInterceptor posix_signal_interceptor;
+    PosixSignalInterceptor *m_posix_signal_interceptor;
     Controller *m_anyserver_controller;
 };
 

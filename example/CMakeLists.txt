@@ -11,9 +11,6 @@ set(SOURCES
 
 include_directories(
 	${anyserverdir}/include
-	${anyserverdir}/external/json
-	${anyserverdir}/external/libmicrohttpd/include
-	${anyserverdir}/external/libwebsockets/include
 )
 
 add_definitions(-std=c++11 -fexceptions)

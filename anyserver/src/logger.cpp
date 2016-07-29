@@ -54,9 +54,11 @@ pthread_mutex_t Logger::m_filelogging_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZE
 
 #endif
 
+const unsigned int MAX_LEN = 1024;
 FILE *Logger::m_log_fp = NULL;
-string Logger::m_log_filename(1024, '\0');
-string Logger::m_log_rootpath(1024, '\0');
+string Logger::m_log_filename(MAX_LEN, '\0');
+string Logger::m_log_rootpath(MAX_LEN, '\0');
+string Logger::m_log_prefix(MAX_LEN, '\0');
 
 #define LOGGING_WITH_DATE
 
@@ -75,7 +77,7 @@ string Logger::getDate()
 }
 
 void Logger::setLogLevel(bool info, bool debug, bool warn, bool error, \
-             bool filewrite, unsigned int filesize, string rootpath)
+             bool filewrite, unsigned int filesize, string rootpath, string prefix)
 {
     m_info = info;
     m_debug = debug;
@@ -84,6 +86,7 @@ void Logger::setLogLevel(bool info, bool debug, bool warn, bool error, \
     m_filewrite = filewrite;
     m_filesize = filesize;
     m_log_rootpath = rootpath;
+    m_log_prefix = prefix;
 }
 
 void Logger::__save_logfile__(FILE *out, const string filename, const string funcname, \
@@ -130,7 +133,8 @@ void Logger::__save_logfile__(FILE *out, const string filename, const string fun
         t = localtime(&timer);
         m_log_filename.assign(m_log_rootpath);
         snprintf(_suffix, sizeof(_suffix),
-                    "/archon_%04d%02d%02d_%02d%02d%02d.log", \
+                    "/%s_%04d%02d%02d_%02d%02d%02d.log", \
+                    m_log_prefix.data(), \
                     t->tm_year + 1900, \
                     t->tm_mon + 1, \
                     t->tm_mday, \

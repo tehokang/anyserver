@@ -9,59 +9,42 @@ namespace anyserver
 {
 
 AnyServer::AnyServer(int argc, char **argv)
-    : m_anyserver_controller(new Controller(argv[1]))
-    , m_posix_signal_interceptor(new PosixSignalInterceptor())
+    : m_controller(new Controller(argv[1]))
     , m_run(false)
 {
-    m_anyserver_controller->setLogLevel(true, true, true, true);
+    m_controller->setListener(this);
 };
 
 AnyServer::AnyServer(string config_file)
-    : m_anyserver_controller(new Controller(config_file))
-    , m_posix_signal_interceptor(new PosixSignalInterceptor())
+    : m_controller(new Controller(config_file))
     , m_run(false)
 {
-    m_anyserver_controller->setLogLevel(true, true, true, true);
+    m_controller->setListener(this);
 }
 
 AnyServer::~AnyServer()
 {
-    if ( m_anyserver_controller )
+    if ( m_controller )
     {
-        delete m_anyserver_controller;
-        m_anyserver_controller = nullptr;
+        delete m_controller;
+        m_controller = nullptr;
     }
-
-    if ( m_posix_signal_interceptor )
-    {
-        delete m_posix_signal_interceptor;
-        m_posix_signal_interceptor = nullptr;
-    }
-};
+}
 
 bool AnyServer::init()
 {
-    std::vector<int> signal_ids;
-    signal_ids.push_back(SIGINT);
-    signal_ids.push_back(SIGQUIT);
-    signal_ids.push_back(SIGTERM);
-    signal_ids.push_back(SIGHUP);
-    signal_ids.push_back(SIGPIPE);
-    m_posix_signal_interceptor->HandleSignals(
-            signal_ids,
-            std::bind1st(std::mem_fun(&AnyServer::onReceivedPosixSignal), this));
-
-    return m_anyserver_controller->init();
+    return m_controller->init();
 }
 
-void AnyServer::onReceivedPosixSignal(int signal_id)
+void AnyServer::__deinit__()
 {
-    m_run = false;
+    RETURN_IF_NULL(m_controller);
+    m_controller->setListener(nullptr);
 }
 
 bool AnyServer::start()
 {
-    if ( m_anyserver_controller->start() )
+    if ( m_controller->start() )
     {
         m_run = true;
         return true;
@@ -71,7 +54,50 @@ bool AnyServer::start()
 
 void AnyServer::stop()
 {
-    m_anyserver_controller->stop();
+    m_controller->stop();
 }
+
+void AnyServer::onReceivedSystemSignal(int signal)
+{
+    for ( list<IAnyServerListener*>::iterator it = m_listeners.begin();
+             it!=m_listeners.end(); ++it )
+    {
+        IAnyServerListener *listener = (*it);
+        listener->onReceivedSystemSignal(signal);
+    }
+
+    m_run = false;
+}
+
+void AnyServer::onClientConnected(size_t server_id, size_t client_id)
+{
+    for ( list<IAnyServerListener*>::iterator it = m_listeners.begin();
+             it!=m_listeners.end(); ++it )
+    {
+        IAnyServerListener *listener = (*it);
+        listener->onClientConnected(server_id, client_id);
+    }
+}
+
+void AnyServer::onClientDisconnected(size_t server_id, size_t client_id)
+{
+    for ( list<IAnyServerListener*>::iterator it = m_listeners.begin();
+             it!=m_listeners.end(); ++it )
+    {
+        IAnyServerListener *listener = (*it);
+        listener->onClientDisconnected(server_id, client_id);
+    }
+}
+
+void AnyServer::onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
+{
+    for ( list<IAnyServerListener*>::iterator it = m_listeners.begin();
+             it!=m_listeners.end(); ++it )
+    {
+        IAnyServerListener *listener = (*it);
+        listener->onReceive(server_id, client_id, msg, msg_len);
+    }
+}
+
 
 } // end of namespace

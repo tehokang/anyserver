@@ -62,12 +62,31 @@ public:
         list<string> m_ssl_ca_list;
     };
 
+    class Log
+    {
+    public:
+        Log()
+            : enable_debug(false), enable_info(false)
+            , enable_error(false), enable_warn(false)
+            , enable_filewrite(false), directory(""), filesize(0)
+        {
+
+        }
+
+        bool enable_debug;
+        bool enable_info;
+        bool enable_error;
+        bool enable_warn;
+        bool enable_filewrite;
+        string directory;
+        unsigned int filesize;
+    };
+
     class JsonConfiguration
     {
     public:
         JsonConfiguration()
-            : name(""), enable_log(true)
-            , log_file(""), version("")
+            : name("")
             , copyright(""), enable_echo_test(false)
         {
         };
@@ -76,10 +95,9 @@ public:
         string name;
         ServerInfoList server_infos;
         Capabilities capabilities;
-        bool enable_log;
+        Log log;
         bool enable_echo_test;
-        string log_file;
-        string version;
+
         string copyright;
     };
 

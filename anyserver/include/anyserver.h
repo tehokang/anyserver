@@ -1,14 +1,25 @@
 #ifndef __ANYSERVER_H__
 #define __ANYSERVER_H__
 
+#include "icontroller.h"
 #include <string>
+#include <list>
 using namespace std;
 
 namespace anyserver
 {
-class PosixSignalInterceptor;
+
+class IAnyServerListener
+{
+public:
+    virtual void onReceivedSystemSignal(int signal) = 0;
+    virtual void onClientConnected(size_t server_id, size_t client_id) = 0;
+    virtual void onClientDisconnected(size_t server_id, size_t client_id) = 0;
+    virtual void onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len) = 0;
+};
+
 class Controller;
-class AnyServer
+class AnyServer : public IControllerListener
 {
 public:
     /**
@@ -42,16 +53,36 @@ public:
      * @return return true if servers work out successfully
      */
     bool isRun() { return m_run; };
+
+    virtual void addEventListener(IAnyServerListener *listener)
+    {
+        m_listeners.push_back(listener);
+    }
+
+    virtual void removeEventListener(IAnyServerListener *listener)
+    {
+        for ( list<IAnyServerListener*>::iterator it = m_listeners.begin();
+                it!=m_listeners.end(); ++it )
+        {
+            if ( listener == (*it) )
+            {
+                m_listeners.erase(it);
+                break;
+            }
+        }
+    }
+
+    virtual void onReceivedSystemSignal(int signal) override;
+    virtual void onClientConnected(size_t server_id, size_t client_id) override;
+    virtual void onClientDisconnected(size_t server_id, size_t client_id) override;
+    virtual void onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len) override;
+
 private:
-    /**
-     * @brief To handle posix signal(SIGPIPE, SIGXXX and so on)
-     * @param signal_id
-     */
-    void onReceivedPosixSignal(int signal_id);
+    void __deinit__();
 
     bool m_run;
-    PosixSignalInterceptor *m_posix_signal_interceptor;
-    Controller *m_anyserver_controller;
+    Controller *m_controller;
+    list<IAnyServerListener*> m_listeners;
 };
 
 } // end of namespace

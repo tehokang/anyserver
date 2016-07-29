@@ -2,16 +2,11 @@
 #define __ANYSERVER_CONTROLLER_H__
 
 #include "server_factory.h"
+#include "posix_signal_interceptor.h"
 
 namespace anyserver
 {
-
-class IControllerListener
-{
-public:
-    virtual void onReceivedSystemSignal(int signal) = 0;
-};
-
+class IControllerListener;
 class Controller : public IServerFactoryListener
 {
 public:
@@ -24,7 +19,6 @@ public:
     virtual bool init();
     virtual bool start();
     virtual void stop();
-    virtual void setLogLevel(bool debug, bool info, bool warn, bool error);
 
     virtual void onClientConnected(size_t server_id, size_t client_id) override;
     virtual void onClientDisconnected(size_t server_id, size_t client_id) override;
@@ -32,10 +26,16 @@ public:
 
 protected:
     virtual void __deinit__();
+    /**
+     * @brief To handle posix signal(SIGPIPE, SIGXXX and so on)
+     * @param signal_id
+     */
+    void onReceivedPosixSignal(int signal_id);
 
 private:
     IControllerListener *m_listener;
-    ServerFactory *m_anyserver_factory;
+    ServerFactory *m_server_factory;
+    PosixSignalInterceptor *m_posix_signal_interceptor;
     int m_argc;
     char **m_argv;
     string m_config_file;

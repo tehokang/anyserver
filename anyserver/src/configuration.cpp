@@ -39,7 +39,7 @@ bool Configuration::__parse__(string file)
     LOG_DEBUG("\n");
     Json::Value root;
     Json::Reader reader;
-    LOG_DEBUG("conf file : %s \n", file.data());
+    LOG_DEBUG("config file : %s \n", file.data());
 
     try
     {
@@ -154,10 +154,20 @@ void Configuration::__subparse_log__(Json::Value &root)
     /**
      * @note Parse log configuration
      */
-    m_configuration.enable_log = root["log"]["enable"].asBool();
-    m_configuration.log_file = root["log"]["file"].asString();
-    LOG_DEBUG("enable_log : %d \n", m_configuration.enable_log);
-    LOG_DEBUG("log_file : %s \n", m_configuration.log_file.data());
+    m_configuration.log.enable_debug = root["log"]["enable_debug"].asBool();
+    m_configuration.log.enable_info = root["log"]["enable_info"].asBool();
+    m_configuration.log.enable_error = root["log"]["enable_error"].asBool();
+    m_configuration.log.enable_warn = root["log"]["enable_warn"].asBool();
+    m_configuration.log.enable_filewrite = root["log"]["enable_filewrite"].asBool();
+    m_configuration.log.directory = root["log"]["directory"].asString();
+    m_configuration.log.filesize = root["log"]["filesize"].asUInt();
+
+    LOG_DEBUG("enable_log_debug : %d \n", m_configuration.log.enable_debug);
+    LOG_DEBUG("enable_log_info : %d \n", m_configuration.log.enable_info);
+    LOG_DEBUG("enable_log_error : %d \n", m_configuration.log.enable_error);
+    LOG_DEBUG("enable_log_warn : %d \n", m_configuration.log.enable_warn);
+    LOG_DEBUG("log_directory : %s \n", m_configuration.log.directory.data());
+    LOG_DEBUG("filesize : %d \n", m_configuration.log.filesize);
 }
 
 void Configuration::__subparse_test__(Json::Value &root)
@@ -172,16 +182,11 @@ void Configuration::__subparse_test__(Json::Value &root)
 void Configuration::__subparse_common__(Json::Value &root)
 {
     /**
-     * @note Parse version of server
-     */
-    m_configuration.version = root["version"].asString();
-    LOG_DEBUG("[Version] : %s \n", m_configuration.version.data());
-
-    /**
      * @note Parse copyright of server
      */
     m_configuration.copyright = root["copyright"].asString();
-    LOG_DEBUG("[Copyright] : %s \n", m_configuration.copyright.data());
+    LOG_DEBUG("[Copyright] \n");
+    LOG_DEBUG("copy right : %s \n", m_configuration.copyright.data());
 }
 
 } // end of namespace

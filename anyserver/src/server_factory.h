@@ -57,7 +57,7 @@ protected:
     virtual void __deinit__();
 
 private:
-    Configuration *m_anyserver_configuration;
+    Configuration *m_configuration;
     const string m_config_file;
 
     typedef shared_ptr<BaseServer> BaseServerPtr;

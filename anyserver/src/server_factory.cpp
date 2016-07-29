@@ -12,7 +12,7 @@ namespace anyserver
 {
 
 ServerFactory::ServerFactory()
-    : m_anyserver_configuration(new Configuration())
+    : m_configuration(new Configuration())
 {
     LOG_DEBUG("\n");
 }
@@ -22,7 +22,7 @@ ServerFactory::~ServerFactory()
     LOG_DEBUG("\n");
     __deinit__();
 
-    SAFE_DELETE(m_anyserver_configuration);
+    SAFE_DELETE(m_configuration);
     m_servers.clear();
 }
 
@@ -44,13 +44,23 @@ bool ServerFactory::init(const string config_file)
     /**
      * make configuration
      */
-    RETURN_FALSE_IF_FALSE(m_anyserver_configuration->init(config_file));
+    RETURN_FALSE_IF_FALSE(m_configuration->init(config_file));
 
     /**
      * @todo create servers and save the server into list
      */
     typedef Configuration::JsonConfiguration JsonConfiguration;
-    const JsonConfiguration configuration = m_anyserver_configuration->getJsonConfiguration();
+    const JsonConfiguration configuration = m_configuration->getJsonConfiguration();
+
+    Logger::setLogLevel(
+            configuration.log.enable_info,
+            configuration.log.enable_debug,
+            configuration.log.enable_warn,
+            configuration.log.enable_error,
+            configuration.log.enable_filewrite,
+            configuration.log.filesize,
+            configuration.log.directory,
+            configuration.name);
 
     typedef Configuration::ServerInfoPtr SInfo;
     for ( list<SInfo>::const_iterator it=configuration.server_infos.begin();
@@ -217,8 +227,8 @@ void ServerFactory::onReceived(size_t server_id, size_t client_id, char *msg, un
         listener->onReceive(server_id, client_id, msg, msg_len);
     }
 
-    RETURN_IF_NULL(m_anyserver_configuration);
-    if ( true == m_anyserver_configuration->getJsonConfiguration().enable_echo_test )
+    RETURN_IF_NULL(m_configuration);
+    if ( true == m_configuration->getJsonConfiguration().enable_echo_test )
     {
         sendToClient(server_id, client_id, msg, msg_len);
     }

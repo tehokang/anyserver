@@ -40,7 +40,7 @@ public:
 
     static void setLogLevel(bool info, bool debug, bool warn, bool error, \
                         bool filewrite = false, unsigned int filesize = 5 * 1024 * 1024, \
-                        string rootpath = "/mnt/hd2/");
+                        string rootpath = "/mnt/hd2/", string prefix="noname");
 
     static void info(const string filename, const unsigned int linenumber, \
                         const string funcname, const string format, ...);
@@ -81,6 +81,7 @@ protected:
     static FILE *m_log_fp;
     static string m_log_filename;
     static string m_log_rootpath;
+    static string m_log_prefix;
 };
 
 /** @} */ // End of doxygen group

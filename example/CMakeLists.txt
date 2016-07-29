@@ -5,7 +5,7 @@ project(${project_name} CXX)
 
 set(rootdir ${CMAKE_SOURCE_DIR}/example)
 set(anyserverdir ${CMAKE_SOURCE_DIR}/anyserver)
-set(SOURCES
+set(sources
 	${rootdir}/main.cpp
 )
 
@@ -20,5 +20,5 @@ link_directories(
 	${anyserverdir}/external/libwebsockets/lib/${CHIP_CORE}
 )
 
-add_executable(${project_name} ${SOURCES})
+add_executable(${project_name} ${sources})
 target_link_libraries(${project_name} websockets microhttpd anyserver)

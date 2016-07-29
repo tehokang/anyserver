@@ -11,7 +11,7 @@ else ("${CMAKE_BUILD_TYPE}" MATCHES "debug")
 endif ("${CMAKE_BUILD_TYPE}" MATCHES "release")
 
 set(rootdir ${CMAKE_SOURCE_DIR}/anyserver)
-set(SOURCES 
+set(sources 
 	${rootdir}/src/anyserver.cpp
 	${rootdir}/src/logger.cpp
 	${rootdir}/src/base_server.cpp
@@ -44,7 +44,7 @@ link_directories(
 	${rootdir}/external/libwebsockets/lib/${CHIP_CORE}
 )
 
-add_library(${project_name} SHARED ${SOURCES})
+add_library(${project_name} SHARED ${sources})
 
 add_custom_command(
 	TARGET ${project_name}
@@ -52,15 +52,15 @@ add_custom_command(
 	COMMAND cp -f ${rootdir}/src/${project_name}.json ${CMAKE_BINARY_DIR}
 )
 # Version configuration
-set(VERSION_MAJOR 0)
-set(VERSION_MINOR 1)
-set(VERSION_PATCH 1)
+set(version_major 0)
+set(version_minor 1)
+set(version_patch 1)
 
 set_target_properties(
 	${project_name} 
 	PROPERTIES 
-	VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" 
-	SOVERSION "${VERSION_MAJOR}"
+	VERSION "${version_major}.${version_minor}.${version_patch}" 
+	SOVERSION "${version_major}"
 )
 
 target_link_libraries(${project_name} websockets microhttpd pthread)

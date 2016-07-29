@@ -10,19 +10,8 @@
 -include globalconfig
 
 CROSS :=
-CHIP_CORE := 
-
-ifeq ($(CROSS),)
-SYSTEM := x86
-CXX := g++
-else
-ifeq ($(CHIP_CORE),mipsel)
-SYSTEM := mipsel
-elif ($(CHIP_CORE),arm)
-SYSTEM := arm
-endif
+CHIP_CORE := x86
 CXX := $(CROSS)g++
-endif
 
 # Build Configuration
 ECHO := @echo
@@ -34,7 +23,6 @@ FRAMEWORK_DIR := $(BUILD_SRC_DIR)/framework/
 EXTERNAL_DIR := $(BUILD_SRC_DIR)/external/
 
 TARGET := anyserver
-TARGET_ARCH := x86
 TARGET_LIB := lib$(TARGET)
 CONFIG_FILE := $(TARGET).json
 CONFIG_DEBUG := YES

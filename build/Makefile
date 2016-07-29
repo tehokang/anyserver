@@ -33,8 +33,8 @@ prepare:
 	@if [ ! -d $(BUILD_OUT_DIR) ]; then \
 		mkdir -p $(BUILD_OUT_DIR); \
 	fi;
-	cp -dprf $(EXTERNAL_DIR)/libwebsockets/lib/$(TARGET_ARCH)/* $(BUILD_OUT_DIR)
-	cp -dprf $(EXTERNAL_DIR)/libmicrohttpd/lib/$(TARGET_ARCH)/* $(BUILD_OUT_DIR)
+	cp -dprf $(EXTERNAL_DIR)/libwebsockets/lib/$(CHIP_CORE)/* $(BUILD_OUT_DIR)
+	cp -dprf $(EXTERNAL_DIR)/libmicrohttpd/lib/$(CHIP_CORE)/* $(BUILD_OUT_DIR)
 	cp -f $(FRAMEWORK_DIR)/src/$(CONFIG_FILE) $(BUILD_OUT_DIR)/
 
 .PHONY: distclean

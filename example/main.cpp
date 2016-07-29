@@ -16,6 +16,9 @@ bool g_run = false;
  */
 int main(int argc, char **argv)
 {
+    /**
+     * @note AnyServer has to receive argv[1] that has configuration path
+     */
     AnyServer server(argc, argv);
 
     if ( server.init() && server.start() )

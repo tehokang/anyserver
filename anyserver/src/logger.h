@@ -133,7 +133,7 @@ protected:
 
     enum
     {
-        MAX_PREFIX_LEN = 64,
+        MAX_PREFIX_LEN = 256,
         MAX_MSG_LEN = 4*1024,
     };
     static FILE *m_log_fp;

@@ -3,9 +3,63 @@
 
 #include <stdio.h>
 #include <string>
+#include <string.h>
 #include <pthread.h>
 
 using namespace std;
+
+#define __SHORT_FILE__ \
+(strrchr(__FILE__,'/') \
+? strrchr(__FILE__,'/')+1 \
+: __FILE__ )
+
+#if defined(CONFIG_DEBUG)
+#if defined(USE_PLATFORM_LOGGER)
+/* USE-CASE of HxLOG Humax octo LOGGER */
+#define LOG_DEBUG PLATFORM_LOG_DEBUG
+#define LOG_INFO PLATFORM_LOG_INFO
+#define LOG_WARNING PLATFORM_LOG_WARNING
+#define LOG_ERROR PLATFORM_LOG_ERROR
+#define LOG_KEY PLATFORM_LOG_KEY
+
+#define REMOTE_DEBUG PLATFORM_REMOTE_DEBUG
+#define REMOTE_INFO PLATFORM_REMOTE_INFO
+#define REMOTE_WARNING PLATFORM_REMOTE_WARNING
+#define REMOTE_ERROR PLATFORM_REMOTE_ERROR
+#else
+
+/* USE-CASE of ARCHON LOGGER */
+#define LOG_DEBUG(...) Logger::debug \
+        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
+#define LOG_INFO(...)  Logger::info \
+        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
+#define LOG_WARNING(...) Logger::warning \
+        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
+#define LOG_ERROR(...) Logger::error \
+        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
+#define LOG_KEY(...) Logger::debug \
+        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
+
+#define REMOTE_DEBUG LOG_DEBUG
+#define REMOTE_INFO LOG_INFO
+#define REMOTE_WARNING LOG_WARNING
+#define REMOTE_ERROR LOG_ERROR
+
+#endif
+
+#else
+#define LOG_DEBUG(...)
+#define LOG_INFO(...)
+#define LOG_WARNING(...)
+#define LOG_ERROR(...)
+#define LOG_KEY(...)
+
+#define REMOTE_DEBUG(...)
+#define REMOTE_INFO(...)
+#define REMOTE_WARNING(...)
+#define REMOTE_ERROR(...)
+#endif
+
 
 namespace anyserver
 {
@@ -40,7 +94,7 @@ public:
 
     static void setLogLevel(bool info, bool debug, bool warn, bool error, \
                         bool filewrite = false, unsigned int filesize = 5 * 1024 * 1024, \
-                        string rootpath = "/mnt/hd2/", string prefix="noname");
+                        string rootpath = "/mnt/hd2/", string log_filename_prefix="noname");
 
     static void info(const string filename, const unsigned int linenumber, \
                         const string funcname, const string format, ...);
@@ -79,14 +133,13 @@ protected:
 
     enum
     {
-        MAX_FILENAME_LEN = 256,
         MAX_PREFIX_LEN = 64,
-        MAX_MSG_LEN = 2048,
+        MAX_MSG_LEN = 4*1024,
     };
     static FILE *m_log_fp;
-    static char m_log_filename[MAX_FILENAME_LEN];
-    static char m_log_rootpath[MAX_FILENAME_LEN];
-    static char m_log_prefix[MAX_PREFIX_LEN];
+    static string m_log_filename;
+    static string m_log_filename_prefix;
+    static string m_log_rootpath;
     static bool m_use_date;
 };
 

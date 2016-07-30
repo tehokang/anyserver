@@ -11,59 +11,6 @@
 #define SAFE_FREE(x) do{if(x){free(x);x=nullptr;}}while(0)
 
 #include "logger.h"
-#include <string.h>
-
-#define __SHORT_FILE__ \
-(strrchr(__FILE__,'/') \
-? strrchr(__FILE__,'/')+1 \
-: __FILE__ )
-
-#if defined(CONFIG_DEBUG)
-#if defined(USE_PLATFORM_LOGGER)
-/* USE-CASE of HxLOG Humax octo LOGGER */
-#define LOG_DEBUG PLATFORM_LOG_DEBUG
-#define LOG_INFO PLATFORM_LOG_INFO
-#define LOG_WARNING PLATFORM_LOG_WARNING
-#define LOG_ERROR PLATFORM_LOG_ERROR
-#define LOG_KEY PLATFORM_LOG_KEY
-
-#define REMOTE_DEBUG PLATFORM_REMOTE_DEBUG
-#define REMOTE_INFO PLATFORM_REMOTE_INFO
-#define REMOTE_WARNING PLATFORM_REMOTE_WARNING
-#define REMOTE_ERROR PLATFORM_REMOTE_ERROR
-#else
-
-/* USE-CASE of ARCHON LOGGER */
-#define LOG_DEBUG(...) Logger::debug \
-        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
-#define LOG_INFO(...)  Logger::info \
-        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
-#define LOG_WARNING(...) Logger::warning \
-        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
-#define LOG_ERROR(...) Logger::error \
-        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
-#define LOG_KEY(...) Logger::debug \
-        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
-
-#define REMOTE_DEBUG LOG_DEBUG
-#define REMOTE_INFO LOG_INFO
-#define REMOTE_WARNING LOG_WARNING
-#define REMOTE_ERROR LOG_ERROR
-
-#endif
-
-#else
-#define LOG_DEBUG(...)
-#define LOG_INFO(...)
-#define LOG_WARNING(...)
-#define LOG_ERROR(...)
-#define LOG_KEY(...)
-
-#define REMOTE_DEBUG(...)
-#define REMOTE_INFO(...)
-#define REMOTE_WARNING(...)
-#define REMOTE_ERROR(...)
-#endif
 
 /*
  * Return macro for each state

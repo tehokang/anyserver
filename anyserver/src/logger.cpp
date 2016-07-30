@@ -57,9 +57,9 @@ pthread_mutex_t Logger::m_filelogging_mutex = PTHREAD_MUTEX_INITIALIZER
 #define LOGGING_WITH_DATE true
 
 FILE *Logger::m_log_fp = nullptr;
-char Logger::m_log_filename[MAX_FILENAME_LEN];
-char Logger::m_log_rootpath[MAX_FILENAME_LEN];
-char Logger::m_log_prefix[MAX_PREFIX_LEN];
+string Logger::m_log_filename;
+string Logger::m_log_filename_prefix;
+string Logger::m_log_rootpath;
 bool Logger::m_use_date = LOGGING_WITH_DATE;
 
 string Logger::getDate()
@@ -86,7 +86,7 @@ string Logger::getLogTypeString(LOG_TYPE logtype)
 }
 
 void Logger::setLogLevel(bool info, bool debug, bool warn, bool error, \
-             bool filewrite, unsigned int filesize, string rootpath, string prefix)
+             bool filewrite, unsigned int filesize, string rootpath, string log_filename_prefix)
 {
     m_info = info;
     m_debug = debug;
@@ -94,8 +94,8 @@ void Logger::setLogLevel(bool info, bool debug, bool warn, bool error, \
     m_error = error;
     m_filewrite = filewrite;
     m_filesize = filesize;
-    snprintf(m_log_rootpath, sizeof(m_log_rootpath), "%s", rootpath.data());
-    snprintf(m_log_prefix, sizeof(m_log_prefix), "%s", prefix.data());
+    m_log_rootpath = rootpath;
+    m_log_filename_prefix = log_filename_prefix;
 }
 
 void Logger::__save_logfile__(const string msg_prefix, const string msg)
@@ -109,7 +109,7 @@ void Logger::__save_logfile__(const string msg_prefix, const string msg)
         fflush(m_log_fp);
 
         struct stat st;
-        if ( 0 == stat(m_log_filename, &st) )
+        if ( 0 == stat(m_log_filename.data(), &st) )
         {
             if ( m_filesize < st.st_size )
             {
@@ -126,19 +126,18 @@ void Logger::__save_logfile__(const string msg_prefix, const string msg)
         struct tm *t;
         timer = time(NULL);
         t = localtime(&timer);
-        snprintf(m_log_filename, sizeof(m_log_filename), "%s", m_log_rootpath);
+        m_log_filename.assign(m_log_rootpath);
         snprintf(_suffix, sizeof(_suffix),
                     "/%s_%04d%02d%02d_%02d%02d%02d.log", \
-                    m_log_prefix, \
+                    m_log_filename_prefix.data(), \
                     t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, \
                     t->tm_hour, t->tm_min, t->tm_sec);
-        snprintf(m_log_filename+strlen(m_log_filename),
-                sizeof(m_log_filename) - strlen(m_log_filename), "%s", _suffix);
-        m_log_fp = fopen(m_log_filename, "w+");
-        fprintf(stdout, "Created a log file [%s] \n", m_log_filename);
+        m_log_filename.append(_suffix);
+        m_log_fp = fopen(m_log_filename.data(), "w+");
+        fprintf(stdout, "Created a log file [%s] \n", m_log_filename.data());
         if ( m_log_fp == nullptr )
         {
-            fprintf(stderr, "Couldn't create archon logging file [%s] \n", m_log_filename);
+            fprintf(stderr, "Couldn't create archon logging file [%s] \n", m_log_filename.data());
         }
     }
     pthread_mutex_unlock( &m_filelogging_mutex );

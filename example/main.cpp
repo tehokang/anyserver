@@ -19,22 +19,30 @@ class AnyServerListener : public IAnyServerListener
 {
     virtual void onReceivedSystemSignal(int signal)
     {
-        printf("[%s:%s:%d] \n", __FILE__, __FUNCTION__, __LINE__);
+        printf("[%s:%s:%d] received signal : %d \n",
+                __FILE__, __FUNCTION__, __LINE__, signal);
+
     }
 
     virtual void onClientConnected(size_t server_id, size_t client_id)
     {
-        printf("[%s:%s:%d] \n", __FILE__, __FUNCTION__, __LINE__);
+        printf("[%s:%s:%d] sid : 0x%x, cid : 0x%x\n",
+                __FILE__, __FUNCTION__, __LINE__,
+                server_id, client_id);
     }
 
     virtual void onClientDisconnected(size_t server_id, size_t client_id)
     {
-        printf("[%s:%s:%d] \n", __FILE__, __FUNCTION__, __LINE__);
+        printf("[%s:%s:%d] sid : 0x%x, cid : 0x%x \n",
+                __FILE__, __FUNCTION__, __LINE__,
+                server_id, client_id);
     }
 
     virtual void onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
     {
-        printf("[%s:%s:%d] \n", __FILE__, __FUNCTION__, __LINE__);
+        printf("[%s:%s:%d] sid : 0x%x, cid : 0x%x, msg : %s \n",
+                __FILE__, __FUNCTION__, __LINE__,
+                server_id, client_id, msg);
     }
 };
 

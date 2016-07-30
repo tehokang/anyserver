@@ -48,7 +48,7 @@ bool WebSocketTcpServer::init()
     m_context_create_info.port = stoi(m_bind);
     m_context_create_info.iface = nullptr;
     m_context_create_info.protocols = m_protocols;
-    m_context_create_info.extensions = lws_get_internal_extensions();
+    m_context_create_info.extensions = nullptr;
     m_context_create_info.keepalive_timeout = 60;
     m_context_create_info.ssl_private_key_filepath = nullptr;
     m_context_create_info.ssl_cert_filepath = nullptr;

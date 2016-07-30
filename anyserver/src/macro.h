@@ -34,16 +34,16 @@
 #else
 
 /* USE-CASE of ARCHON LOGGER */
-#define LOG_DEBUG(fmt, ...) Logger::debug \
-        (__SHORT_FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
-#define LOG_INFO(fmt, ...)  Logger::info \
-        (__SHORT_FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
-#define LOG_WARNING(fmt, ...) Logger::warning \
-        (__SHORT_FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
-#define LOG_ERROR(fmt, ...) Logger::error \
-        (__SHORT_FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
-#define LOG_KEY(fmt, ...) Logger::debug \
-        (__SHORT_FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__);
+#define LOG_DEBUG(...) Logger::debug \
+        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
+#define LOG_INFO(...)  Logger::info \
+        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
+#define LOG_WARNING(...) Logger::warning \
+        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
+#define LOG_ERROR(...) Logger::error \
+        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
+#define LOG_KEY(...) Logger::debug \
+        (__SHORT_FILE__, __LINE__, __FUNCTION__, __VA_ARGS__);
 
 #define REMOTE_DEBUG LOG_DEBUG
 #define REMOTE_INFO LOG_INFO
@@ -53,16 +53,16 @@
 #endif
 
 #else
-#define LOG_DEBUG(fmt, ...)
-#define LOG_INFO(fmt, ...)
-#define LOG_WARNING(fmt, ...)
-#define LOG_ERROR(fmt, ...)
-#define LOG_KEY(fmt, ...)
+#define LOG_DEBUG(...)
+#define LOG_INFO(...)
+#define LOG_WARNING(...)
+#define LOG_ERROR(...)
+#define LOG_KEY(...)
 
-#define REMOTE_DEBUG(fmt, ...)
-#define REMOTE_INFO(fmt, ...)
-#define REMOTE_WARNING(fmt, ...)
-#define REMOTE_ERROR(fmt, ...)
+#define REMOTE_DEBUG(...)
+#define REMOTE_INFO(...)
+#define REMOTE_WARNING(...)
+#define REMOTE_ERROR(...)
 #endif
 
 /*

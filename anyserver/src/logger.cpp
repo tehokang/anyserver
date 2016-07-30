@@ -170,7 +170,6 @@ void Logger::__log__(LOG_TYPE logtype, FILE *out, const string msg_prefix, const
                 snprintf(msg_prefix, sizeof(msg_prefix), "[%s] [%s:%s:%d] ", \
                         getLogTypeString(logtype).data(), \
                         filename.data(), funcname.data(), linenumber); \
-            printf("msg_prefix : %s \n", msg_prefix); \
             vsnprintf(msg, sizeof(msg), format.data(), arglist); \
             __log__(logtype, stdout, msg_prefix, msg); \
             va_end(arglist); \

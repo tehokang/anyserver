@@ -3,12 +3,13 @@ anyserver is a component library to support intercommunication between local pro
 Like websocket, http, inet domain for external communication and also unix domain server for IPC.
 
 # Architecture
-* Block Diagram
-
-* Class Diagram
+- Block Diagram (ASAP)
+- Class Diagram
 ![alt tag](https://github.com/tehokang/anyserver/blob/master/anyserver_class_diagram.png)
 
 # How to configure
+- anyserver can configure via anyserver.json
+- The json config file for example can deploy in build/out after make building.
 
 # How to build
 1. Create build directory

@@ -40,6 +40,12 @@ libwebsockets for http and websocket server
 libmicrohttpd for backup of http
 
 # Example
-
+<pre>
+#mkdir build
+#cd build
+#make
+#cd out
+#./example anyserver.json
+</pre>
 
 

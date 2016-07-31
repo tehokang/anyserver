@@ -140,8 +140,6 @@ protected:
     const string m_name;
 
     size_t m_server_id;
-    int m_seed;
-
     ClientInfoList m_client_list;
 };
 

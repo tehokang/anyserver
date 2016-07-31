@@ -57,9 +57,9 @@ public:
         }
 
         bool enable_security;
-        list<string> m_ssl_cert_list;
-        list<string> m_ssl_private_key_list;
-        list<string> m_ssl_ca_list;
+        list<string> ssl_cert_list;
+        list<string> ssl_private_key_list;
+        list<string> ssl_ca_list;
     };
 
     class Log
@@ -90,7 +90,6 @@ public:
             , copyright(""), enable_echo_test(false)
         {
         };
-        ~JsonConfiguration(){};
 
         string name;
         ServerInfoList server_infos;

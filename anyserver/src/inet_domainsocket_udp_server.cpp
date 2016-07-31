@@ -76,7 +76,7 @@ void InetDomainSocketUdpServer::stop()
 bool InetDomainSocketUdpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
 {
     LOG_DEBUG("\n");
-    auto client = static_pointer_cast<InetUdpClientInfo>(findClientInfo(client_id));
+    auto client = static_pointer_cast<UdpClientInfo>(findClientInfo(client_id));
     if ( 0 > sendto(m_server_fd, msg, msg_len, 0,
             (struct sockaddr*)client->getSockAddrIn(), sizeof(struct sockaddr_in)) )
     {
@@ -85,11 +85,11 @@ bool InetDomainSocketUdpServer::sendToClient(size_t client_id, char *msg, unsign
     return true;
 }
 
-void* InetDomainSocketUdpServer::communication_thread(void *argv)
+void* InetDomainSocketUdpServer::communication_thread(void *arg)
 {
     LOG_DEBUG("\n");
 
-    InetDomainSocketUdpServer *server = static_cast<InetDomainSocketUdpServer*>(argv);
+    InetDomainSocketUdpServer *server = static_cast<InetDomainSocketUdpServer*>(arg);
     server->m_run_thread = true;
 
     struct sockaddr_in clientaddr;
@@ -114,7 +114,7 @@ void* InetDomainSocketUdpServer::communication_thread(void *argv)
         char *hostaddrp = inet_ntoa(clientaddr.sin_addr);
         if (hostaddrp == NULL) LOG_WARNING("ERROR on inet_ntoa\n");
 
-        size_t client_id = server->addClientInfo(ClientInfoPtr(new InetUdpClientInfo(&clientaddr)));
+        size_t client_id = server->addClientInfo(ClientInfoPtr(new UdpClientInfo(&clientaddr)));
         NOTIFY_CLIENT_CONNECTED(server_id, client_id);
 
         LOG_DEBUG("server[0x%x] received %d bytes: %s from client[0x%x] %s (%s) \n",

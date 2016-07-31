@@ -101,7 +101,7 @@ void InetDomainSocketTcpServer::stop()
 bool InetDomainSocketTcpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
 {
     LOG_DEBUG("\n");
-    auto client = static_pointer_cast<InetTcpClientInfo>(findClientInfo(client_id));
+    auto client = static_pointer_cast<TcpClientInfo>(findClientInfo(client_id));
     if ( -1 == write(client->getFd(), msg, msg_len) )
     {
         return false;
@@ -109,11 +109,11 @@ bool InetDomainSocketTcpServer::sendToClient(size_t client_id, char *msg, unsign
     return true;
 }
 
-void* InetDomainSocketTcpServer::epoll_thread(void *argv)
+void* InetDomainSocketTcpServer::epoll_thread(void *arg)
 {
     LOG_DEBUG("\n");
 
-    InetDomainSocketTcpServer *server = static_cast<InetDomainSocketTcpServer*>(argv);
+    InetDomainSocketTcpServer *server = static_cast<InetDomainSocketTcpServer*>(arg);
     server->m_run_thread = true;
     int trigger_count = 0;
     int client_fd = 0;
@@ -141,7 +141,7 @@ void* InetDomainSocketTcpServer::epoll_thread(void *argv)
                 ev.data.fd = client_fd;
                 epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &ev);
 
-                size_t client_id = server->addClientInfo(ClientInfoPtr(new InetTcpClientInfo(client_fd, &clientaddr)));
+                size_t client_id = server->addClientInfo(ClientInfoPtr(new TcpClientInfo(client_fd, &clientaddr)));
                 NOTIFY_CLIENT_CONNECTED(server_id, client_id);
             }
             else

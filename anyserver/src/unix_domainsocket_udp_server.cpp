@@ -77,7 +77,7 @@ void UnixDomainSocketUdpServer::stop()
 bool UnixDomainSocketUdpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
 {
     LOG_DEBUG("\n");
-    auto client = static_pointer_cast<UnixUdpClientInfo>(findClientInfo(client_id));
+    auto client = static_pointer_cast<UdpClientInfo>(findClientInfo(client_id));
     if ( 0 > sendto(m_server_fd, msg, msg_len, 0,
             (struct sockaddr*)client->getSockAddrUn(), sizeof(struct sockaddr_un)) )
     {
@@ -87,11 +87,11 @@ bool UnixDomainSocketUdpServer::sendToClient(size_t client_id, char *msg, unsign
     return true;
 }
 
-void* UnixDomainSocketUdpServer::communication_thread(void *argv)
+void* UnixDomainSocketUdpServer::communication_thread(void *arg)
 {
     LOG_DEBUG("\n");
 
-    UnixDomainSocketUdpServer *server = static_cast<UnixDomainSocketUdpServer*>(argv);
+    UnixDomainSocketUdpServer *server = static_cast<UnixDomainSocketUdpServer*>(arg);
     server->m_run_thread = true;
 
     struct sockaddr_un clientaddr;
@@ -109,7 +109,7 @@ void* UnixDomainSocketUdpServer::communication_thread(void *argv)
                 (struct sockaddr *) &clientaddr, &clientlen);
         if (readn < 0) perror("ERROR in recvfrom \n");
 
-        size_t client_id = server->addClientInfo(ClientInfoPtr(new UnixUdpClientInfo(&clientaddr)));
+        size_t client_id = server->addClientInfo(ClientInfoPtr(new UdpClientInfo(&clientaddr)));
 
         NOTIFY_CLIENT_CONNECTED(server_id, client_id);
 

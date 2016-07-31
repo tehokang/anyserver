@@ -26,6 +26,7 @@ public:
             , m_wsi(wsi)
         {
         }
+        void* getWsi() { return m_wsi; };
         void *m_wsi;
     };
 
@@ -33,7 +34,7 @@ public:
 protected:
     virtual void __deinit__() override;
 
-    static void* http_thread(void *argv);
+    static void* http_thread(void *arg);
     pthread_t m_http_thread;
 
     enum { HTTP, WEBSOCKET, DUMMY, MAX_SERVER };

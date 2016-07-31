@@ -20,20 +20,6 @@ public:
     virtual void stop() override;
     virtual bool sendToClient(size_t client_id, char *msg, unsigned int msg_len) override;
 
-    class UnixUdpClientInfo : public UdpClientInfo
-    {
-    public:
-        UnixUdpClientInfo(struct sockaddr_in* sockaddr)
-            : UdpClientInfo(sockaddr)
-        {
-        }
-
-        UnixUdpClientInfo(struct sockaddr_un* sockaddr)
-            : UdpClientInfo(sockaddr)
-        {
-        }
-    };
-
 protected:
     virtual void __deinit__() override;
 
@@ -41,7 +27,7 @@ private:
     /**
      * @note http://www.joinc.co.kr/w/Site/Network_Programing/AdvancedComm/epoll24
      */
-    static void* communication_thread(void *argv);
+    static void* communication_thread(void *arg);
     pthread_t m_communication_thread;
 
     bool m_run_thread;

@@ -98,7 +98,7 @@ void UnixDomainSocketTcpServer::stop()
 bool UnixDomainSocketTcpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
 {
     LOG_DEBUG("\n");
-    auto client = static_pointer_cast<UnixTcpClientInfo>(findClientInfo(client_id));
+    auto client = static_pointer_cast<TcpClientInfo>(findClientInfo(client_id));
     if ( -1 == write(client->getFd(), msg, msg_len) )
     {
         return false;
@@ -106,11 +106,11 @@ bool UnixDomainSocketTcpServer::sendToClient(size_t client_id, char *msg, unsign
     return true;
 }
 
-void* UnixDomainSocketTcpServer::epoll_thread(void *argv)
+void* UnixDomainSocketTcpServer::epoll_thread(void *arg)
 {
     LOG_DEBUG("\n");
 
-    UnixDomainSocketTcpServer *server = static_cast<UnixDomainSocketTcpServer*>(argv);
+    UnixDomainSocketTcpServer *server = static_cast<UnixDomainSocketTcpServer*>(arg);
     server->m_run_thread = true;
     int trigger_count = 0;
     int client_fd = 0;
@@ -138,7 +138,7 @@ void* UnixDomainSocketTcpServer::epoll_thread(void *argv)
                 ev.data.fd = client_fd;
                 epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &ev);
 
-                size_t client_id = server->addClientInfo(ClientInfoPtr(new UnixTcpClientInfo(client_fd, &clientaddr)));
+                size_t client_id = server->addClientInfo(ClientInfoPtr(new TcpClientInfo(client_fd, &clientaddr)));
 
                 NOTIFY_CLIENT_CONNECTED(server_id, client_id);
             }

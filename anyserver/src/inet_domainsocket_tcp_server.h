@@ -20,20 +20,6 @@ public:
     virtual void stop() override;
     virtual bool sendToClient(size_t client_id, char *msg, unsigned int msg_len) override;
 
-    class InetTcpClientInfo : public TcpClientInfo
-    {
-    public:
-        InetTcpClientInfo(int fd, struct sockaddr_in* sockaddr)
-            : TcpClientInfo(fd, sockaddr)
-        {
-        }
-
-        InetTcpClientInfo(int fd, struct sockaddr_un* sockaddr)
-            : TcpClientInfo(fd, sockaddr)
-        {
-        }
-    };
-
 protected:
     virtual void __deinit__() override;
 
@@ -41,7 +27,7 @@ private:
     /**
      * @note http://www.joinc.co.kr/w/Site/Network_Programing/AdvancedComm/epoll24
      */
-    static void* epoll_thread(void *argv);
+    static void* epoll_thread(void *arg);
     pthread_t m_epoll_thread;
 
     bool m_run_thread;

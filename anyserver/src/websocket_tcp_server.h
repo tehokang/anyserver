@@ -34,7 +34,7 @@ public:
 protected:
     virtual void __deinit__() override;
 
-    static void* websocket_thread(void *argv);
+    static void* websocket_thread(void *arg);
     pthread_t m_websocket_thread;
 
     enum { HTTP, WEBSOCKET, DUMMY, MAX_SERVER };

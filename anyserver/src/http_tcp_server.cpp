@@ -48,7 +48,7 @@ bool HttpTcpServer::init()
     m_context_create_info.port = stoi(m_bind);
     m_context_create_info.iface = nullptr;
     m_context_create_info.protocols = m_protocols;
-    m_context_create_info.extensions = lws_get_internal_extensions();
+    m_context_create_info.extensions = nullptr;
     m_context_create_info.keepalive_timeout = 60;
     m_context_create_info.ssl_private_key_filepath = nullptr;
     m_context_create_info.ssl_cert_filepath = nullptr;
@@ -141,10 +141,10 @@ void HttpTcpServer::__log__(int level, const char *line)
     }
 }
 
-void* HttpTcpServer::http_thread(void *argv)
+void* HttpTcpServer::http_thread(void *arg)
 {
     LOG_DEBUG("\n");
-    HttpTcpServer *server = static_cast<HttpTcpServer*>(argv);
+    HttpTcpServer *server = static_cast<HttpTcpServer*>(arg);
     server->m_run_thread = true;
 
     while ( server->m_run_thread )

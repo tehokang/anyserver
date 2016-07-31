@@ -127,7 +127,7 @@ void Configuration::__subparse_capabilities__(Json::Value &root)
         for ( int i=0; i<ssl_cert_files.size(); i++ )
         {
             const Json::Value file = ssl_cert_files[i];
-            m_configuration.capabilities.m_ssl_cert_list.push_back(file["path"].asString());
+            m_configuration.capabilities.ssl_cert_list.push_back(file["path"].asString());
             LOG_DEBUG("ssl_cert_file[%d] : %s \n", i, file["path"].asString().data());
         }
 
@@ -135,7 +135,7 @@ void Configuration::__subparse_capabilities__(Json::Value &root)
         for ( int i=0; i<ssl_private_key_files.size(); i++ )
         {
             const Json::Value file = ssl_private_key_files[i];
-            m_configuration.capabilities.m_ssl_private_key_list.push_back(file["path"].asString());
+            m_configuration.capabilities.ssl_private_key_list.push_back(file["path"].asString());
             LOG_DEBUG("ssl_private_key_file[%d] : %s \n", i, file["path"].asString().data());
         }
 
@@ -143,7 +143,7 @@ void Configuration::__subparse_capabilities__(Json::Value &root)
         for ( int i=0; i<ssl_ca_files.size(); i++ )
         {
             const Json::Value file = ssl_ca_files[i];
-            m_configuration.capabilities.m_ssl_ca_list.push_back(file["path"].asString());
+            m_configuration.capabilities.ssl_ca_list.push_back(file["path"].asString());
             LOG_DEBUG("ssl_ca_file[%d] : %s \n", i, file["path"].asString().data());
         }
     }

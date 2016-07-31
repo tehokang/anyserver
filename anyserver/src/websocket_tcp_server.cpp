@@ -120,10 +120,10 @@ void WebSocketTcpServer::__log__(int level, const char *line)
     }
 }
 
-void* WebSocketTcpServer::websocket_thread(void *argv)
+void* WebSocketTcpServer::websocket_thread(void *arg)
 {
     LOG_DEBUG("\n");
-    WebSocketTcpServer *server = static_cast<WebSocketTcpServer*>(argv);
+    WebSocketTcpServer *server = static_cast<WebSocketTcpServer*>(arg);
     server->m_run_thread = true;
 
     while ( server->m_run_thread )

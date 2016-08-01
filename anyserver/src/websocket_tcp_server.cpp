@@ -78,13 +78,33 @@ bool WebSocketTcpServer::init()
     m_context_create_info.protocols = m_lws_protocols;
     m_context_create_info.extensions = nullptr;
     m_context_create_info.keepalive_timeout = 60;
+    m_context_create_info.options = 0;
+    m_context_create_info.timeout_secs = 5;
 
     if ( m_security )
     {
         m_context_create_info.ssl_private_key_filepath = m_private_key_file.data();
         m_context_create_info.ssl_cert_filepath = m_cert_file.data();
         m_context_create_info.ssl_ca_filepath = m_ca_file.data();
-        m_context_create_info.options = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
+        m_context_create_info.options = LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;
+//        m_context_create_info.options |= LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT;
+        m_context_create_info.options |= LWS_SERVER_OPTION_VALIDATE_UTF8;
+        m_context_create_info.options |= LWS_SERVER_OPTION_ALLOW_NON_SSL_ON_SSL_PORT;
+        m_context_create_info.options |= LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
+        m_context_create_info.ssl_cipher_list =
+                "ECDHE-ECDSA-AES256-GCM-SHA384:"
+                "ECDHE-RSA-AES256-GCM-SHA384:"
+                "DHE-RSA-AES256-GCM-SHA384:"
+                "ECDHE-RSA-AES256-SHA384:"
+                "HIGH:!aNULL:!eNULL:!EXPORT:"
+                "!DES:!MD5:!PSK:!RC4:!HMAC_SHA1:"
+                "!SHA1:!DHE-RSA-AES128-GCM-SHA256:"
+                "!DHE-RSA-AES128-SHA256:"
+                "!AES128-GCM-SHA256:"
+                "!AES128-SHA256:"
+                "!DHE-RSA-AES256-SHA256:"
+                "!AES256-GCM-SHA384:"
+                "!AES256-SHA256";
     }
     else
     {

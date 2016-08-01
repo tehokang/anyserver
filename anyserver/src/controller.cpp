@@ -51,7 +51,7 @@ bool Controller::init()
     signal_ids.push_back(SIGQUIT);
     signal_ids.push_back(SIGTERM);
     signal_ids.push_back(SIGHUP);
-    signal_ids.push_back(SIGPIPE);
+//    signal_ids.push_back(SIGPIPE);
     m_posix_signal_interceptor->HandleSignals(
             signal_ids,
             std::bind1st(std::mem_fun(&Controller::onReceivedPosixSignal), this));

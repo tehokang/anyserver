@@ -50,13 +50,16 @@ bool HttpTcpServer::init()
         m_context_create_info.ssl_private_key_filepath = m_private_key_file.data();
         m_context_create_info.ssl_cert_filepath = m_cert_file.data();
         m_context_create_info.ssl_ca_filepath = m_ca_file.data();
+        m_context_create_info.options = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
     }
     else
     {
         m_context_create_info.ssl_private_key_filepath = nullptr;
         m_context_create_info.ssl_cert_filepath = nullptr;
         m_context_create_info.ssl_ca_filepath = nullptr;
+        m_context_create_info.options = 0;
     }
+
     m_context_create_info.server_string = m_name.data();
     m_context_create_info.options = 0;
     m_context_create_info.fd_limit_per_thread = m_max_client;

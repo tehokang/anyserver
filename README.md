@@ -8,8 +8,9 @@ Like websocket, http, inet domain for external communication and also unix domai
 ![alt tag](https://github.com/tehokang/anyserver/blob/master/anyserver_class_diagram.png)
 
 # How to configure
-- anyserver can configure via anyserver.json
+- anyserver can configure via anyserver.json that you can choose servers to launch with specific information.
 - The json config file for example can deploy in build/out after make building.
+- Link sample : https://github.com/tehokang/anyserver/blob/master/anyserver/src/anyserver.json
 
 # How to build
 1. Create build directory

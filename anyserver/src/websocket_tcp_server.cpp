@@ -87,11 +87,18 @@ bool WebSocketTcpServer::init()
         m_context_create_info.ssl_private_key_password = m_private_key_password.data();
         m_context_create_info.ssl_cert_filepath = m_cert_file.data();
         m_context_create_info.ssl_ca_filepath = m_ca_file.data();
-        m_context_create_info.options = LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;
-//        m_context_create_info.options |= LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT;
-        m_context_create_info.options |= LWS_SERVER_OPTION_VALIDATE_UTF8;
-        m_context_create_info.options |= LWS_SERVER_OPTION_ALLOW_NON_SSL_ON_SSL_PORT;
-        m_context_create_info.options |= LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
+        m_context_create_info.options =
+                LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS
+                | LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT
+                | LWS_SERVER_OPTION_VALIDATE_UTF8
+                | LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
+//                | LWS_SERVER_OPTION_ALLOW_NON_SSL_ON_SSL_PORT;
+        /**
+         * @warning LWS_SERVER_OPTION_ALLOW_NON_SSL_ON_SSL_PORT has a bug
+         * When client request ws(non-secure), server emit so much many logs (reason 34,35,36)
+         * via callback_websocket()
+         */
+
         m_context_create_info.ssl_cipher_list =
                 "ECDHE-ECDSA-AES256-GCM-SHA384:"
                 "ECDHE-RSA-AES256-GCM-SHA384:"

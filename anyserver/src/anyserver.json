@@ -52,9 +52,10 @@
   "capabilities" :
   {
     "security" : false, 
-    "ssl_cert_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/libwebsockets-test-server.pem",
-    "ssl_private_key_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/libwebsockets-test-server.key.pem",
-    "ssl_ca_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/GlobalSign_Root_CA.pem"
+    "ssl_cert_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/webserver.crt",
+    "ssl_private_key_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/webserver.key",
+    "ssl_private_key_password" : "1234",
+    "ssl_ca_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/rootca_cert.crt"
   },
   "log" : 
   {

@@ -130,32 +130,13 @@ void Configuration::__subparse_capabilities__(Json::Value &root)
 
     LOG_DEBUG("enable_security : %d \n", m_configuration.capabilities.enable_security);
 
-    if ( true == m_configuration.capabilities.enable_security )
-    {
-        const Json::Value ssl_cert_files = capabilities["ssl_cert_files"];
-        for ( int i=0; i<ssl_cert_files.size(); i++ )
-        {
-            const Json::Value file = ssl_cert_files[i];
-            m_configuration.capabilities.ssl_cert_list.push_back(file["path"].asString());
-            LOG_DEBUG("ssl_cert_file[%d] : %s \n", i, file["path"].asString().data());
-        }
+    m_configuration.capabilities.ssl_cert = capabilities["ssl_cert_file"].asString();
+    m_configuration.capabilities.ssl_private_key = capabilities["ssl_private_key_file"].asString();
+    m_configuration.capabilities.ssl_ca = capabilities["ssl_ca_file"].asString();
 
-        const Json::Value ssl_private_key_files = capabilities["ssl_private_key_files"];
-        for ( int i=0; i<ssl_private_key_files.size(); i++ )
-        {
-            const Json::Value file = ssl_private_key_files[i];
-            m_configuration.capabilities.ssl_private_key_list.push_back(file["path"].asString());
-            LOG_DEBUG("ssl_private_key_file[%d] : %s \n", i, file["path"].asString().data());
-        }
-
-        const Json::Value ssl_ca_files = capabilities["ssl_ca_files"];
-        for ( int i=0; i<ssl_ca_files.size(); i++ )
-        {
-            const Json::Value file = ssl_ca_files[i];
-            m_configuration.capabilities.ssl_ca_list.push_back(file["path"].asString());
-            LOG_DEBUG("ssl_ca_file[%d] : %s \n", i, file["path"].asString().data());
-        }
-    }
+    LOG_DEBUG("ssl_cert : %s \n", m_configuration.capabilities.ssl_cert.data());
+    LOG_DEBUG("ssl_private_key : %s \n", m_configuration.capabilities.ssl_private_key.data());
+    LOG_DEBUG("ssl_ca : %s \n", m_configuration.capabilities.ssl_ca.data());
 }
 
 void Configuration::__subparse_log__(Json::Value &root)

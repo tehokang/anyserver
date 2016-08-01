@@ -58,9 +58,9 @@ public:
         }
 
         bool enable_security;
-        list<string> ssl_cert_list;
-        list<string> ssl_private_key_list;
-        list<string> ssl_ca_list;
+        string ssl_cert;
+        string ssl_private_key;
+        string ssl_ca;
     };
 
     class Log

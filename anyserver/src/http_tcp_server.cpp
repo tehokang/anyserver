@@ -44,8 +44,19 @@ bool HttpTcpServer::init()
     m_context_create_info.protocols = m_protocols;
     m_context_create_info.extensions = nullptr;
     m_context_create_info.keepalive_timeout = 60;
-    m_context_create_info.ssl_private_key_filepath = nullptr;
-    m_context_create_info.ssl_cert_filepath = nullptr;
+
+    if ( m_security )
+    {
+        m_context_create_info.ssl_private_key_filepath = m_private_key_file.data();
+        m_context_create_info.ssl_cert_filepath = m_cert_file.data();
+        m_context_create_info.ssl_ca_filepath = m_ca_file.data();
+    }
+    else
+    {
+        m_context_create_info.ssl_private_key_filepath = nullptr;
+        m_context_create_info.ssl_cert_filepath = nullptr;
+        m_context_create_info.ssl_ca_filepath = nullptr;
+    }
     m_context_create_info.server_string = m_name.data();
     m_context_create_info.options = 0;
     m_context_create_info.fd_limit_per_thread = m_max_client;

@@ -38,9 +38,13 @@ public:
     virtual bool start() = 0;
     virtual void stop() = 0;
     virtual bool sendToClient(size_t client_id, char *msg, unsigned int msg_len) = 0;
-
-    virtual void enableSecurity() { m_security = true; };
-    virtual void disableSecurity() { m_security = false; };
+    virtual void setCertification(bool security, string cert_file, string private_key_file, string ca_file)
+    {
+        m_security = security;
+        m_cert_file = cert_file;
+        m_private_key_file = private_key_file;
+        m_ca_file = ca_file;
+    };
 
     const unsigned int getMaxClient() { return m_max_client; };
     const string getName() { return m_name; };
@@ -138,6 +142,10 @@ protected:
     bool m_security;
     const string m_bind;
     const string m_name;
+
+    string m_cert_file;
+    string m_private_key_file;
+    string m_ca_file;
 
     size_t m_server_id;
     ClientInfoList m_client_list;

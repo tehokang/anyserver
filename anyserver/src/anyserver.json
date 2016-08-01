@@ -52,15 +52,9 @@
   "capabilities" :
   {
     "security" : false, 
-    "ssl_cert_files" : [
-      { "path" : "test.pem" }
-    ],
-    "ssl_private_key_files" : [
-      { "path" : "test.key.pem" }
-    ],
-    "ssl_ca_files" : [
-      { "path" : "test.ca" }
-    ]
+    "ssl_cert_file" : "test.pem",
+    "ssl_private_key_file" : "test.key.pem",
+    "ssl_ca_file" : "test.ca"
   },
   "log" : 
   {

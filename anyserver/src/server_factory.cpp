@@ -80,6 +80,11 @@ bool ServerFactory::init(const string config_file)
                             ADD_SERVER(server_info, WebSocketTcpServer, m_servers);
                             auto websocket_server = static_pointer_cast<WebSocketTcpServer>(server);
                             websocket_server->addProtocols(server_info->protocols);
+                            websocket_server->setCertification(
+                                    configuration.capabilities.enable_security,
+                                    configuration.capabilities.ssl_cert,
+                                    configuration.capabilities.ssl_private_key,
+                                    configuration.capabilities.ssl_ca);
                         }
                         else
                         {
@@ -93,6 +98,12 @@ bool ServerFactory::init(const string config_file)
                         if ( server_info->tcp )
                         {
                             ADD_SERVER(server_info, HttpTcpServer, m_servers);
+                            auto http_server = static_pointer_cast<HttpTcpServer>(server);
+                            http_server->setCertification(
+                                    configuration.capabilities.enable_security,
+                                    configuration.capabilities.ssl_cert,
+                                    configuration.capabilities.ssl_private_key,
+                                    configuration.capabilities.ssl_ca);
                         }
                         else
                         {

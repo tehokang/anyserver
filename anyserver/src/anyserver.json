@@ -52,9 +52,9 @@
   "capabilities" :
   {
     "security" : false, 
-    "ssl_cert_file" : "test.pem",
-    "ssl_private_key_file" : "test.key.pem",
-    "ssl_ca_file" : "test.ca"
+    "ssl_cert_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/libwebsockets-test-server.pem",
+    "ssl_private_key_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/libwebsockets-test-server.key.pem",
+    "ssl_ca_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/GlobalSign_Root_CA.pem"
   },
   "log" : 
   {

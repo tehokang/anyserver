@@ -65,5 +65,6 @@ libmicrohttpd for backup of http
 
 # TODO
 - HTTP and Websocket server are using same library(libwebsockets), they are sharing same context, it has to be seperated via another reference like http server of microhttpd.
+- SSL test (Especially, wss)
 - Ready for portaility example
 

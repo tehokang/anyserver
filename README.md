@@ -63,4 +63,7 @@ libmicrohttpd for backup of http
 #./example anyserver.json
 </pre>
 
+# TODO
+- HTTP and Websocket server are using same library(libwebsockets), they are sharing same context, it has to be seperated via another reference like http server of microhttpd.
+- Ready for portaility example
 

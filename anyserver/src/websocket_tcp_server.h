@@ -17,6 +17,7 @@ public:
     virtual bool start() override;
     virtual void stop() override;
     virtual bool sendToClient(size_t client_id, char *msg, unsigned int msg_len) override;
+    virtual void addProtocols(list<string> protocols);
 
     class WebSocketTcpClientInfo : public TcpClientInfo
     {
@@ -40,9 +41,9 @@ protected:
     enum Protocol
     {
         HTTP,
-        WEBSOCKET_PROTOCOL_A,
+        TEST,
         DUMMY,
-        MAX_SERVER
+        BASIC_PROTOCOL
     };
 private:
     static int callback_websocket(struct lws *wsi,
@@ -53,7 +54,7 @@ private:
     static struct lws_context *m_context;
 
     bool m_run_thread;
-    struct lws_protocols m_protocols[MAX_SERVER];
+    struct lws_protocols *m_lws_protocols;
     struct lws_context_creation_info m_context_create_info;
 
 };

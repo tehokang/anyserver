@@ -94,6 +94,15 @@ void Configuration::__subparse_server_list__(Json::Value &root)
                     new_server->bind.data(), new_server->tcp,
                     new_server->max_client);
 
+            if ( false == server["protocols"].isNull() )
+            {
+                for( int i=0; i<server["protocols"].size(); i++ )
+                {
+                    new_server->protocols.push_back(server["protocols"][i].asString());
+                    LOG_DEBUG("pushed a protocol : %s \n", server["protocols"][i].asString().data());
+                }
+            }
+
             m_configuration.server_infos.push_back(new_server);
         }
         else

@@ -42,6 +42,7 @@ public:
         bool enable;
         bool tcp;
         unsigned int max_client;
+        list<string> protocols;
         ServerKinds kinds;
     };
     typedef shared_ptr<ServerInfo> ServerInfoPtr;

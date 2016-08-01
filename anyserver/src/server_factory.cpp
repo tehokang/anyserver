@@ -28,7 +28,7 @@ ServerFactory::~ServerFactory()
 
 #define ADD_SERVER(sinfo, TYPE, slist) \
     do { \
-        BaseServerPtr server = BaseServerPtr( \
+        server = BaseServerPtr( \
                 new TYPE( \
                         sinfo->header, \
                         sinfo->bind, \
@@ -70,6 +70,7 @@ bool ServerFactory::init(const string config_file)
         LOG_DEBUG("%s enable : %d \n", server_info->header.data(), server_info->enable);
         if ( true == server_info->enable )
         {
+            BaseServerPtr server;
             switch ( server_info->kinds )
             {
                 case Configuration::WEBSOCKET:
@@ -77,6 +78,8 @@ bool ServerFactory::init(const string config_file)
                         if ( server_info->tcp )
                         {
                             ADD_SERVER(server_info, WebSocketTcpServer, m_servers);
+                            auto websocket_server = static_pointer_cast<WebSocketTcpServer>(server);
+                            websocket_server->addProtocols(server_info->protocols);
                         }
                         else
                         {

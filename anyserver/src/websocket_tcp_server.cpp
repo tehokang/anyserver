@@ -7,31 +7,9 @@ WebSocketTcpServer::WebSocketTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
     : BaseServer(name, bind, tcp, max_client)
     , m_run_thread(false)
+    , m_lws_protocols(nullptr)
 {
     LOG_DEBUG("\n");
-    /**
-     * @note None protocol request will patch from callback_websocket
-     */
-    m_protocols[HTTP].name = "http-only";
-    m_protocols[HTTP].callback = callback_websocket;
-    m_protocols[HTTP].user = this;
-    m_protocols[HTTP].per_session_data_size = 0;
-    m_protocols[HTTP].rx_buffer_size = 0;
-
-    /**
-     * @note Specific protocol request will also patch from callback_websocket.
-     */
-    m_protocols[WEBSOCKET_PROTOCOL_A].name = "protocol_a";
-    m_protocols[WEBSOCKET_PROTOCOL_A].callback = callback_websocket;
-    m_protocols[WEBSOCKET_PROTOCOL_A].user = this;
-    m_protocols[WEBSOCKET_PROTOCOL_A].per_session_data_size = 0;
-    m_protocols[WEBSOCKET_PROTOCOL_A].rx_buffer_size = 0;
-
-    m_protocols[DUMMY].name = nullptr;
-    m_protocols[DUMMY].callback = nullptr;
-    m_protocols[DUMMY].user = nullptr;
-    m_protocols[DUMMY].per_session_data_size = 0;
-    m_protocols[DUMMY].rx_buffer_size = 0;
 
     lws_set_log_level(
             LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_INFO |
@@ -43,7 +21,51 @@ WebSocketTcpServer::~WebSocketTcpServer()
 {
     LOG_DEBUG("\n");
     __deinit__();
+
     lws_context_destroy(m_context);
+    SAFE_FREE(m_lws_protocols);
+}
+
+void WebSocketTcpServer::addProtocols(list<string> protocols)
+{
+    LOG_DEBUG("protocols.size : %d \n", protocols.size());
+    m_lws_protocols = (struct lws_protocols*)
+            malloc(sizeof(struct lws_protocols)*(BASIC_PROTOCOL+protocols.size()));
+
+    /**
+     * @note None protocol request will patch from callback_websocket
+     */
+    m_lws_protocols[HTTP].name = "http-only";
+    m_lws_protocols[HTTP].callback = callback_websocket;
+    m_lws_protocols[HTTP].user = this;
+    m_lws_protocols[HTTP].per_session_data_size = 0;
+    m_lws_protocols[HTTP].rx_buffer_size = 0;
+
+    /**
+     * @note "test" protocol
+     */
+    m_lws_protocols[TEST].name = "test";
+    m_lws_protocols[TEST].callback = callback_websocket;
+    m_lws_protocols[TEST].user = this;
+    m_lws_protocols[TEST].per_session_data_size = 0;
+    m_lws_protocols[TEST].rx_buffer_size = 0;
+
+    int index = TEST+1;
+    for ( list<string>::iterator it=protocols.begin();
+            it!=protocols.end(); ++it, index++)
+    {
+        m_lws_protocols[index].name = (*it).data();
+        m_lws_protocols[index].callback = callback_websocket;
+        m_lws_protocols[index].user = this;
+        m_lws_protocols[index].per_session_data_size = 0;
+        m_lws_protocols[index].rx_buffer_size = 0;
+    }
+
+    m_lws_protocols[index].name = nullptr;
+    m_lws_protocols[index].callback = nullptr;
+    m_lws_protocols[index].user = nullptr;
+    m_lws_protocols[index].per_session_data_size = 0;
+    m_lws_protocols[index].rx_buffer_size = 0;
 }
 
 bool WebSocketTcpServer::init()
@@ -53,7 +75,7 @@ bool WebSocketTcpServer::init()
 
     m_context_create_info.port = stoi(m_bind);
     m_context_create_info.iface = nullptr;
-    m_context_create_info.protocols = m_protocols;
+    m_context_create_info.protocols = m_lws_protocols;
     m_context_create_info.extensions = nullptr;
     m_context_create_info.keepalive_timeout = 60;
     m_context_create_info.ssl_private_key_filepath = nullptr;

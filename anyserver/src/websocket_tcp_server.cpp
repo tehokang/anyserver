@@ -9,17 +9,23 @@ WebSocketTcpServer::WebSocketTcpServer(
     , m_run_thread(false)
 {
     LOG_DEBUG("\n");
+    /**
+     * @note None protocol request will patch from callback_websocket
+     */
     m_protocols[HTTP].name = "http-only";
-    m_protocols[HTTP].callback = callback_http;
+    m_protocols[HTTP].callback = callback_websocket;
     m_protocols[HTTP].user = this;
     m_protocols[HTTP].per_session_data_size = 0;
     m_protocols[HTTP].rx_buffer_size = 0;
 
-    m_protocols[WEBSOCKET].name = "protocol";
-    m_protocols[WEBSOCKET].callback = callback_websocket;
-    m_protocols[WEBSOCKET].user = this;
-    m_protocols[WEBSOCKET].per_session_data_size = 0;
-    m_protocols[WEBSOCKET].rx_buffer_size = 0;
+    /**
+     * @note Specific protocol request will also patch from callback_websocket.
+     */
+    m_protocols[WEBSOCKET_PROTOCOL_A].name = "protocol_a";
+    m_protocols[WEBSOCKET_PROTOCOL_A].callback = callback_websocket;
+    m_protocols[WEBSOCKET_PROTOCOL_A].user = this;
+    m_protocols[WEBSOCKET_PROTOCOL_A].per_session_data_size = 0;
+    m_protocols[WEBSOCKET_PROTOCOL_A].rx_buffer_size = 0;
 
     m_protocols[DUMMY].name = nullptr;
     m_protocols[DUMMY].callback = nullptr;
@@ -133,16 +139,6 @@ void* WebSocketTcpServer::websocket_thread(void *arg)
     return nullptr;
 }
 
-int WebSocketTcpServer::callback_http(struct lws *wsi,
-        enum lws_callback_reasons reason,
-        void *user, void *in, size_t len)
-{
-    /**
-     * @warning Nothing to do
-     */
-    return 0;
-}
-
 int WebSocketTcpServer::callback_websocket(struct lws *wsi,
         enum lws_callback_reasons reason,
         void *user, void *in, size_t len)
@@ -199,7 +195,7 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
             LOG_DEBUG("LWS_CALLBACK_PROTOCOL_DESTROY \n");
             break;
         default:
-            LOG_WARNING("Unhandled callback reason [%d] \n", reason);
+//            LOG_WARNING("Unhandled callback reason [%d] \n", reason);
             break;
     }
     return 0;

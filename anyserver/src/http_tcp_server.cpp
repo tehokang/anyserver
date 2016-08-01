@@ -15,12 +15,6 @@ HttpTcpServer::HttpTcpServer(
     m_protocols[HTTP].per_session_data_size = 0;
     m_protocols[HTTP].rx_buffer_size = 0;
 
-    m_protocols[WEBSOCKET].name = "protocol";
-    m_protocols[WEBSOCKET].callback = callback_websocket;
-    m_protocols[WEBSOCKET].user = this;
-    m_protocols[WEBSOCKET].per_session_data_size = 0;
-    m_protocols[WEBSOCKET].rx_buffer_size = 0;
-
     m_protocols[DUMMY].name = nullptr;
     m_protocols[DUMMY].callback = nullptr;
     m_protocols[DUMMY].user = nullptr;
@@ -212,7 +206,7 @@ int HttpTcpServer::callback_http(struct lws *wsi,
             break;
         case LWS_CALLBACK_HTTP_BODY:
             LOG_DEBUG("LWS_CALLBACK_HTTP_BODY [in: %s, len: %d] \n", in, len);
-            req_body += string((const char*)in);
+            req_body += string((const char*)in, len);
             break;
         case LWS_CALLBACK_HTTP_BODY_COMPLETION:
             LOG_DEBUG("LWS_CALLBACK_HTTP_BODY_COMPLETION [in: %s] \n", req_body.data());
@@ -235,13 +229,6 @@ int HttpTcpServer::callback_http(struct lws *wsi,
             LOG_WARNING("Unhandled callback reason [%d] \n", reason);
             break;
     }
-    return 0;
-}
-
-int HttpTcpServer::callback_websocket(struct lws *wsi,
-        enum lws_callback_reasons reason,
-        void *user, void *in, size_t len)
-{
     return 0;
 }
 

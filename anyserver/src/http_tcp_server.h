@@ -37,13 +37,9 @@ protected:
     static void* http_thread(void *arg);
     pthread_t m_http_thread;
 
-    enum { HTTP, WEBSOCKET, DUMMY, MAX_SERVER };
+    enum { HTTP, DUMMY, MAX_SERVER };
 private:
     static int callback_http(struct lws *wsi,
-            enum lws_callback_reasons reason,
-            void *user, void *in, size_t len);
-
-    static int callback_websocket(struct lws *wsi,
             enum lws_callback_reasons reason,
             void *user, void *in, size_t len);
 

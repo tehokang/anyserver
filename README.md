@@ -13,6 +13,20 @@ Like websocket, http, inet domain for external communication and also unix domai
 - Link sample : https://github.com/tehokang/anyserver/blob/master/anyserver/src/anyserver.json
 
 # How to build
+At first, there are resources like below after clone.
+<pre>
+.
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+├── anyserver
+├── anyserver_class_diagram.png
+├── build (user who want to build has to make directory 'build')
+├── doc
+├── example
+└── port
+</pre>
+
 1. Create build directory
 <pre>
 #mkdir build

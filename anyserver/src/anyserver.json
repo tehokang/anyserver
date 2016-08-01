@@ -8,11 +8,11 @@
       "bind" : 10000, 
       "tcp" : true,
       "max_client" : 200,
-	  "protocols" : [
-	    "test_a",
-	    "test_b"
-	  ]	
-    },    
+      "protocols" : [
+        "test_a",
+        "test_b"
+      ]
+    },
     {
       "type" : "http",
       "enable" : true, 

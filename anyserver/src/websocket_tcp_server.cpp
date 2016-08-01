@@ -84,6 +84,7 @@ bool WebSocketTcpServer::init()
     if ( m_security )
     {
         m_context_create_info.ssl_private_key_filepath = m_private_key_file.data();
+        m_context_create_info.ssl_private_key_password = m_private_key_password.data();
         m_context_create_info.ssl_cert_filepath = m_cert_file.data();
         m_context_create_info.ssl_ca_filepath = m_ca_file.data();
         m_context_create_info.options = LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;

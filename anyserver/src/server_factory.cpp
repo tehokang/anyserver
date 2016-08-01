@@ -84,6 +84,7 @@ bool ServerFactory::init(const string config_file)
                                     configuration.capabilities.enable_security,
                                     configuration.capabilities.ssl_cert,
                                     configuration.capabilities.ssl_private_key,
+                                    configuration.capabilities.ssl_private_key_password,
                                     configuration.capabilities.ssl_ca);
                         }
                         else
@@ -103,6 +104,7 @@ bool ServerFactory::init(const string config_file)
                                     configuration.capabilities.enable_security,
                                     configuration.capabilities.ssl_cert,
                                     configuration.capabilities.ssl_private_key,
+                                    configuration.capabilities.ssl_private_key_password,
                                     configuration.capabilities.ssl_ca);
                         }
                         else

@@ -38,11 +38,14 @@ public:
     virtual bool start() = 0;
     virtual void stop() = 0;
     virtual bool sendToClient(size_t client_id, char *msg, unsigned int msg_len) = 0;
-    virtual void setCertification(bool security, string cert_file, string private_key_file, string ca_file)
+    virtual void setCertification(bool security, string cert_file,
+            string private_key_file, string private_key_password,
+            string ca_file)
     {
         m_security = security;
         m_cert_file = cert_file;
         m_private_key_file = private_key_file;
+        m_private_key_password = private_key_password;
         m_ca_file = ca_file;
     };
 
@@ -146,6 +149,7 @@ protected:
     string m_cert_file;
     string m_private_key_file;
     string m_ca_file;
+    string m_private_key_password;
 
     size_t m_server_id;
     ClientInfoList m_client_list;

@@ -132,10 +132,12 @@ void Configuration::__subparse_capabilities__(Json::Value &root)
 
     m_configuration.capabilities.ssl_cert = capabilities["ssl_cert_file"].asString();
     m_configuration.capabilities.ssl_private_key = capabilities["ssl_private_key_file"].asString();
+    m_configuration.capabilities.ssl_private_key_password = capabilities["ssl_private_key_password"].asString();
     m_configuration.capabilities.ssl_ca = capabilities["ssl_ca_file"].asString();
 
     LOG_DEBUG("ssl_cert : %s \n", m_configuration.capabilities.ssl_cert.data());
     LOG_DEBUG("ssl_private_key : %s \n", m_configuration.capabilities.ssl_private_key.data());
+    LOG_DEBUG("ssl_private_key_password : %s \n", m_configuration.capabilities.ssl_private_key_password.data());
     LOG_DEBUG("ssl_ca : %s \n", m_configuration.capabilities.ssl_ca.data());
 }
 

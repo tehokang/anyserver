@@ -60,6 +60,7 @@ public:
         bool enable_security;
         string ssl_cert;
         string ssl_private_key;
+        string ssl_private_key_password;
         string ssl_ca;
     };
 

@@ -12,6 +12,8 @@ openssl x509 -req -days 3650 -extensions v3_ca -set_serial 1 -in rootca.csr -sig
 ## Server Certification
 #1. Create webserver private key
 openssl genrsa -aes256 -out webserver.key 2048
+cp webserver.key webserver.key.enc
+openssl rsa -in webserver.key.enc -out webserver.key
 
 #2. Make conf to create CSR of webserver certification(host_openssl.conf)
 openssl req -new -key webserver.key -out webserver.csr -config host_openssl.conf
@@ -21,4 +23,6 @@ openssl x509 -req -days 1825 -extensions v3_user -in webserver.csr -CA rootca_ce
 
 
 
+# double check 
+openssl x509 -text -in /etc/pki/tls/certs/lesstif.com.crt
 

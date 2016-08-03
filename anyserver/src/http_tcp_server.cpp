@@ -268,6 +268,14 @@ int HttpTcpServer::callback_http(struct lws *wsi,
             break;
         case LWS_CALLBACK_GET_THREAD_ID:
             break;
+        case LWS_CALLBACK_DEL_POLL_FD:
+            LOG_DEBUG("LWS_CALLBACK_DEL_POLL_FD \n");
+            {
+                int client_fd = lws_get_socket_fd(wsi);
+                size_t client_id = server->removeClientInfo(client_fd);
+                NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
+            }
+            break;
         default:
             LOG_WARNING("Unhandled callback reason [%d] \n", reason);
             break;

@@ -93,6 +93,7 @@ bool WebSocketTcpServer::init()
                 LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS
                 | LWS_SERVER_OPTION_VALIDATE_UTF8
                 | LWS_SERVER_OPTION_ALLOW_NON_SSL_ON_SSL_PORT
+                | LWS_SERVER_OPTION_PEER_CERT_NOT_REQUIRED
                 | LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
         /**
          * @warning LWS_SERVER_OPTION_ALLOW_NON_SSL_ON_SSL_PORT has a bug
@@ -259,6 +260,14 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
             LOG_DEBUG("LWS_CALLBACK_PROTOCOL_DESTROY \n");
             break;
         case LWS_CALLBACK_GET_THREAD_ID: /* to be silent */
+            break;
+        case LWS_CALLBACK_DEL_POLL_FD:
+            LOG_DEBUG("LWS_CALLBACK_DEL_POLL_FD \n");
+            {
+                int client_fd = lws_get_socket_fd(wsi);
+                size_t client_id = server->removeClientInfo(client_fd);
+                NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
+            }
             break;
         default:
             LOG_WARNING("Unhandled callback reason [%d] \n", reason);

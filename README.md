@@ -21,6 +21,7 @@ At first, there are resources like below after clone.
 ├── LICENSE
 ├── README.md
 ├── anyserver
+├── anyserver_block_diagram.png
 ├── anyserver_class_diagram.png
 ├── build (user who want to build has to make directory 'build')
 ├── doc
@@ -36,10 +37,12 @@ At first, there are resources like below after clone.
 2. Build as debug
 <pre><code>
 #cmake .. -Dbuild=debug 
+#make
 </code></pre>
 3. Build as release
 <pre><code>
 #cmake .. -Dbuild=release
+#make
 </code></pre>
 4. Example executable and anyserver library deploy in build/out
 <pre>

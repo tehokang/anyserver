@@ -15,7 +15,7 @@ Like websocket, http, inet domain for external communication and also unix domai
 
 # How to build
 At first, there are resources like below after clone.
-<pre>
+```
 .
 ├── CMakeLists.txt
 ├── LICENSE
@@ -27,28 +27,28 @@ At first, there are resources like below after clone.
 ├── doc
 ├── example
 └── port
-</pre>
+```
 
 1. Create build directory
-<pre>
+```
 #mkdir build
 #cd build
-</pre>
+```
 2. Build as debug
-<pre><code>
+```
 #cmake .. -Dbuild=debug 
 #make
-</code></pre>
+```
 3. Build as release
-<pre><code>
+```
 #cmake .. -Dbuild=release
 #make
-</code></pre>
+```
 4. Example executable and anyserver library deploy in build/out
-<pre>
+```
 #cd build/out
 #./example anyserver.json
-</pre>
+```
 
 # How to port this library
 - Update (ASAP) 
@@ -60,13 +60,13 @@ libmicrohttpd 1.9.30-1 for backup of http <br>
 toolchain : g++ 4.8.2-19Ubuntu1
 
 # Example
-<pre>
+```
 #mkdir build
 #cd build
 #make
 #cd out
 #./example anyserver.json
-</pre>
+```
 
 # TODO
 - ~~HTTP and Websocket server are using same library(libwebsockets), they are sharing same context, it has to be seperated via another reference like http server of microhttpd~~ : libwebsockets context can be multiple but it couldn't make multiple openssl context at security mode like wss, https.

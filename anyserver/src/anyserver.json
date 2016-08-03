@@ -1,0 +1,79 @@
+{
+  "__comment__": "",
+  "@name": "GameServer",
+  "server_list": [
+    {
+      "type" : "websocket", 
+      "enable" : true, 
+      "bind" : 10000, 
+      "tcp" : true,
+      "max_client" : 200,
+      "protocols" : [
+        "test_a",
+        "test_b"
+      ]
+    },
+    {
+      "type" : "http",
+      "enable" : true, 
+      "bind" : 10001, 
+      "tcp" : true,
+      "max_client" : 200
+    }, 
+    { 
+      "type" : "inet_domainsocket", 
+      "enable" : true, 
+      "bind" : 10002, 
+      "tcp" : true,
+      "max_client" : 200
+    },
+    {
+      "type" : "inet_domainsocket", 
+      "enable" : true, 
+      "bind" : 10002, 
+      "tcp" : false,
+      "max_client" : 200
+    },
+    { 
+      "type" : "unix_domainsocket", 
+      "enable" : true, 
+      "bind" : "/tmp/uds_tcp.tmp", 
+      "tcp" : true,
+      "max_client" : 200
+    },
+    { 
+      "type" : "unix_domainsocket", 
+      "enable" : true, 
+      "bind" : "/tmp/uds_udp.tmp", 
+      "tcp" : false,
+      "max_client" : 200
+    }
+  ],
+  "capabilities" :
+  {
+    "__comment__" : "security server is only one of above listed servers",
+    "security" : false, 
+    "ssl_cert_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/webserver.crt",
+    "ssl_private_key_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/webserver.key",
+    "ssl_private_key_password" : "1234",
+    "ssl_ca_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/rootca_cert.crt"
+  },
+  "log" : 
+  {
+    "__comment__" : "all of logs will be disabled when you cmake .. -Dbuild=release",
+    "__comment__" : "or -Dbuild=debug will use following keys",
+    "enable" : true,
+    "enable_debug" : true, 
+    "enable_info" : true,
+    "enable_error" : true, 
+    "enable_warn" : true,
+    "enable_filewrite" : false,
+    "directory" : "/tmp",
+    "filesize" : 80000000
+  },
+  "test" :
+  {
+    "echo" : true
+  },
+  "copyright": "All right reserved by TehoKang"
+}

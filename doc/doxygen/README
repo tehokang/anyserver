@@ -1,0 +1,22 @@
+#
+#	Doxygen for Archon
+#
+
+1. Installation of doxygen
+		>sudo apt-get install doxygen
+		>sudo apt-get install graphviz
+		 : if you couldn't get graphviz, please do following
+		 : if you are working in Ubuntu 12.04, 
+		 :    unfortunately you should find all of dependuncies packages and install it.
+		>sudo apt-get upgrade graphviz
+
+2. Editting of doxygen-anyserver configuration file
+		> INPUT = {anyserver source absolute/relative path}
+		> PROJECT_LOGO = {anyserver logo absolute/relative path}
+		> OUTPUT_DIRECTORY = {doxygen output absolute/relative path}
+
+3. Run doxygen
+		> ./build_doxygen.sh
+
+4. Check it works out well as open output/html/index.html (OUTPUT_DIRECTORY)
+

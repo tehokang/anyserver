@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Anyserver by tehokang</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Anyserver</h1>
+      <h2 class="project-tagline">anyserver is to make some kinds of server, for example websocket server, http, inet domain and unix domain server.</h2>
+      <a href="https://github.com/tehokang/anyserver" class="btn">View on GitHub</a>
+      <a href="https://github.com/tehokang/anyserver/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/tehokang/anyserver/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="what-is-anyserver" class="anchor" href="#what-is-anyserver" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is anyserver?</h1>
+
+<p>anyserver is a component library to support intercommunication between local processes and also remote. <br>
+Like websocket, http, inet domain for external communication and also unix domain server for IPC.</p>
+
+<h1>
+<a id="architecture" class="anchor" href="#architecture" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Architecture</h1>
+
+<h2>
+<a id="--block-diagram" class="anchor" href="#--block-diagram" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>- Block Diagram</h2>
+
+<p><img src="https://github.com/tehokang/anyserver/blob/master/anyserver_block_diagram.png" alt="alt tag"></p>
+
+<h2>
+<a id="--class-diagram" class="anchor" href="#--class-diagram" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>- Class Diagram</h2>
+
+<p><img src="https://github.com/tehokang/anyserver/blob/master/anyserver_class_diagram.png" alt="alt tag"></p>
+
+<h1>
+<a id="how-to-configure" class="anchor" href="#how-to-configure" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to configure</h1>
+
+<ul>
+<li>anyserver can configure via anyserver.json that you can choose servers to launch with specific information.</li>
+<li>The json config file for example can deploy in build/out after make building.</li>
+<li>Link sample : <a href="https://github.com/tehokang/anyserver/blob/master/anyserver/src/anyserver.json">https://github.com/tehokang/anyserver/blob/master/anyserver/src/anyserver.json</a>
+</li>
+</ul>
+
+<h1>
+<a id="how-to-build" class="anchor" href="#how-to-build" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to build</h1>
+
+<p>At first, there are resources like below after clone.</p>
+
+<pre>
+.
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+├── anyserver
+├── anyserver_class_diagram.png
+├── build (user who want to build has to make directory 'build')
+├── doc
+├── example
+└── port
+</pre>
+
+<ol>
+<li>Create build directory
+<pre>
+#mkdir build
+#cd build
+</pre>
+</li>
+<li>Build as debug
+<pre><code>
+#cmake .. -Dbuild=debug 
+</code></pre>
+</li>
+<li>Build as release
+<pre><code>
+#cmake .. -Dbuild=release
+</code></pre>
+</li>
+<li>Example executable and anyserver library deploy in build/out
+<pre>
+#cd build/out
+#./example anyserver.json
+</pre>
+</li>
+</ol>
+
+<h1>
+<a id="how-to-port-this-library" class="anchor" href="#how-to-port-this-library" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to port this library</h1>
+
+<ul>
+<li>Update (ASAP) </li>
+</ul>
+
+<h1>
+<a id="external-dependencies" class="anchor" href="#external-dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>External Dependencies</h1>
+
+<p>jsoncpp 1.7.4 for codec of json <br>
+libwebsockets 2.0.0 for http and websocket server <br>
+libmicrohttpd 1.9.30-1 for backup of http <br>
+toolchain : g++ 4.8.2-19Ubuntu1</p>
+
+<h1>
+<a id="example" class="anchor" href="#example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Example</h1>
+
+<pre>
+#mkdir build
+#cd build
+#make
+#cd out
+#./example anyserver.json
+</pre>
+
+<h1>
+<a id="todo" class="anchor" href="#todo" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>TODO</h1>
+
+<ul>
+<li>
+<del>HTTP and Websocket server are using same library(libwebsockets), they are sharing same context, it has to be seperated via another reference like http server of microhttpd</del> : libwebsockets context can be multiple but it couldn't make multiple openssl context at security mode like wss, https.</li>
+<li>
+<del>SSL test</del> (Especially, wss) : complete to support security of only one of servers at runtime</li>
+<li>Ready for portaility example</li>
+</ul>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/tehokang/anyserver">Anyserver</a> is maintained by <a href="https://github.com/tehokang">tehokang</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>

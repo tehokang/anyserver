@@ -65,7 +65,7 @@ libmicrohttpd for backup of http
 </pre>
 
 # TODO
-- HTTP and Websocket server are using same library(libwebsockets), they are sharing same context, it has to be seperated via another reference like http server of microhttpd.
-- SSL test (Especially, wss)
+- ~~HTTP and Websocket server are using same library(libwebsockets), they are sharing same context, it has to be seperated via another reference like http server of microhttpd~~ : libwebsockets context can be multiple but it couldn't make multiple openssl context at security mode like wss, https.
+- ~~SSL test~~ (Especially, wss) : complete to support security of only one of servers at runtime
 - Ready for portaility example
 

@@ -51,9 +51,10 @@ At first, there are resources like below after clone.
 - Update (ASAP) 
 
 # External Dependencies
-jsoncpp for codec of json
-libwebsockets for http and websocket server
-libmicrohttpd for backup of http
+jsoncpp 1.7.4 for codec of json <br>
+libwebsockets 2.0.0 for http and websocket server <br>
+libmicrohttpd 1.9.30-1 for backup of http <br>
+toolchain : g++ 4.8.2-19Ubuntu1
 
 # Example
 <pre>

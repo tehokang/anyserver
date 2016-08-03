@@ -1,5 +1,5 @@
 {
-  "_comment": "",
+  "__comment__": "",
   "@name": "GameServer",
   "server_list": [
     {
@@ -51,6 +51,7 @@
   ],
   "capabilities" :
   {
+    "__comment__" : "security server is only one of above listed servers",
     "security" : false, 
     "ssl_cert_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/webserver.crt",
     "ssl_private_key_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/webserver.key",
@@ -59,6 +60,8 @@
   },
   "log" : 
   {
+    "__comment__" : "all of logs will be disabled when you cmake .. -Dbuild=release",
+    "__comment__" : "or -Dbuild=debug will use following keys",
     "enable" : true,
     "enable_debug" : true, 
     "enable_info" : true,

@@ -51,7 +51,8 @@
   ],
   "capabilities" :
   {
-    "__comment__" : "security server is only one of above listed servers",
+    "__comment__" : "security server has to be only one of above listed servers",
+    "__comment__" : "That is, only one server can be enabled and else server can't be enabled",
     "security" : false, 
     "ssl_cert_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/webserver.crt",
     "ssl_private_key_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/webserver.key",

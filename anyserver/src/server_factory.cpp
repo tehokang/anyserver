@@ -26,18 +26,6 @@ ServerFactory::~ServerFactory()
     m_servers.clear();
 }
 
-#define ADD_SERVER(sinfo, TYPE, slist) \
-    do { \
-        server = BaseServerPtr( \
-                new TYPE( \
-                        sinfo->header, \
-                        sinfo->bind, \
-                        sinfo->tcp, \
-                        sinfo->max_client)); \
-        server->addEventListener(this); \
-        slist.push_back(server); \
-    } while(0)
-
 bool ServerFactory::init(const string config_file)
 {
     LOG_DEBUG("\n");
@@ -62,93 +50,8 @@ bool ServerFactory::init(const string config_file)
             configuration.log.directory,
             configuration.name);
 
-    typedef Configuration::ServerInfoPtr SInfo;
-    for ( list<SInfo>::const_iterator it=configuration.server_infos.begin();
-            it!=configuration.server_infos.end(); ++it )
-    {
-        const SInfo &server_info = (*it);
-        LOG_DEBUG("%s enable : %d \n", server_info->header.data(), server_info->enable);
-        if ( true == server_info->enable )
-        {
-            BaseServerPtr server;
-            switch ( server_info->kinds )
-            {
-                case Configuration::WEBSOCKET:
-                    {
-                        if ( server_info->tcp )
-                        {
-                            ADD_SERVER(server_info, WebSocketTcpServer, m_servers);
-                            auto websocket_server = static_pointer_cast<WebSocketTcpServer>(server);
-                            websocket_server->addProtocols(server_info->protocols);
-                            websocket_server->setCertification(
-                                    configuration.capabilities.enable_security,
-                                    configuration.capabilities.ssl_cert,
-                                    configuration.capabilities.ssl_private_key,
-                                    configuration.capabilities.ssl_private_key_password,
-                                    configuration.capabilities.ssl_ca);
-                        }
-                        else
-                        {
-                            LOG_ERROR("Not support UDP websocket server yet \n");
-                            return false;
-                        }
-                    }
-                    break;
-                case Configuration::HTTP:
-                    {
-                        if ( server_info->tcp )
-                        {
-                            ADD_SERVER(server_info, HttpTcpServer, m_servers);
-                            auto http_server = static_pointer_cast<HttpTcpServer>(server);
-                            http_server->setCertification(
-                                    configuration.capabilities.enable_security,
-                                    configuration.capabilities.ssl_cert,
-                                    configuration.capabilities.ssl_private_key,
-                                    configuration.capabilities.ssl_private_key_password,
-                                    configuration.capabilities.ssl_ca);
-                        }
-                        else
-                        {
-                            LOG_ERROR("Not support UDP http server yet \n");
-                            return false;
-                        }
-                    }
-                    break;
-                case Configuration::INETDS:
-                    {
-                        BaseServerPtr server;
-                        if ( server_info->tcp )
-                        {
-                            ADD_SERVER(server_info, InetDomainSocketTcpServer, m_servers);
-                        }
-                        else
-                        {
-                            ADD_SERVER(server_info, InetDomainSocketUdpServer, m_servers);
-                        }
-                    }
-                    break;
-                case Configuration::UNIXDS:
-                    {
-                        BaseServerPtr server;
-                        if ( server_info->tcp )
-                        {
-                            ADD_SERVER(server_info, UnixDomainSocketTcpServer, m_servers);
-                        }
-                        else
-                        {
-                            ADD_SERVER(server_info, UnixDomainSocketUdpServer, m_servers);
-                        }
-                    }
-                    break;
-                default:
-                    {
-                        LOG_DEBUG("Unknown and unsupported server : %s \n",
-                                server_info->header.data());
-                    }
-                    break;
-            }
-        }
-    }
+    RETURN_FALSE_IF_FALSE(__check_restrict_configuration__(configuration));
+    RETURN_FALSE_IF_FALSE(__create_servers__(configuration));
 
     /**
      * @todo initialize servers of list
@@ -283,6 +186,141 @@ bool ServerFactory::sendToClient(size_t server_id, size_t client_id, char *msg, 
         }
     }
     return false;
+}
+
+#define ADD_SERVER(sinfo, TYPE, slist) \
+    do { \
+        server = BaseServerPtr( \
+                new TYPE( \
+                        sinfo->header, \
+                        sinfo->bind, \
+                        sinfo->tcp, \
+                        sinfo->max_client)); \
+        server->addEventListener(this); \
+        slist.push_back(server); \
+    } while(0)
+
+bool ServerFactory::__check_restrict_configuration__(
+        const Configuration::JsonConfiguration &configuration)
+{
+    /**
+     * @warning Must check if security is enabled
+     * If so, security server will have be only one server or
+     * anyserver have to reject this configuration
+     */
+    typedef Configuration::ServerInfoPtr SInfo;
+    if ( configuration.capabilities.enable_security )
+    {
+        int enable_server_count = 0;
+        for ( list<SInfo>::const_iterator it=configuration.server_infos.begin();
+                it!=configuration.server_infos.end(); ++it )
+        {
+            const SInfo &server_info = (*it);
+            if ( server_info->enable ) enable_server_count++;
+        }
+        if ( 1 < enable_server_count )
+        {
+            LOG_ERROR("Please enable only one server to support "
+                    "security type of server.\n"
+                    "Currently openssl context couldn't create multiple in a process\n");
+            return false;
+
+        }
+    }
+    return true;
+}
+
+bool ServerFactory::__create_servers__(
+        const Configuration::JsonConfiguration &configuration)
+{
+    typedef Configuration::ServerInfoPtr SInfo;
+    for ( list<SInfo>::const_iterator it=configuration.server_infos.begin();
+            it!=configuration.server_infos.end(); ++it )
+    {
+        const SInfo &server_info = (*it);
+        LOG_DEBUG("%s enable : %d \n", server_info->header.data(), server_info->enable);
+        if ( true == server_info->enable )
+        {
+            BaseServerPtr server;
+            switch ( server_info->kinds )
+            {
+                case Configuration::WEBSOCKET:
+                    {
+                        if ( server_info->tcp )
+                        {
+                            ADD_SERVER(server_info, WebSocketTcpServer, m_servers);
+                            auto websocket_server = static_pointer_cast<WebSocketTcpServer>(server);
+                            websocket_server->addProtocols(server_info->protocols);
+                            websocket_server->setCertification(
+                                    configuration.capabilities.enable_security,
+                                    configuration.capabilities.ssl_cert,
+                                    configuration.capabilities.ssl_private_key,
+                                    configuration.capabilities.ssl_private_key_password,
+                                    configuration.capabilities.ssl_ca);
+                        }
+                        else
+                        {
+                            LOG_ERROR("Not support UDP websocket server yet \n");
+                            return false;
+                        }
+                    }
+                    break;
+                case Configuration::HTTP:
+                    {
+                        if ( server_info->tcp )
+                        {
+                            ADD_SERVER(server_info, HttpTcpServer, m_servers);
+                            auto http_server = static_pointer_cast<HttpTcpServer>(server);
+                            http_server->setCertification(
+                                    configuration.capabilities.enable_security,
+                                    configuration.capabilities.ssl_cert,
+                                    configuration.capabilities.ssl_private_key,
+                                    configuration.capabilities.ssl_private_key_password,
+                                    configuration.capabilities.ssl_ca);
+                        }
+                        else
+                        {
+                            LOG_ERROR("Not support UDP http server yet \n");
+                            return false;
+                        }
+                    }
+                    break;
+                case Configuration::INETDS:
+                    {
+                        BaseServerPtr server;
+                        if ( server_info->tcp )
+                        {
+                            ADD_SERVER(server_info, InetDomainSocketTcpServer, m_servers);
+                        }
+                        else
+                        {
+                            ADD_SERVER(server_info, InetDomainSocketUdpServer, m_servers);
+                        }
+                    }
+                    break;
+                case Configuration::UNIXDS:
+                    {
+                        BaseServerPtr server;
+                        if ( server_info->tcp )
+                        {
+                            ADD_SERVER(server_info, UnixDomainSocketTcpServer, m_servers);
+                        }
+                        else
+                        {
+                            ADD_SERVER(server_info, UnixDomainSocketUdpServer, m_servers);
+                        }
+                    }
+                    break;
+                default:
+                    {
+                        LOG_DEBUG("Unknown and unsupported server : %s \n",
+                                server_info->header.data());
+                    }
+                    break;
+            }
+        }
+    }
+    return true;
 }
 
 } // end of namespace

@@ -55,7 +55,8 @@ public:
     virtual void onReceived(size_t server_id, size_t client_id, char *msg, unsigned int msg_len) override;
 protected:
     virtual void __deinit__();
-
+    bool __check_restrict_configuration__(const Configuration::JsonConfiguration &configuration);
+    bool __create_servers__(const Configuration::JsonConfiguration &configuration);
 private:
     Configuration *m_configuration;
     const string m_config_file;

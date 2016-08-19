@@ -15,7 +15,7 @@
       ]
     },
     {
-	  "__comment__": "websocket server can work only for single instance",
+	  "__comment__": "http server can work only for single instance",
       "type" : "http",
       "enable" : true, 
       "bind" : 10001, 

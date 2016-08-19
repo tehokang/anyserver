@@ -49,7 +49,7 @@ add_library(${project_name} SHARED ${sources})
 add_custom_command(
 	TARGET ${project_name}
 	POST_BUILD
-	COMMAND cp -f ${rootdir}/src/${project_name}.json ${CMAKE_BINARY_DIR}
+	COMMAND cp -f ${rootdir}/${project_name}.json ${CMAKE_BINARY_DIR}
 )
 # Version configuration
 set(version_major 0)

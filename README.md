@@ -4,9 +4,9 @@ Like websocket, http(post communication), inet domain for external communication
 
 # Architecture
 ## - Block Diagram 
-![screenshot](https://github.com/tehokang/anyserver/blob/master/anyserver_block_diagram.png)
+![screenshot](https://github.com/tehokang/anyserver/blob/master/doc/img/anyserver_block_diagram.png)
 ## - Class Diagram 
-![screenshot](https://github.com/tehokang/anyserver/blob/master/anyserver_class_diagram.png)
+![screenshot](https://github.com/tehokang/anyserver/blob/master/doc/img/anyserver_class_diagram.png)
 
 # How to configure
 - anyserver can configure via anyserver.json that you can choose servers to launch with specific information.

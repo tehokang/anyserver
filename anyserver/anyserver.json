@@ -3,6 +3,7 @@
   "@name": "GameServer",
   "server_list": [
     {
+	  "__comment__": "websocket server can work only for single instance",
       "type" : "websocket", 
       "enable" : true, 
       "bind" : 10000, 
@@ -14,6 +15,7 @@
       ]
     },
     {
+	  "__comment__": "websocket server can work only for single instance",
       "type" : "http",
       "enable" : true, 
       "bind" : 10001, 

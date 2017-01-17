@@ -44,3 +44,9 @@ message("LIBRARY_OUTPUT_PATH : " ${LIBRARY_OUTPUT_PATH})
 # The following folder will be included
 add_subdirectory(anyserver)
 add_subdirectory(example)
+
+add_custom_command(
+	TARGET ${project_name}
+	POST_BUILD
+	COMMAND cp -f ${rootdir}/${project_name}.json ${CMAKE_BINARY_DIR}
+)

@@ -3,6 +3,8 @@
 namespace anyserver
 {
 struct lws_context *WebSocketTcpServer::m_context = nullptr;
+struct lws_vhost *WebSocketTcpServer::m_vhost = nullptr;
+
 WebSocketTcpServer::WebSocketTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
     : BaseServer(name, bind, tcp, max_client)
@@ -22,7 +24,11 @@ WebSocketTcpServer::~WebSocketTcpServer()
     LOG_DEBUG("\n");
     __deinit__();
 
-    lws_context_destroy(m_context);
+    if ( m_context )
+    {
+        lws_context_destroy(m_context);
+        m_context = nullptr;
+    }
     SAFE_FREE(m_lws_protocols);
 }
 
@@ -40,6 +46,7 @@ void WebSocketTcpServer::addProtocols(list<string> protocols)
     m_lws_protocols[HTTP].user = this;
     m_lws_protocols[HTTP].per_session_data_size = 0;
     m_lws_protocols[HTTP].rx_buffer_size = 0;
+    m_lws_protocols[HTTP].id = 0;
 
     /**
      * @note "test" protocol
@@ -49,6 +56,7 @@ void WebSocketTcpServer::addProtocols(list<string> protocols)
     m_lws_protocols[TEST].user = this;
     m_lws_protocols[TEST].per_session_data_size = 0;
     m_lws_protocols[TEST].rx_buffer_size = 0;
+    m_lws_protocols[TEST].id = 0;
 
     int index = TEST+1;
     for ( list<string>::iterator it=protocols.begin();
@@ -59,6 +67,7 @@ void WebSocketTcpServer::addProtocols(list<string> protocols)
         m_lws_protocols[index].user = this;
         m_lws_protocols[index].per_session_data_size = 0;
         m_lws_protocols[index].rx_buffer_size = 0;
+        m_lws_protocols[index].id = 0;
     }
 
     m_lws_protocols[index].name = nullptr;
@@ -66,6 +75,7 @@ void WebSocketTcpServer::addProtocols(list<string> protocols)
     m_lws_protocols[index].user = nullptr;
     m_lws_protocols[index].per_session_data_size = 0;
     m_lws_protocols[index].rx_buffer_size = 0;
+    m_lws_protocols[index].id = 0;
 }
 
 bool WebSocketTcpServer::init()
@@ -94,6 +104,7 @@ bool WebSocketTcpServer::init()
                 | LWS_SERVER_OPTION_VALIDATE_UTF8
                 | LWS_SERVER_OPTION_ALLOW_NON_SSL_ON_SSL_PORT
                 | LWS_SERVER_OPTION_PEER_CERT_NOT_REQUIRED
+                | LWS_SERVER_OPTION_EXPLICIT_VHOSTS
                 | LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
         /**
          * @warning LWS_SERVER_OPTION_ALLOW_NON_SSL_ON_SSL_PORT has a bug
@@ -121,7 +132,7 @@ bool WebSocketTcpServer::init()
         m_context_create_info.ssl_private_key_filepath = nullptr;
         m_context_create_info.ssl_cert_filepath = nullptr;
         m_context_create_info.ssl_ca_filepath = nullptr;
-        m_context_create_info.options = 0;
+        m_context_create_info.options = LWS_SERVER_OPTION_EXPLICIT_VHOSTS;
     }
 
     m_context_create_info.server_string = m_name.data();
@@ -132,6 +143,13 @@ bool WebSocketTcpServer::init()
     if ( nullptr == m_context )
     {
         LOG_ERROR("context has nullptr \n");
+        return false;
+    }
+
+    m_vhost = lws_create_vhost(m_context, &m_context_create_info);
+    if ( nullptr == m_vhost )
+    {
+        LOG_ERROR("vhost_context has nullptr \n");
         return false;
     }
     return true;
@@ -153,6 +171,10 @@ void WebSocketTcpServer::stop()
 {
     LOG_DEBUG("\n");
     m_run_thread = false;
+    {
+        int status = 0;
+        pthread_join(m_websocket_thread, (void**)&status);
+    }
 }
 
 bool WebSocketTcpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
@@ -215,6 +237,8 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
 
     switch ( reason )
     {
+        case LWS_CALLBACK_WSI_CREATE:
+            break;
         case LWS_CALLBACK_ESTABLISHED:
             LOG_DEBUG("LWS_CALLBACK_ESTABLISHED \n");
             {

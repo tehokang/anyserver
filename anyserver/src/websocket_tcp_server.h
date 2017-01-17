@@ -52,6 +52,7 @@ private:
 
     static void __log__(int level, const char *line);
     static struct lws_context *m_context;
+    static struct lws_vhost* m_vhost;
 
     bool m_run_thread;
     struct lws_protocols *m_lws_protocols;

@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(project_name example)
+set(project_name relayserver)
 project(${project_name} CXX)
 
-set(rootdir ${CMAKE_SOURCE_DIR}/example)
+set(rootdir ${CMAKE_SOURCE_DIR}/example/relayserver)
 set(anyserverdir ${CMAKE_SOURCE_DIR}/anyserver)
 set(sources
 	${rootdir}/main.cpp

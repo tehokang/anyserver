@@ -4,49 +4,49 @@
   "server_list": [
     {
 	  "__comment__": "websocket server can work only for single instance",
-      "type" : "websocket", 
-      "enable" : true, 
-      "bind" : 10000, 
+      "type" : "websocket",
+      "enable" : true,
+      "bind" : 10000,
       "tcp" : true,
       "max_client" : 200,
       "protocols" : [
-        "test_a",
-        "test_b"
+        "receiver",
+        "sender"
       ]
     },
     {
 	  "__comment__": "http server can work only for single instance",
       "type" : "http",
-      "enable" : true, 
-      "bind" : 10001, 
-      "tcp" : true,
-      "max_client" : 200
-    }, 
-    { 
-      "type" : "inet_domainsocket", 
-      "enable" : true, 
-      "bind" : 10002, 
+      "enable" : true,
+      "bind" : 10001,
       "tcp" : true,
       "max_client" : 200
     },
     {
-      "type" : "inet_domainsocket", 
-      "enable" : true, 
-      "bind" : 10002, 
-      "tcp" : false,
-      "max_client" : 200
-    },
-    { 
-      "type" : "unix_domainsocket", 
-      "enable" : true, 
-      "bind" : "/tmp/uds_tcp.tmp", 
+      "type" : "inet_domainsocket",
+      "enable" : true,
+      "bind" : 10002,
       "tcp" : true,
       "max_client" : 200
     },
-    { 
-      "type" : "unix_domainsocket", 
-      "enable" : true, 
-      "bind" : "/tmp/uds_udp.tmp", 
+    {
+      "type" : "inet_domainsocket",
+      "enable" : true,
+      "bind" : 10002,
+      "tcp" : false,
+      "max_client" : 200
+    },
+    {
+      "type" : "unix_domainsocket",
+      "enable" : true,
+      "bind" : "/tmp/uds_tcp.tmp",
+      "tcp" : true,
+      "max_client" : 200
+    },
+    {
+      "type" : "unix_domainsocket",
+      "enable" : true,
+      "bind" : "/tmp/uds_udp.tmp",
       "tcp" : false,
       "max_client" : 200
     }
@@ -55,20 +55,20 @@
   {
     "__comment__" : "security server has to be only one of above listed servers",
     "__comment__" : "That is, only one server can be enabled and else server can't be enabled",
-    "security" : false, 
+    "security" : false,
     "ssl_cert_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/webserver.crt",
     "ssl_private_key_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/webserver.key",
     "ssl_private_key_password" : "1234",
     "ssl_ca_file" : "/home/tehokang/project/workspace/github/anyserver/build/out/rootca_cert.crt"
   },
-  "log" : 
+  "log" :
   {
     "__comment__" : "all of logs will be disabled when you cmake .. -Dbuild=release",
     "__comment__" : "or -Dbuild=debug will use following keys",
     "enable" : true,
-    "enable_debug" : true, 
+    "enable_debug" : true,
     "enable_info" : true,
-    "enable_error" : true, 
+    "enable_error" : true,
     "enable_warn" : true,
     "enable_filewrite" : false,
     "directory" : "/tmp",
@@ -76,7 +76,7 @@
   },
   "test" :
   {
-    "echo" : true
+    "echo" : false
   },
   "copyright": "All right reserved by TehoKang"
 }

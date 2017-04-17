@@ -11,12 +11,12 @@ else ("${CMAKE_BUILD_TYPE}" MATCHES "debug")
 endif ("${CMAKE_BUILD_TYPE}" MATCHES "release")
 
 set(rootdir ${CMAKE_SOURCE_DIR}/anyserver)
-set(sources 
+set(sources
 	${rootdir}/src/anyserver.cpp
+	${rootdir}/src/anyserver_impl.cpp
 	${rootdir}/src/logger.cpp
-	${rootdir}/src/base_server.cpp
+	${rootdir}/src/base_server_impl.cpp
 	${rootdir}/src/configuration.cpp
-	${rootdir}/src/controller.cpp
 	${rootdir}/src/server_factory.cpp
 	${rootdir}/src/http_tcp_server.cpp
 	${rootdir}/src/inet_domainsocket_tcp_server.cpp
@@ -57,9 +57,9 @@ set(version_minor 1)
 set(version_patch 1)
 
 set_target_properties(
-	${project_name} 
-	PROPERTIES 
-	VERSION "${version_major}.${version_minor}.${version_patch}" 
+	${project_name}
+	PROPERTIES
+	VERSION "${version_major}.${version_minor}.${version_patch}"
 	SOVERSION "${version_major}"
 )
 

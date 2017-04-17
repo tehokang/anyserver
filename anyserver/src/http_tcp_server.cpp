@@ -201,6 +201,9 @@ int HttpTcpServer::callback_http(struct lws *wsi,
     if ( nullptr == m_context ) return 0;
 
     HttpTcpServer *server = static_cast<HttpTcpServer*>(lws_context_user(m_context));
+
+    if ( server->m_run_thread == false ) return 0;
+
     static string req_body;
 
     switch ( reason )

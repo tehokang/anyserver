@@ -18,7 +18,7 @@ class AnyServerListener : public IAnyServerListener
     {
         printf("[%s:%s:%d] received signal : %d \n",
                 __FILE__, __FUNCTION__, __LINE__, signal);
-        exit(signal);
+        any_server->stop();
     }
 
     virtual void onClientConnected(size_t server_id, size_t client_id)
@@ -104,7 +104,6 @@ int main(int argc, char **argv)
         {
             usleep(100000);
         }
-        any_server->stop();
     }
     printf("Stopped example \n");
     return 0;

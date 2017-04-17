@@ -266,6 +266,8 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
 
     WebSocketTcpServer *server = static_cast<WebSocketTcpServer*>(lws_context_user(m_context));
 
+    if ( server->m_run_thread == false ) return 0;
+
     switch ( reason )
     {
         case LWS_CALLBACK_WSI_CREATE:

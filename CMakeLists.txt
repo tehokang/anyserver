@@ -43,7 +43,7 @@ message("LIBRARY_OUTPUT_PATH : " ${LIBRARY_OUTPUT_PATH})
 
 # The following folder will be included
 add_subdirectory(anyserver)
-add_subdirectory(example)
+add_subdirectory(example/relayserver)
 
 add_custom_command(
 	TARGET ${project_name}

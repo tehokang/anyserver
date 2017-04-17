@@ -11,7 +11,7 @@ namespace anyserver
 
 InetDomainSocketTcpServer::InetDomainSocketTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
-    : BaseServer(name, bind, tcp, max_client)
+    : BaseServerImpl(name, bind, tcp, max_client)
     , m_events(nullptr)
     , m_run_thread(false)
     , m_epoll_fd(0)
@@ -124,7 +124,6 @@ void* InetDomainSocketTcpServer::epoll_thread(void *arg)
     struct epoll_event *events = server->m_events;
     int &epoll_fd = server->m_epoll_fd;
     int &server_fd = server->m_server_fd;
-    size_t &server_id = server->m_server_id;
 
     enum { BUFFER_LENGTH = 2048 };
     char buffer[BUFFER_LENGTH] = {0, };
@@ -142,7 +141,7 @@ void* InetDomainSocketTcpServer::epoll_thread(void *arg)
                 epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &ev);
 
                 size_t client_id = server->addClientInfo(ClientInfoPtr(new TcpClientInfo(client_fd, &clientaddr)));
-                NOTIFY_CLIENT_CONNECTED(server_id, client_id);
+                NOTIFY_CLIENT_CONNECTED(server->m_server_id, client_id);
             }
             else
             {
@@ -154,12 +153,12 @@ void* InetDomainSocketTcpServer::epoll_thread(void *arg)
                     close(events[i].data.fd);
 
                     size_t client_id = server->removeClientInfo(events[i].data.fd);
-                    NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
+                    NOTIFY_CLIENT_DISCONNECTED(server->m_server_id, client_id);
                 }
                 else
                 {
                     ClientInfoPtr client = server->findClientInfo(events[i].data.fd);
-                    NOTIFY_SERVER_RECEIVED(server_id, client->getClientId(), buffer, readn);
+                    NOTIFY_SERVER_RECEIVED(server->m_server_id, client->getClientId(), buffer, readn);
                 }
             }
         }

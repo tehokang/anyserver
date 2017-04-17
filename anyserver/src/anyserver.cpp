@@ -1,5 +1,6 @@
 #include "anyserver.h"
-#include "controller.h"
+#include "anyserver_impl.h"
+#include "server_factory.h"
 #include "posix_signal_interceptor.h"
 
 #include <unistd.h>
@@ -7,96 +8,38 @@
 
 namespace anyserver
 {
-
-AnyServer::AnyServer(int argc, char **argv)
-    : m_controller(new Controller(argv[1]))
-    , m_run(false)
+AnyServer* AnyServer::m_instance = nullptr;
+AnyServer* AnyServer::getInstance(int argc, char **argv)
 {
-    m_controller->setListener(this);
-};
-
-AnyServer::AnyServer(string config_file)
-    : m_controller(new Controller(config_file))
-    , m_run(false)
-{
-    m_controller->setListener(this);
-}
-
-AnyServer::~AnyServer()
-{
-    if ( m_controller )
+    if ( m_instance == nullptr )
     {
-        delete m_controller;
-        m_controller = nullptr;
+        m_instance = new AnyServerImpl(string(argv[1]));
     }
+    return m_instance;
 }
 
-bool AnyServer::init()
+AnyServer* AnyServer::getInstance(string config_file)
 {
-    return m_controller->init();
-}
-
-void AnyServer::__deinit__()
-{
-    RETURN_IF_NULL(m_controller);
-    m_controller->setListener(nullptr);
-}
-
-bool AnyServer::start()
-{
-    if ( m_controller->start() )
+    if ( m_instance == nullptr )
     {
-        m_run = true;
-        return true;
+        m_instance = new AnyServerImpl(config_file);
     }
-    return false;
+    return m_instance;
 }
 
-void AnyServer::stop()
+BaseServer::BaseServer(const string name, const string bind, const bool tcp, const unsigned int max_client)
+    : m_name(name)
+    , m_bind(bind)
+    , m_tcp(tcp)
+    , m_max_client(max_client)
+    , m_server_id(hash<string>()(m_name + bind + to_string(tcp)))
 {
-    m_controller->stop();
+
 }
 
-void AnyServer::onReceivedSystemSignal(int signal)
+BaseServer::~BaseServer()
 {
-    for ( list<IAnyServerListener*>::iterator it = m_listeners.begin();
-             it!=m_listeners.end(); ++it )
-    {
-        IAnyServerListener *listener = (*it);
-        listener->onReceivedSystemSignal(signal);
-    }
 
-    m_run = false;
-}
-
-void AnyServer::onClientConnected(size_t server_id, size_t client_id)
-{
-    for ( list<IAnyServerListener*>::iterator it = m_listeners.begin();
-             it!=m_listeners.end(); ++it )
-    {
-        IAnyServerListener *listener = (*it);
-        listener->onClientConnected(server_id, client_id);
-    }
-}
-
-void AnyServer::onClientDisconnected(size_t server_id, size_t client_id)
-{
-    for ( list<IAnyServerListener*>::iterator it = m_listeners.begin();
-             it!=m_listeners.end(); ++it )
-    {
-        IAnyServerListener *listener = (*it);
-        listener->onClientDisconnected(server_id, client_id);
-    }
-}
-
-void AnyServer::onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
-{
-    for ( list<IAnyServerListener*>::iterator it = m_listeners.begin();
-             it!=m_listeners.end(); ++it )
-    {
-        IAnyServerListener *listener = (*it);
-        listener->onReceive(server_id, client_id, msg, msg_len);
-    }
 }
 
 

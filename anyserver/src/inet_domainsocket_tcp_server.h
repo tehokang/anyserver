@@ -1,13 +1,13 @@
 #ifndef __INET_DOMAIN_SOCKET_TCP_SERVER_H__
 #define __INET_DOMAIN_SOCKET_TCP_SERVER_H__
 
-#include "base_server.h"
 #include <sys/epoll.h>
+#include "base_server_impl.h"
 
 namespace anyserver
 {
 
-class InetDomainSocketTcpServer : public BaseServer
+class InetDomainSocketTcpServer : public BaseServerImpl
 {
 public:
     InetDomainSocketTcpServer(

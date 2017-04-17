@@ -1,13 +1,13 @@
 #ifndef __UNIX_DOMAIN_SOCKET_TCP_SERVER_H__
 #define __UNIX_DOMAIN_SOCKET_TCP_SERVER_H__
 
-#include "base_server.h"
 #include <sys/epoll.h>
+#include "base_server_impl.h"
 
 namespace anyserver
 {
 
-class UnixDomainSocketTcpServer : public BaseServer
+class UnixDomainSocketTcpServer : public BaseServerImpl
 {
 public:
     UnixDomainSocketTcpServer(

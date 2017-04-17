@@ -1,5 +1,7 @@
 #include "websocket_tcp_server.h"
 
+#define MAX_ECHO_PAYLOAD 1024
+
 namespace anyserver
 {
 struct lws_context *WebSocketTcpServer::m_context = nullptr;
@@ -7,7 +9,7 @@ struct lws_vhost *WebSocketTcpServer::m_vhost = nullptr;
 
 WebSocketTcpServer::WebSocketTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
-    : BaseServer(name, bind, tcp, max_client)
+    : BaseServerImpl(name, bind, tcp, max_client)
     , m_run_thread(false)
     , m_lws_protocols(nullptr)
 {
@@ -38,25 +40,26 @@ void WebSocketTcpServer::addProtocols(list<string> protocols)
     m_lws_protocols = (struct lws_protocols*)
             malloc(sizeof(struct lws_protocols)*(BASIC_PROTOCOL+protocols.size()));
 
+    unsigned int protocol_id = 0;
     /**
      * @note None protocol request will patch from callback_websocket
      */
     m_lws_protocols[HTTP].name = "http-only";
     m_lws_protocols[HTTP].callback = callback_websocket;
-    m_lws_protocols[HTTP].user = this;
-    m_lws_protocols[HTTP].per_session_data_size = 0;
-    m_lws_protocols[HTTP].rx_buffer_size = 0;
-    m_lws_protocols[HTTP].id = 0;
+    m_lws_protocols[HTTP].user = (void*)(m_lws_protocols[HTTP].name);
+    m_lws_protocols[HTTP].per_session_data_size = strlen(m_lws_protocols[HTTP].name);
+    m_lws_protocols[HTTP].rx_buffer_size = MAX_ECHO_PAYLOAD;
+    m_lws_protocols[HTTP].id = protocol_id++;
 
     /**
      * @note "test" protocol
      */
     m_lws_protocols[TEST].name = "test";
     m_lws_protocols[TEST].callback = callback_websocket;
-    m_lws_protocols[TEST].user = this;
-    m_lws_protocols[TEST].per_session_data_size = 0;
-    m_lws_protocols[TEST].rx_buffer_size = 0;
-    m_lws_protocols[TEST].id = 0;
+    m_lws_protocols[TEST].user = (void*)(m_lws_protocols[TEST].name);
+    m_lws_protocols[TEST].per_session_data_size = strlen(m_lws_protocols[TEST].name);
+    m_lws_protocols[TEST].rx_buffer_size = MAX_ECHO_PAYLOAD;
+    m_lws_protocols[TEST].id = protocol_id++;
 
     int index = TEST+1;
     for ( list<string>::iterator it=protocols.begin();
@@ -64,10 +67,10 @@ void WebSocketTcpServer::addProtocols(list<string> protocols)
     {
         m_lws_protocols[index].name = (*it).data();
         m_lws_protocols[index].callback = callback_websocket;
-        m_lws_protocols[index].user = this;
-        m_lws_protocols[index].per_session_data_size = 0;
-        m_lws_protocols[index].rx_buffer_size = 0;
-        m_lws_protocols[index].id = 0;
+        m_lws_protocols[index].user = (void*)(m_lws_protocols[index].name);
+        m_lws_protocols[index].per_session_data_size = strlen(m_lws_protocols[index].name);
+        m_lws_protocols[index].rx_buffer_size = MAX_ECHO_PAYLOAD;
+        m_lws_protocols[index].id = protocol_id++;
     }
 
     m_lws_protocols[index].name = nullptr;
@@ -75,7 +78,7 @@ void WebSocketTcpServer::addProtocols(list<string> protocols)
     m_lws_protocols[index].user = nullptr;
     m_lws_protocols[index].per_session_data_size = 0;
     m_lws_protocols[index].rx_buffer_size = 0;
-    m_lws_protocols[index].id = 0;
+    m_lws_protocols[index].id = protocol_id;
 }
 
 bool WebSocketTcpServer::init()
@@ -177,6 +180,20 @@ void WebSocketTcpServer::stop()
     }
 }
 
+bool WebSocketTcpServer::sendToClient(size_t client_id, string protocol, char *msg, unsigned int msg_len)
+{
+    LOG_DEBUG("\n");
+    auto client = static_pointer_cast<WebSocketTcpClientInfo>(findClientInfo(client_id));
+    if ( client && strcmp(protocol.data(), client->getProtocol().data()) == 0 )
+    {
+        LOG_DEBUG("sent\n");
+        lws_write((struct lws *)client->getWsi(), (unsigned char*)msg, msg_len, LWS_WRITE_TEXT);
+        return true;
+    }
+    LOG_DEBUG("not sent\n");
+    return false;
+}
+
 bool WebSocketTcpServer::sendToClient(size_t client_id, char *msg, unsigned int msg_len)
 {
     LOG_DEBUG("\n");
@@ -226,6 +243,23 @@ void* WebSocketTcpServer::websocket_thread(void *arg)
     return nullptr;
 }
 
+string WebSocketTcpServer::getProtocolFromHeader(struct lws *wsi)
+{
+    string protocol(64, '\0');
+    lws_hdr_copy(wsi, (char*)protocol.data(), protocol.length(), WSI_TOKEN_GET_URI);
+    return replaceAll(protocol, "/", "");
+}
+
+string WebSocketTcpServer::replaceAll(string &str, const string& from, const string& to){
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos)
+    {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length();
+    }
+    return str;
+}
+
 int WebSocketTcpServer::callback_websocket(struct lws *wsi,
         enum lws_callback_reasons reason,
         void *user, void *in, size_t len)
@@ -233,15 +267,17 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
     if ( nullptr == m_context ) return 0;
 
     WebSocketTcpServer *server = static_cast<WebSocketTcpServer*>(lws_context_user(m_context));
-    size_t &server_id = server->m_server_id;
 
     switch ( reason )
     {
         case LWS_CALLBACK_WSI_CREATE:
             break;
         case LWS_CALLBACK_ESTABLISHED:
-            LOG_DEBUG("LWS_CALLBACK_ESTABLISHED \n");
             {
+                LOG_DEBUG("LWS_CALLBACK_ESTABLISHED \n");
+                string protocol = server->getProtocolFromHeader(wsi);
+                LOG_DEBUG("user : %s \n", protocol.data());
+
                 int client_fd = lws_get_socket_fd(wsi);
                 struct sockaddr_in clientaddr;
                 socklen_t peeraddrlen = sizeof(clientaddr);
@@ -250,8 +286,9 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
                     perror("getpeername error ");
                 }
 
-                size_t client_id = server->addClientInfo(ClientInfoPtr(new WebSocketTcpClientInfo(client_fd, &clientaddr, wsi)));
-                NOTIFY_CLIENT_CONNECTED(server_id, client_id);
+                size_t client_id = server->addClientInfo(ClientInfoPtr(
+                    new WebSocketTcpClientInfo(client_fd, &clientaddr, wsi, protocol)));
+                NOTIFY_CLIENT_CONNECTED(server->m_server_id, client_id);
             }
             break;
         case LWS_CALLBACK_RECEIVE:
@@ -259,8 +296,9 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
             {
                 LOG_DEBUG("received data: %s\n", (char *) in);
                 int client_fd = lws_get_socket_fd(wsi);
-                ClientInfoPtr client = server->findClientInfo(client_fd);
-                NOTIFY_SERVER_RECEIVED(server_id, client->getClientId(), (char*)in, len);
+                auto client = static_pointer_cast<WebSocketTcpClientInfo>(server->findClientInfo(client_fd));
+                NOTIFY_SERVER_RECEIVED_FROM_PROTOCOL(
+                        server->m_server_id, client->getClientId(), (char*)in, len, client->getProtocol());
             }
             break;
         case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:
@@ -274,7 +312,7 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
             {
                 int client_fd = lws_get_socket_fd(wsi);
                 size_t client_id = server->removeClientInfo(client_fd);
-                NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
+                NOTIFY_CLIENT_DISCONNECTED(server->m_server_id, client_id);
             }
             break;
         case LWS_CALLBACK_PROTOCOL_INIT:
@@ -290,7 +328,7 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
             {
                 int client_fd = lws_get_socket_fd(wsi);
                 size_t client_id = server->removeClientInfo(client_fd);
-                NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
+                NOTIFY_CLIENT_DISCONNECTED(server->m_server_id, client_id);
             }
             break;
         default:

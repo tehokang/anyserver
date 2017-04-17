@@ -1,13 +1,13 @@
 #ifndef __UNIX_DOMAIN_SOCKET_UDP_SERVER_H__
 #define __UNIX_DOMAIN_SOCKET_UDP_SERVER_H__
 
-#include "base_server.h"
 #include <sys/epoll.h>
+#include "base_server_impl.h"
 
 namespace anyserver
 {
 
-class UnixDomainSocketUdpServer : public BaseServer
+class UnixDomainSocketUdpServer : public BaseServerImpl
 {
 public:
     UnixDomainSocketUdpServer(

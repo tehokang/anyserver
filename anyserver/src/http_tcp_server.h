@@ -1,13 +1,13 @@
 #ifndef __HTTP_TCP_SERVER_H__
 #define __HTTP_TCP_SERVER_H__
 
-#include "base_server.h"
+#include "base_server_impl.h"
 #include "libwebsockets.h"
 
 namespace anyserver
 {
 
-class HttpTcpServer : public BaseServer 
+class HttpTcpServer : public BaseServerImpl 
 {
 public:
     HttpTcpServer(const string name, const string bind, const bool tcp, const unsigned int max_client=200);

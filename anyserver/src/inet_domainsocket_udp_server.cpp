@@ -10,7 +10,7 @@ namespace anyserver
 
 InetDomainSocketUdpServer::InetDomainSocketUdpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
-    : BaseServer(name, bind, tcp, max_client)
+    : BaseServerImpl(name, bind, tcp, max_client)
     , m_run_thread(false)
     , m_server_fd(0)
 {
@@ -96,7 +96,6 @@ void* InetDomainSocketUdpServer::communication_thread(void *arg)
     enum { BUFFER_LENGTH = 2048 };
     char buffer[BUFFER_LENGTH] = {0, };
     int &server_fd = server->m_server_fd;
-    size_t &server_id = server->m_server_id;
     unsigned int clientlen = sizeof(clientaddr);
 
     while ( server->m_run_thread )
@@ -115,14 +114,14 @@ void* InetDomainSocketUdpServer::communication_thread(void *arg)
         if (hostaddrp == NULL) LOG_WARNING("ERROR on inet_ntoa\n");
 
         size_t client_id = server->addClientInfo(ClientInfoPtr(new UdpClientInfo(&clientaddr)));
-        NOTIFY_CLIENT_CONNECTED(server_id, client_id);
+        NOTIFY_CLIENT_CONNECTED(server->m_server_id, client_id);
 
         LOG_DEBUG("server[0x%x] received %d bytes: %s from client[0x%x] %s (%s) \n",
-                server_id, readn, buffer, client_id, hostp->h_name, hostaddrp);
-        NOTIFY_SERVER_RECEIVED(server_id, client_id, (char*)buffer, readn);
+                server->m_server_id, readn, buffer, client_id, hostp->h_name, hostaddrp);
+        NOTIFY_SERVER_RECEIVED(server->m_server_id, client_id, (char*)buffer, readn);
 
         client_id = server->removeClientInfo(client_id);
-        NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
+        NOTIFY_CLIENT_DISCONNECTED(server->m_server_id, client_id);
 
     }
     close(server_fd);

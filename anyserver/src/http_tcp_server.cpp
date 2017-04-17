@@ -5,7 +5,7 @@ namespace anyserver
 struct lws_context *HttpTcpServer::m_context = nullptr;
 HttpTcpServer::HttpTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
-    : BaseServer(name, bind, tcp, max_client)
+    : BaseServerImpl(name, bind, tcp, max_client)
     , m_run_thread(false)
 {
     LOG_DEBUG("\n");
@@ -201,7 +201,6 @@ int HttpTcpServer::callback_http(struct lws *wsi,
     if ( nullptr == m_context ) return 0;
 
     HttpTcpServer *server = static_cast<HttpTcpServer*>(lws_context_user(m_context));
-    size_t &server_id = server->m_server_id;
     static string req_body;
 
     switch ( reason )
@@ -218,7 +217,7 @@ int HttpTcpServer::callback_http(struct lws *wsi,
                 }
 
                 size_t client_id = server->addClientInfo(ClientInfoPtr(new HttpTcpClientInfo(client_fd, &clientaddr, wsi)));
-                NOTIFY_CLIENT_CONNECTED(server_id, client_id);
+                NOTIFY_CLIENT_CONNECTED(server->m_server_id, client_id);
             }
             break;
         case LWS_CALLBACK_CLOSED_HTTP:
@@ -226,7 +225,7 @@ int HttpTcpServer::callback_http(struct lws *wsi,
             {
                 int client_fd = lws_get_socket_fd(wsi);
                 size_t client_id = server->removeClientInfo(client_fd);
-                NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
+                NOTIFY_CLIENT_DISCONNECTED(server->m_server_id, client_id);
             }
             break;
         case LWS_CALLBACK_HTTP:
@@ -256,7 +255,7 @@ int HttpTcpServer::callback_http(struct lws *wsi,
             {
                 int client_fd = lws_get_socket_fd(wsi);
                 ClientInfoPtr client = server->findClientInfo(client_fd);
-                NOTIFY_SERVER_RECEIVED(server_id, client->getClientId(),
+                NOTIFY_SERVER_RECEIVED(server->m_server_id, client->getClientId(),
                         (char*)req_body.data(), req_body.length());
             }
             break;
@@ -273,7 +272,7 @@ int HttpTcpServer::callback_http(struct lws *wsi,
             {
                 int client_fd = lws_get_socket_fd(wsi);
                 size_t client_id = server->removeClientInfo(client_fd);
-                NOTIFY_CLIENT_DISCONNECTED(server_id, client_id);
+                NOTIFY_CLIENT_DISCONNECTED(server->m_server_id, client_id);
             }
             break;
         default:

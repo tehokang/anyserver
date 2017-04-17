@@ -1,12 +1,12 @@
 #ifndef __INET_DOMAIN_SOCKET_UDP_SERVER_H__
 #define __INET_DOMAIN_SOCKET_UDP_SERVER_H__
 
-#include "base_server.h"
+#include "base_server_impl.h"
 
 namespace anyserver
 {
 
-class InetDomainSocketUdpServer : public BaseServer
+class InetDomainSocketUdpServer : public BaseServerImpl
 {
 public:
     InetDomainSocketUdpServer(

@@ -10,6 +10,23 @@
 
 namespace anyserver
 {
+ServerFactory *ServerFactory::m_instance = nullptr;
+ServerFactory* ServerFactory::getInstance()
+{
+    if ( m_instance == nullptr )
+    {
+        m_instance = new ServerFactory();
+    }
+    return m_instance;
+}
+
+void ServerFactory::destroyInstance()
+{
+    if ( m_instance != nullptr )
+    {
+        SAFE_DELETE(m_instance);
+    }
+}
 
 ServerFactory::ServerFactory()
     : m_configuration(new Configuration())
@@ -56,7 +73,7 @@ bool ServerFactory::init(const string config_file)
     /**
      * @todo initialize servers of list
      */
-    for ( BaseServerList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
+    for ( BaseServerImplList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
     {
         BaseServerPtr server = (*it);
         if ( false == server->init() )
@@ -71,7 +88,7 @@ bool ServerFactory::init(const string config_file)
 
 void ServerFactory::__deinit__()
 {
-    for ( BaseServerList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
+    for ( BaseServerImplList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
     {
         BaseServerPtr server = (*it);
         server->removeEventListener(this);
@@ -82,7 +99,7 @@ void ServerFactory::__deinit__()
 bool ServerFactory::start()
 {
     LOG_DEBUG("\n");
-    for ( BaseServerList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
+    for ( BaseServerImplList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
     {
         BaseServerPtr server = (*it);
         if ( false == server->start() )
@@ -97,7 +114,7 @@ bool ServerFactory::start()
 void ServerFactory::stop()
 {
     LOG_DEBUG("\n");
-    for ( BaseServerList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
+    for ( BaseServerImplList::iterator it=m_servers.begin(); it!=m_servers.end(); ++it )
     {
         BaseServerPtr server = (*it);
         if ( nullptr != server )
@@ -135,7 +152,7 @@ void ServerFactory::onClientDisconnected(size_t server_id, size_t client_id)
     }
 }
 
-void ServerFactory::onReceived(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
+void ServerFactory::onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
 {
     LOG_DEBUG("server[0x%x] get message[%s] (len=%d) from client[0x%x] \n", server_id, msg, msg_len, client_id);
 
@@ -153,33 +170,85 @@ void ServerFactory::onReceived(size_t server_id, size_t client_id, char *msg, un
     }
 }
 
+void ServerFactory::onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len, string protocol)
+{
+    LOG_DEBUG("server[0x%x] get message[%s] (len=%d) from client[0x%x] \n", server_id, msg, msg_len, client_id);
+
+    for ( list<IServerFactoryListener*>::iterator it = m_server_listeners.begin();
+             it!=m_server_listeners.end(); ++it )
+    {
+        IServerFactoryListener *listener = (*it);
+        listener->onReceive(server_id, client_id, msg, msg_len, protocol);
+    }
+}
+
 void ServerFactory::showClientList()
 {
     LOG_DEBUG("\n");
-    for ( BaseServerList::iterator it=m_servers.begin();
+    for ( BaseServerImplList::iterator it=m_servers.begin();
             it!=m_servers.end(); ++it )
     {
         BaseServerPtr server = (*it);
         LOG_DEBUG("[Server : %s] \n", server->getName().data());
-        BaseServer::ClientInfoList client_list = server->getClientInfoList();
-        for ( BaseServer::ClientInfoList::iterator it=client_list.begin();
+        BaseServerImpl::ClientInfoList client_list = server->getClientInfoList();
+        for ( BaseServerImpl::ClientInfoList::iterator it=client_list.begin();
                 it!=client_list.end(); ++it )
         {
-            BaseServer::ClientInfoPtr client = (*it);
+            BaseServerImpl::ClientInfoPtr client = (*it);
             LOG_DEBUG("Client : 0x%x \n", client->getClientId());
         }
         LOG_DEBUG("\n");
     }
 }
 
-bool ServerFactory::sendToClient(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
+void ServerFactory::sendToServer(size_t server_id, string protocol, char *msg, unsigned int msg_len)
 {
     LOG_DEBUG("server_id : 0x%x \n", server_id);
-    for ( BaseServerList::iterator it=m_servers.begin();
+    for ( BaseServerImplList::iterator it=m_servers.begin();
             it!=m_servers.end(); ++it )
     {
         BaseServerPtr server = (*it);
-        if ( server_id == server->getServerId() )
+        if ( server_id == server->getId() )
+        {
+            BaseServerImpl::ClientInfoList client_list = server->getClientInfoList();
+            for ( BaseServerImpl::ClientInfoList::iterator it=client_list.begin();
+                    it!=client_list.end(); ++it )
+            {
+                LOG_DEBUG("Found server to send message : 0x%x (msg : %s)\n", server_id, msg);
+                server->sendToClient((*it)->getClientId(), protocol, msg, msg_len);
+            }
+        }
+    }
+}
+
+void ServerFactory::sendToServer(size_t server_id, char *msg, unsigned int msg_len)
+{
+    LOG_DEBUG("server_id : 0x%x \n", server_id);
+    for ( BaseServerImplList::iterator it=m_servers.begin();
+            it!=m_servers.end(); ++it )
+    {
+        BaseServerPtr server = (*it);
+        if ( server_id == server->getId() )
+        {
+            BaseServerImpl::ClientInfoList client_list = server->getClientInfoList();
+            for ( BaseServerImpl::ClientInfoList::iterator it=client_list.begin();
+                    it!=client_list.end(); ++it )
+            {
+                LOG_DEBUG("Found server to send message : 0x%x (msg : %s)\n", server_id, msg);
+                server->sendToClient((*it)->getClientId(), msg, msg_len);
+            }
+        }
+    }
+}
+
+bool ServerFactory::sendToClient(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
+{
+    LOG_DEBUG("server_id : 0x%x \n", server_id);
+    for ( BaseServerImplList::iterator it=m_servers.begin();
+            it!=m_servers.end(); ++it )
+    {
+        BaseServerPtr server = (*it);
+        if ( server_id == server->getId() )
         {
             LOG_DEBUG("Found server to send message : 0x%x (msg : %s)\n", server_id, msg);
             return server->sendToClient(client_id, msg, msg_len);

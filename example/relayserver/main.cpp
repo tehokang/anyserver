@@ -83,10 +83,6 @@ class AnyServerListener : public IAnyServerListener
 
 int main(int argc, char **argv)
 {
-    /**
-     * @note AnyServer has to receive argv[1] that has configuration path
-     */
-
     AnyServerListener listener;
     any_server = AnyServer::getInstance(argc, argv);
     any_server->addEventListener(&listener);

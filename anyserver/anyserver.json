@@ -1,6 +1,6 @@
 {
   "__comment__": "",
-  "@name": "GameServer",
+  "@name": "AnyServer",
   "server_list": [
     {
 	  "__comment__": "websocket server can work only for single instance",
@@ -17,35 +17,35 @@
     {
 	  "__comment__": "http server can work only for single instance",
       "type" : "http",
-      "enable" : true,
+      "enable" : false,
       "bind" : 10001,
-      "tcp" : true,
+      "tcp" : false,
       "max_client" : 200
     },
     {
       "type" : "inet_domainsocket",
-      "enable" : true,
+      "enable" : false,
       "bind" : 10002,
-      "tcp" : true,
+      "tcp" : false,
       "max_client" : 200
     },
     {
       "type" : "inet_domainsocket",
-      "enable" : true,
+      "enable" : false,
       "bind" : 10002,
       "tcp" : false,
       "max_client" : 200
     },
     {
       "type" : "unix_domainsocket",
-      "enable" : true,
+      "enable" : false,
       "bind" : "/tmp/uds_tcp.tmp",
       "tcp" : true,
       "max_client" : 200
     },
     {
       "type" : "unix_domainsocket",
-      "enable" : true,
+      "enable" : false,
       "bind" : "/tmp/uds_udp.tmp",
       "tcp" : false,
       "max_client" : 200

@@ -186,11 +186,9 @@ bool WebSocketTcpServer::sendToClient(size_t client_id, string protocol, char *m
     auto client = static_pointer_cast<WebSocketTcpClientInfo>(findClientInfo(client_id));
     if ( client && strcmp(protocol.data(), client->getProtocol().data()) == 0 )
     {
-        LOG_DEBUG("sent\n");
         lws_write((struct lws *)client->getWsi(), (unsigned char*)msg, msg_len, LWS_WRITE_TEXT);
         return true;
     }
-    LOG_DEBUG("not sent\n");
     return false;
 }
 

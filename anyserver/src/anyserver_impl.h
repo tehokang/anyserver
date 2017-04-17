@@ -37,6 +37,8 @@ public:
 
     virtual BaseServerList getServerList() override;
 
+    virtual bool isRun() { return m_run; };
+
     void sendToServer(size_t server_id, string protocol, char *msg, unsigned int msg_len) override;
 
     void sendToServer(size_t server_id, char *msg, unsigned int msg_len) override;
@@ -52,17 +54,9 @@ public:
     virtual void onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len) override;
     virtual void onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len, string protocol) override;
 protected:
-    /**
-     * @brief AnyServerImpl argv[1] has to include configuration path
-     * @param argc
-     * @param argv
-     */
-
-
     void __deinit__();
 
     bool m_run;
-
     string m_config_file;
     list<IAnyServerListener*> m_listeners;
     PosixSignalInterceptor *m_posix_signal_interceptor;

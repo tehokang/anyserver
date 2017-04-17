@@ -16,7 +16,7 @@ elseif ("${CHIP_CORE}" MATCHES "arm")
 endif()
 
 # Project's name
-set(project_name damoa)
+set(project_name anyserver)
 project(${project_name} CXX)
 
 # Set the output folder where your program will be created
@@ -35,6 +35,7 @@ endif ("${build}" MATCHES "debug")
 message("COMPILER : " ${CMAKE_CXX_COMPILER})
 message("CMAKE_SOURCE_DIR : " ${CMAKE_SOURCE_DIR})
 message("CHIP_CORE : " ${CHIP_CORE})
+message("CMAKE_BINARY_DIR : " ${CMAKE_BINARY_DIR})
 message("CMAKE_MAKE_PROGRAM : " ${CMAKE_MAKE_PROGRAM})
 message("WORKING_DIRECTORY : " ${CMAKE_CURRENT_BINARY_DIR})
 message("CMAKE_BUILD_TOOL : " ${CMAKE_BUILD_TOOL})
@@ -42,11 +43,5 @@ message("CMAKE_COMMAND : " ${CMAKE_COMMAND})
 message("LIBRARY_OUTPUT_PATH : " ${LIBRARY_OUTPUT_PATH})
 
 # The following folder will be included
-add_subdirectory(anyserver)
+add_subdirectory(${project_name})
 add_subdirectory(example/relayserver)
-
-add_custom_command(
-	TARGET ${project_name}
-	POST_BUILD
-	COMMAND cp -f ${rootdir}/${project_name}.json ${CMAKE_BINARY_DIR}
-)

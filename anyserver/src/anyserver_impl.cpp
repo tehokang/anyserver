@@ -75,6 +75,7 @@ bool AnyServerImpl::start()
 {
     LOG_DEBUG("\n");
     RETURN_FALSE_IF_FALSE(m_server_factory->start());
+    m_run = true;
     return true;
 }
 
@@ -82,6 +83,7 @@ void AnyServerImpl::stop()
 {
     LOG_DEBUG("\n");
     m_server_factory->stop();
+    m_run = false;
 }
 
 AnyServer::BaseServerList AnyServerImpl::getServerList()
@@ -164,7 +166,6 @@ void AnyServerImpl::onReceivedPosixSignal(int signal_id)
         IAnyServerListener *listener = (*it);
         listener->onReceivedSystemSignal(signal_id);
     }
-    m_run = false;
 }
 
 } // end of namespace

@@ -98,7 +98,7 @@ public:
      * @brief To check if servers is working out at this moment
      * @return return true if servers work out successfully
      */
-    bool isRun() { return m_run; };
+    virtual bool isRun() = 0;
 
     virtual void addEventListener(IAnyServerListener *listener) = 0;
     virtual void removeEventListener(IAnyServerListener *listener) = 0;
@@ -106,7 +106,6 @@ protected:
     virtual ~AnyServer() { };
     void __deinit__();
 
-    bool m_run;
     BaseServerList m_server_list;
 
     static AnyServer* m_instance;

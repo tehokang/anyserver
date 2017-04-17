@@ -102,6 +102,8 @@ int main(int argc, char **argv)
                     server->getName().data(), (unsigned int)server->getId());
         }
 
+        printf("any_server->isRun : %d \n", any_server->isRun());
+
         while ( any_server->isRun() )
         {
             usleep(100000);

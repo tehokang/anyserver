@@ -16,9 +16,10 @@ include_directories(
 add_definitions(-std=c++11 -fexceptions)
 link_directories(
 	${CMAKE_BINARY_DIR}
-	${anyserverdir}/external/libmicrohttpd/lib/${CHIP_CORE}
 	${anyserverdir}/external/libwebsockets/lib/${CHIP_CORE}
+    ${anyserverdir}/external/openssl/lib/${CHIP_CORE}
+    ${anyserverdir}/external/zlib/lib/${CHIP_CORE}
 )
 
 add_executable(${project_name} ${sources})
-target_link_libraries(${project_name} websockets microhttpd anyserver)
+target_link_libraries(${project_name} z ssl websockets anyserver)

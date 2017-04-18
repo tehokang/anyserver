@@ -1,6 +1,7 @@
 # Specify the minimum version for CMake
 cmake_minimum_required(VERSION 2.8)
 
+#set(CHIP_CORE "x86") # x86, mipsel, arm
 set(CHIP_CORE "x86") # x86, mipsel, arm
 set(TOOLCHAIN_VER "4.8-1.0")
 

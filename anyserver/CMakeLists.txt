@@ -10,6 +10,7 @@ else ("${CMAKE_BUILD_TYPE}" MATCHES "debug")
 	set(CMAKE_CXX_FLAGS_DEBUG "-DCONFIG_DEBUG -O -g")
 endif ("${CMAKE_BUILD_TYPE}" MATCHES "release")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -idirafter /usr/include/")
 set(rootdir ${CMAKE_SOURCE_DIR}/anyserver)
 set(sources
 	${rootdir}/src/anyserver.cpp
@@ -33,15 +34,16 @@ include_directories(
 	${rootdir}/include
 	${rootdir}/port/include
 	${rootdir}/external/json
-	${rootdir}/external/libmicrohttpd/include
 	${rootdir}/external/libwebsockets/include
+	${rootdir}/external/openssl/include
 )
 
 add_definitions(-std=c++11 -fexceptions)
 
 link_directories(
-	${rootdir}/external/libmicrohttpd/lib/${CHIP_CORE}
-	${rootdir}/external/libwebsockets/lib/${CHIP_CORE}
+    ${rootdir}/external/openssl/lib/${CHIP_CORE}
+    ${rootdir}/external/zlib/lib/${CHIP_CORE}
+    ${rootdir}/external/libwebsockets/lib/${CHIP_CORE}
 )
 
 add_library(${project_name} SHARED ${sources})
@@ -63,6 +65,6 @@ set_target_properties(
 	SOVERSION "${version_major}"
 )
 
-target_link_libraries(${project_name} websockets microhttpd pthread)
+target_link_libraries(${project_name} z ssl websockets pthread)
 
 

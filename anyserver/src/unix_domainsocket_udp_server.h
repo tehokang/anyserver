@@ -27,10 +27,9 @@ private:
     /**
      * @note http://www.joinc.co.kr/w/Site/Network_Programing/AdvancedComm/epoll24
      */
-    static void* communication_thread(void *arg);
+    static void* __communication_thread__(void *arg);
     pthread_t m_communication_thread;
 
-    bool m_run_thread;
     int m_server_fd;
 };
 

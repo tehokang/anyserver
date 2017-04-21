@@ -8,6 +8,7 @@ namespace anyserver
 BaseServerImpl::BaseServerImpl(const string name, const string bind, const bool tcp, const unsigned int max_client)
     : BaseServer(name, bind, tcp, max_client)
     , m_security(false)
+    , m_run_thread(false)
 {
     LOG_DEBUG("[%s] server unique id : 0x%x \n", m_name.data(), m_server_id);
 }

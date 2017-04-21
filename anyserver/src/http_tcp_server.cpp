@@ -6,11 +6,10 @@ struct lws_context *HttpTcpServer::m_context = nullptr;
 HttpTcpServer::HttpTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
     : BaseServerImpl(name, bind, tcp, max_client)
-    , m_run_thread(false)
 {
     LOG_DEBUG("\n");
     m_protocols[HTTP].name = "http-only";
-    m_protocols[HTTP].callback = callback_http;
+    m_protocols[HTTP].callback = __callback_http__;
     m_protocols[HTTP].user = this;
     m_protocols[HTTP].per_session_data_size = 0;
     m_protocols[HTTP].rx_buffer_size = 0;
@@ -107,7 +106,7 @@ bool HttpTcpServer::start()
 {
     LOG_DEBUG("\n");
     if ( 0 != pthread_create(
-            &m_http_thread, NULL, HttpTcpServer::http_thread, (void*)this) )
+            &m_http_thread, NULL, HttpTcpServer::__http_thread__, (void*)this) )
     {
         LOG_ERROR("Failed to create thread \n");
         return false;
@@ -178,7 +177,7 @@ void HttpTcpServer::__log__(int level, const char *line)
     }
 }
 
-void* HttpTcpServer::http_thread(void *arg)
+void* HttpTcpServer::__http_thread__(void *arg)
 {
     LOG_DEBUG("\n");
     HttpTcpServer *server = static_cast<HttpTcpServer*>(arg);
@@ -194,7 +193,7 @@ void* HttpTcpServer::http_thread(void *arg)
 /**
  * @ref https://goo.gl/bLpeLH
  */
-int HttpTcpServer::callback_http(struct lws *wsi,
+int HttpTcpServer::__callback_http__(struct lws *wsi,
         enum lws_callback_reasons reason,
         void *user, void *in, size_t len)
 {

@@ -27,10 +27,9 @@ private:
     /**
      * @note http://www.joinc.co.kr/w/Site/Network_Programing/AdvancedComm/epoll24
      */
-    static void* epoll_thread(void *arg);
+    static void* __epoll_thread__(void *arg);
     pthread_t m_epoll_thread;
 
-    bool m_run_thread;
     struct epoll_event m_ev;
     struct epoll_event *m_events;
     int m_epoll_fd;

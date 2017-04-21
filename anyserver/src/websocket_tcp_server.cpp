@@ -10,7 +10,6 @@ struct lws_vhost *WebSocketTcpServer::m_vhost = nullptr;
 WebSocketTcpServer::WebSocketTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
     : BaseServerImpl(name, bind, tcp, max_client)
-    , m_run_thread(false)
     , m_lws_protocols(nullptr)
 {
     LOG_DEBUG("\n");
@@ -45,7 +44,7 @@ void WebSocketTcpServer::addProtocols(list<string> protocols)
      * @note None protocol request will patch from callback_websocket
      */
     m_lws_protocols[HTTP].name = "http-only";
-    m_lws_protocols[HTTP].callback = callback_websocket;
+    m_lws_protocols[HTTP].callback = __callback_websocket__;
     m_lws_protocols[HTTP].user = (void*)(m_lws_protocols[HTTP].name);
     m_lws_protocols[HTTP].per_session_data_size = strlen(m_lws_protocols[HTTP].name);
     m_lws_protocols[HTTP].rx_buffer_size = MAX_ECHO_PAYLOAD;
@@ -55,7 +54,7 @@ void WebSocketTcpServer::addProtocols(list<string> protocols)
      * @note "test" protocol
      */
     m_lws_protocols[TEST].name = "test";
-    m_lws_protocols[TEST].callback = callback_websocket;
+    m_lws_protocols[TEST].callback = __callback_websocket__;
     m_lws_protocols[TEST].user = (void*)(m_lws_protocols[TEST].name);
     m_lws_protocols[TEST].per_session_data_size = strlen(m_lws_protocols[TEST].name);
     m_lws_protocols[TEST].rx_buffer_size = MAX_ECHO_PAYLOAD;
@@ -66,7 +65,7 @@ void WebSocketTcpServer::addProtocols(list<string> protocols)
             it!=protocols.end(); ++it, index++)
     {
         m_lws_protocols[index].name = (*it).data();
-        m_lws_protocols[index].callback = callback_websocket;
+        m_lws_protocols[index].callback = __callback_websocket__;
         m_lws_protocols[index].user = (void*)(m_lws_protocols[index].name);
         m_lws_protocols[index].per_session_data_size = strlen(m_lws_protocols[index].name);
         m_lws_protocols[index].rx_buffer_size = MAX_ECHO_PAYLOAD;
@@ -162,7 +161,7 @@ bool WebSocketTcpServer::start()
 {
     LOG_DEBUG("\n");
     if ( 0 != pthread_create(
-            &m_websocket_thread, NULL, WebSocketTcpServer::websocket_thread, (void*)this) )
+            &m_websocket_thread, NULL, WebSocketTcpServer::__websocket_thread__, (void*)this) )
     {
         LOG_ERROR("Failed to create thread \n");
         return false;
@@ -228,7 +227,7 @@ void WebSocketTcpServer::__log__(int level, const char *line)
     }
 }
 
-void* WebSocketTcpServer::websocket_thread(void *arg)
+void* WebSocketTcpServer::__websocket_thread__(void *arg)
 {
     LOG_DEBUG("\n");
     WebSocketTcpServer *server = static_cast<WebSocketTcpServer*>(arg);
@@ -241,14 +240,14 @@ void* WebSocketTcpServer::websocket_thread(void *arg)
     return nullptr;
 }
 
-string WebSocketTcpServer::getProtocolFromHeader(struct lws *wsi)
+string WebSocketTcpServer::__getProtocolFromHeader__(struct lws *wsi)
 {
     string protocol(64, '\0');
     lws_hdr_copy(wsi, (char*)protocol.data(), protocol.length(), WSI_TOKEN_GET_URI);
-    return replaceAll(protocol, "/", "");
+    return __replaceAll__(protocol, "/", "");
 }
 
-string WebSocketTcpServer::replaceAll(string &str, const string& from, const string& to){
+string WebSocketTcpServer::__replaceAll__(string &str, const string& from, const string& to){
     size_t start_pos = 0;
     while((start_pos = str.find(from, start_pos)) != std::string::npos)
     {
@@ -258,7 +257,7 @@ string WebSocketTcpServer::replaceAll(string &str, const string& from, const str
     return str;
 }
 
-int WebSocketTcpServer::callback_websocket(struct lws *wsi,
+int WebSocketTcpServer::__callback_websocket__(struct lws *wsi,
         enum lws_callback_reasons reason,
         void *user, void *in, size_t len)
 {
@@ -275,7 +274,7 @@ int WebSocketTcpServer::callback_websocket(struct lws *wsi,
         case LWS_CALLBACK_ESTABLISHED:
             {
                 LOG_DEBUG("LWS_CALLBACK_ESTABLISHED \n");
-                string protocol = server->getProtocolFromHeader(wsi);
+                string protocol = server->__getProtocolFromHeader__(wsi);
                 LOG_DEBUG("user : %s \n", protocol.data());
 
                 int client_fd = lws_get_socket_fd(wsi);

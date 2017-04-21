@@ -127,6 +127,7 @@ protected:
 
     list<IBaseServerListener*> m_listeners;
 
+    bool m_run_thread;
     bool m_security;
     string m_cert_file;
     string m_private_key_file;

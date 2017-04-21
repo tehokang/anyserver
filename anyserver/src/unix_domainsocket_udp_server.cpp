@@ -11,7 +11,6 @@ namespace anyserver
 UnixDomainSocketUdpServer::UnixDomainSocketUdpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
     : BaseServerImpl(name, bind, tcp, max_client)
-    , m_run_thread(false)
     , m_server_fd(0)
 {
     LOG_DEBUG("\n");
@@ -60,7 +59,7 @@ bool UnixDomainSocketUdpServer::start()
     LOG_DEBUG("\n");
 
     if ( 0 != pthread_create(
-            &m_communication_thread, NULL, UnixDomainSocketUdpServer::communication_thread, (void*)this) )
+            &m_communication_thread, NULL, UnixDomainSocketUdpServer::__communication_thread__, (void*)this) )
     {
         LOG_ERROR("Failed to create thread \n");
         return false;
@@ -87,7 +86,7 @@ bool UnixDomainSocketUdpServer::sendToClient(size_t client_id, char *msg, unsign
     return true;
 }
 
-void* UnixDomainSocketUdpServer::communication_thread(void *arg)
+void* UnixDomainSocketUdpServer::__communication_thread__(void *arg)
 {
     LOG_DEBUG("\n");
 

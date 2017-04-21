@@ -39,7 +39,7 @@ public:
 protected:
     virtual void __deinit__() override;
 
-    static void* websocket_thread(void *arg);
+    static void* __websocket_thread__(void *arg);
     pthread_t m_websocket_thread;
 
     enum Protocol
@@ -50,10 +50,10 @@ protected:
         BASIC_PROTOCOL
     };
 private:
-    string getProtocolFromHeader(struct lws *wsi);
-    string replaceAll(string &str, const string& from, const string& to);
+    string __getProtocolFromHeader__(struct lws *wsi);
+    string __replaceAll__(string &str, const string& from, const string& to);
 
-    static int callback_websocket(struct lws *wsi,
+    static int __callback_websocket__(struct lws *wsi,
             enum lws_callback_reasons reason,
             void *user, void *in, size_t len);
 
@@ -61,7 +61,7 @@ private:
     static struct lws_context *m_context;
     static struct lws_vhost* m_vhost;
 
-    bool m_run_thread;
+
     struct lws_protocols *m_lws_protocols;
     struct lws_context_creation_info m_context_create_info;
 

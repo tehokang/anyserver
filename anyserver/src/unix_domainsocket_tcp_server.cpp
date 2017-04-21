@@ -14,7 +14,6 @@ UnixDomainSocketTcpServer::UnixDomainSocketTcpServer(
         const string name, const string bind, const bool tcp, const unsigned int max_client)
     : BaseServerImpl(name, bind, tcp, max_client)
     , m_events(nullptr)
-    , m_run_thread(false)
     , m_epoll_fd(0)
     , m_server_fd(0)
 {
@@ -81,7 +80,7 @@ bool UnixDomainSocketTcpServer::start()
     LOG_DEBUG("\n");
 
     if ( 0 != pthread_create(
-            &m_epoll_thread, NULL, UnixDomainSocketTcpServer::epoll_thread, (void*)this) )
+            &m_epoll_thread, NULL, UnixDomainSocketTcpServer::__epoll_thread__, (void*)this) )
     {
         LOG_ERROR("Failed to create thread \n");
         return false;
@@ -106,7 +105,7 @@ bool UnixDomainSocketTcpServer::sendToClient(size_t client_id, char *msg, unsign
     return true;
 }
 
-void* UnixDomainSocketTcpServer::epoll_thread(void *arg)
+void* UnixDomainSocketTcpServer::__epoll_thread__(void *arg)
 {
     LOG_DEBUG("\n");
 

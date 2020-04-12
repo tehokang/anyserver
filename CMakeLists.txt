@@ -46,3 +46,4 @@ message("LIBRARY_OUTPUT_PATH : " ${LIBRARY_OUTPUT_PATH})
 # The following folder will be included
 add_subdirectory(${project_name})
 add_subdirectory(example/relayserver)
+add_subdirectory(example/echoserver)

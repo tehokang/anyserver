@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
-
+#include <map>
 using namespace std;
 using namespace anyserver;
 
@@ -14,6 +14,8 @@ AnyServer::BaseServerList server_list;
 
 class AnyServerListener : public IAnyServerListener
 {
+    map<size_t, size_t> clients;
+   
     virtual void onReceivedSystemSignal(int signal)
     {
         printf("[%s:%s:%d] received signal : %d \n",
@@ -26,6 +28,7 @@ class AnyServerListener : public IAnyServerListener
         printf("[%s:%s:%d] sid : 0x%x, cid : 0x%x\n",
                 __FILE__, __FUNCTION__, __LINE__,
                 (unsigned int)server_id, (unsigned int)client_id);
+        clients.insert(make_pair(client_id, server_id));
     }
 
     virtual void onClientDisconnected(size_t server_id, size_t client_id)
@@ -33,10 +36,12 @@ class AnyServerListener : public IAnyServerListener
         printf("[%s:%s:%d] sid : 0x%x, cid : 0x%x \n",
                 __FILE__, __FUNCTION__, __LINE__,
                 (unsigned int)server_id, (unsigned int)client_id);
+        clients.erase(client_id);
     }
 
     virtual void onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
     {
+        printf("client count : %d \n", clients.size());
         printf("[%s:%s:%d] sid : 0x%x, cid : 0x%x, msg : %s \n",
                 __FILE__, __FUNCTION__, __LINE__,
                 (unsigned int)server_id, (unsigned int)client_id, msg);

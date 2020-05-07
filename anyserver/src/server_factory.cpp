@@ -191,11 +191,12 @@ void ServerFactory::showClientList()
         BaseServerPtr server = (*it);
         LOG_DEBUG("[Server : %s] \n", server->getName().data());
         BaseServerImpl::ClientInfoList client_list = server->getClientInfoList();
+        int i=0;
         for ( BaseServerImpl::ClientInfoList::iterator it=client_list.begin();
                 it!=client_list.end(); ++it )
         {
             BaseServerImpl::ClientInfoPtr client = (*it);
-            LOG_DEBUG("Client : 0x%x \n", client->getClientId());
+            LOG_DEBUG("[%d] Client : 0x%x \n", ++i, client->getClientId());
         }
         LOG_DEBUG("\n");
     }

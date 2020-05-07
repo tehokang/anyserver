@@ -24,16 +24,9 @@
     },
     {
       "type" : "inet_domainsocket",
-      "enable" : false,
+      "enable" : true,
       "bind" : 10002,
-      "tcp" : false,
-      "max_client" : 200
-    },
-    {
-      "type" : "inet_domainsocket",
-      "enable" : false,
-      "bind" : 10002,
-      "tcp" : false,
+      "tcp" : true,
       "max_client" : 200
     },
     {

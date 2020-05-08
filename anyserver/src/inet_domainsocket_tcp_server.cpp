@@ -59,7 +59,7 @@ bool InetDomainSocketTcpServer::init()
         perror("bind error ");
         return false;
     }
-    listen(m_server_fd, 5);
+    listen(m_server_fd, 2*1024);
 
     m_ev.events = EPOLLIN;
     m_ev.data.fd = m_server_fd;

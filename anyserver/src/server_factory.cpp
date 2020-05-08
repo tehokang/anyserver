@@ -196,8 +196,9 @@ void ServerFactory::showClientList()
                 it!=client_list.end(); ++it )
         {
             BaseServerImpl::ClientInfoPtr client = (*it);
-            LOG_DEBUG("[%d] Client : 0x%x \n", ++i, client->getClientId());
+            //LOG_DEBUG("[%d] Client : 0x%x \n", ++i, client->getClientId());
         }
+        LOG_DEBUG("Client connected : %d \n", i);
         LOG_DEBUG("\n");
     }
 }

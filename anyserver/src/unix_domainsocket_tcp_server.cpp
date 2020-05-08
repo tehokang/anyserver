@@ -59,7 +59,7 @@ bool UnixDomainSocketTcpServer::init()
     m_ev.data.fd = m_server_fd;
 
     if ( 0 > bind (m_server_fd, (struct sockaddr *)&serveraddr, sizeof(serveraddr))
-            || 0 > listen(m_server_fd, 5)
+            || 0 > listen(m_server_fd, 2*1024)
             ||  0 > epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, m_server_fd, &m_ev) )
     {
         perror("bind/listen/epoll_ctl, adding listenfd ");

@@ -41,7 +41,7 @@ class AnyServerListener : public IAnyServerListener
 
     virtual void onReceive(size_t server_id, size_t client_id, char *msg, unsigned int msg_len)
     {
-        printf("client count : %d \n", clients.size());
+        printf("client count : %u \n", clients.size());
         printf("[%s:%s:%d] sid : 0x%x, cid : 0x%x, msg : %s \n",
                 __FILE__, __FUNCTION__, __LINE__,
                 (unsigned int)server_id, (unsigned int)client_id, msg);
